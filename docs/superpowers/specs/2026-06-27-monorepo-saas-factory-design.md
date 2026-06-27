@@ -261,6 +261,31 @@ If a SaaS grows beyond the monorepo:
 
 ---
 
+## Knowledge Graph Infrastructure
+
+Two tools maintain queryable code graphs to reduce token consumption for autonomous LLM agents.
+
+### code-review-graph (CRG)
+- SQLite-backed dependency graph with MCP tools exposed to Claude Code / Codex
+- Configured with focused 8-tool set (`CRG_TOOLS` env var) — reduces schema overhead ~70%
+- Updated automatically via Claude Code Stop hook (~0.425s, non-blocking)
+- Scope: entire monorepo root (covers all packages + all apps in one graph)
+
+### graphify
+- AST-based community graph → `graphify-out/GRAPH_REPORT.md` + `graph.html`
+- Updated via `post-commit` git hook only (~10s, runs in background)
+- NOT in Claude hooks — 10s updates cause process pile-up in autonomous sessions
+
+### Integration with AGENTS.md
+`AGENTS.md` contains a pointer to `docs/agent/knowledge-graph.md` (not inline docs).
+This activates graph usage without bloating context on every session.
+
+### One graph per monorepo
+A single CRG database at the repo root covers `packages/*` and `apps/*`.
+New SaaS apps are automatically included after the next commit or Claude session turn.
+
+---
+
 ## Out of Scope
 
 - Multi-tenant routing (subdomain per tenant)

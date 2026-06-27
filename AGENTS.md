@@ -3,6 +3,8 @@
 Operating manual for Claude Code, Codex, and any autonomous agent working in this repo.
 Read this before touching any file.
 
+> **Knowledge graph available.** Before grepping the codebase, tracing call chains, planning a refactor, or answering architecture questions — read `docs/agent/knowledge-graph.md` and use the graph tools instead. It's 5–10x cheaper in tokens than grep+Read.
+
 ---
 
 ## What this is
