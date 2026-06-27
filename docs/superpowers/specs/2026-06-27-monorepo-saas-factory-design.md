@@ -84,6 +84,9 @@ All SaaS apps share the same infrastructure (single Postgres instance, single St
 - `cn()` utility re-exported
 - Tailwind CSS required as peer dependency (configured via `@koeti/config`)
 
+### Frontend Design: `ui-ux-pro-max` skill
+All frontend work in any SaaS (landing pages, dashboards, components, forms) must be implemented using the `ui-ux-pro-max` skill. This is enforced to prevent generic/templated UIs. LLMs invoke the skill before implementing any UI surface. The skill provides 50+ styles, 161 color palettes, 57 font pairings, and UX guidelines across Next.js + shadcn/ui stacks.
+
 ### `@koeti/email`
 - Resend client (configured from `RESEND_API_KEY`)
 - Base templates: `WelcomeEmail`, `PasswordResetEmail`
