@@ -215,19 +215,20 @@ pnpm create-mvp <saas-name>
 
 ---
 
-## AGENTS.md
+## LLM operating context (`.claude/` directory)
 
-A root-level `AGENTS.md` is a first-class deliverable of this setup. It is the LLM operating manual for this monorepo. It must contain:
+Instead of a single large AGENTS.md, the LLM context is split by load trigger:
 
-1. **What this repo is** — one paragraph, no fluff
-2. **How to create a new SaaS** — exact commands
-3. **Package reference** — what each `@koeti/*` exports and the exact import syntax
-4. **DB pattern** — the canonical code verbatim (LLMs copy-paste from here)
-5. **File structure** — annotated tree for a SaaS app
-6. **Rules** — what to never do
-7. **Commands** — dev, build, migrate, create
+| File | Loads when | Contains |
+|---|---|---|
+| `CLAUDE.md` | Every session | Commands, core rules, package imports, pointers |
+| `.claude/rules/db.md` | Editing `lib/db/**`, `drizzle.config.ts` | Canonical DB pattern verbatim |
+| `.claude/rules/auth.md` | Editing `middleware.ts`, `lib/auth/**`, `lib/actions/**` | Auth import table, action wrapper pattern |
+| `.claude/rules/billing.md` | Editing `api/stripe/**`, `lib/payments/**` | Webhook DI pattern, checkout/portal pattern |
+| `.claude/rules/ui.md` | Editing `app/**/*.tsx`, `components/**/*.tsx` | design-taste-frontend trigger, component imports |
+| `.claude/skills/create-saas/` | `/create-saas <name>` invocation | Full autonomous SaaS implementation workflow |
 
-The file lives at the repo root so Claude Code and Codex auto-detect it. It is updated whenever the monorepo structure changes.
+This replaces AGENTS.md. Context is loaded only when relevant, reducing token waste per session.
 
 ---
 
