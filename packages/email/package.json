@@ -1,0 +1,23 @@
+{
+  "name": "@koeti/email",
+  "version": "0.1.0",
+  "private": true,
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@react-email/components": "^0.0.34",
+    "react-email": "^4.0.16",
+    "resend": "^4.5.2"
+  },
+  "peerDependencies": {
+    "react": ">=19.0.0"
+  },
+  "devDependencies": {
+    "@koeti/config": "workspace:*",
+    "@types/react": "^19.0.0",
+    "typescript": "^5.8.3"
+  }
+}
