@@ -287,13 +287,13 @@ pnpm lint                                          # lint all
 
 ## Frontend design — mandatory
 
-**Every UI surface uses the `ui-ux-pro-max` skill.** Before implementing any page, component, dashboard, or landing — invoke the skill. This is not optional. The skill provides style direction, color palettes, font pairings, and UX guidelines tuned for Next.js + shadcn/ui.
+**Every UI surface uses the `design-taste-frontend` skill.** Before implementing any page, component, dashboard, or landing — invoke the skill. This is not optional. The skill reads the SaaS brief/spec and infers the right design direction — it prevents generic, templated output.
 
-Stack context for the skill: **Next.js + shadcn/ui + Tailwind CSS**. Always specify this when invoking.
+Stack context for the skill: **Next.js + shadcn/ui + Tailwind CSS**. Pass the SaaS spec summary as context when invoking so it can infer the right aesthetic for that product.
 
 ```
 # How to invoke before implementing UI:
-Skill(ui-ux-pro-max) → then implement the component/page
+Skill(design-taste-frontend) → then implement the component/page
 ```
 
 ---
