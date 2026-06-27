@@ -4,18 +4,18 @@ import { z } from 'zod';
 import { and, eq, sql } from 'drizzle-orm';
 import { db } from '@/lib/db/drizzle';
 import {
-  User,
   users,
   teams,
   teamMembers,
   activityLogs,
+  invitations,
+  type User,
   type NewUser,
   type NewTeam,
   type NewTeamMember,
   type NewActivityLog,
   ActivityType,
-  invitations
-} from '@/lib/db/schema';
+} from '@koeti/db';
 import { comparePasswords, hashPassword, setSession } from '@/lib/auth/session';
 import { redirect } from 'next/navigation';
 import { cookies } from 'next/headers';
@@ -94,7 +94,7 @@ export const signIn = validatedAction(signInSchema, async (data, formData) => {
   const redirectTo = formData.get('redirect') as string | null;
   if (redirectTo === 'checkout') {
     const priceId = formData.get('priceId') as string;
-    return createCheckoutSession({ team: foundTeam, priceId });
+    return createCheckoutSession({ team: foundTeam, priceId, getUser });
   }
 
   redirect('/dashboard');
@@ -215,7 +215,7 @@ export const signUp = validatedAction(signUpSchema, async (data, formData) => {
   const redirectTo = formData.get('redirect') as string | null;
   if (redirectTo === 'checkout') {
     const priceId = formData.get('priceId') as string;
-    return createCheckoutSession({ team: createdTeam, priceId });
+    return createCheckoutSession({ team: createdTeam, priceId, getUser });
   }
 
   redirect('/dashboard');
