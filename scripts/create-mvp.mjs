@@ -130,10 +130,12 @@ appendFileSync(initSqlPath, `\n-- ${name}\nCREATE USER ${dbName} WITH PASSWORD '
 
 // Provision on live postgres if already running
 try {
+  // ponytail: two -c flags — CREATE DATABASE can't run in a transaction (implicit when multiple stmts in one -c)
   execFileSync(
     'docker',
-    ['compose', 'exec', '-T', 'postgres', 'psql', '-U', 'postgres', '-c',
-      `CREATE USER ${dbName} WITH PASSWORD 'localdev'; CREATE DATABASE ${dbName} OWNER ${dbName};`],
+    ['compose', 'exec', '-T', 'postgres', 'psql', '-U', 'postgres',
+      '-c', `CREATE USER ${dbName} WITH PASSWORD 'localdev';`,
+      '-c', `CREATE DATABASE ${dbName} OWNER ${dbName};`],
     { cwd: root, stdio: 'pipe' }
   )
   console.log(`  ✅ Postgres: database '${dbName}' created live`)

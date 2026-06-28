@@ -5,3 +5,7 @@ CREATE DATABASE saas_template OWNER saas_template;
 -- ponytail: add one block per app created with pnpm create-mvp
 -- CREATE USER <app_name> WITH PASSWORD 'localdev';
 -- CREATE DATABASE <app_name> OWNER <app_name>;
+
+-- pos
+CREATE USER pos WITH PASSWORD 'localdev';
+CREATE DATABASE pos OWNER pos;
