@@ -44,11 +44,11 @@ const pkg = JSON.parse(readFileSync(pkgPath, 'utf-8'))
 pkg.name = `@koeti/${name}`
 writeFileSync(pkgPath, JSON.stringify(pkg, null, 2) + '\n')
 
-// Replace saas-template references in text files (README, middleware, etc.)
+// Replace saas-template references in key text files that may embed the template name
 const filesToPatch = [
   'README.md',
-  'middleware.ts',
-  'next.config.ts',
+  'middleware.ts',   // createAuthMiddleware comment may reference saas-template
+  'next.config.ts',  // transpilePackages may reference @koeti/saas-template
   'tsconfig.json',
 ]
 for (const file of filesToPatch) {
@@ -60,9 +60,6 @@ for (const file of filesToPatch) {
     .replaceAll('@koeti/saas-template', `@koeti/${name}`)
   writeFileSync(filePath, patched)
 }
-
-// Ensure lib/db directory exists
-mkdirSync(join(dest, 'lib', 'db'), { recursive: true })
 
 // Write canonical lib/db/index.ts
 writeFileSync(join(dest, 'lib', 'db', 'index.ts'), `import { baseSchema } from '@koeti/db'
