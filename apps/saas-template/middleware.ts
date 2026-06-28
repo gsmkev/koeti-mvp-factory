@@ -1,8 +1,11 @@
 import { createAuthMiddleware } from '@koeti/auth'
-import type { NextRequest } from 'next/server'
-import type { NextResponse } from 'next/server'
 
-const _auth = createAuthMiddleware({ protectedRoutes: ['/dashboard'] })
+const { middleware: _middleware } = createAuthMiddleware({ protectedRoutes: ['/dashboard'] })
 
-export const middleware: (req: NextRequest) => Promise<NextResponse | Response> = _auth.middleware
-export const config = _auth.config
+export const middleware = _middleware
+
+// ponytail: static literal required by Turbopack — cannot be dynamic reference
+export const config = {
+  matcher: ['/((?!api|_next/static|_next/image|favicon.ico).*)'],
+  runtime: 'nodejs',
+}
