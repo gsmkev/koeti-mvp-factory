@@ -15,6 +15,9 @@ dist/
 # Turbo
 .turbo/
 
+# Python venv
+.venv/
+
 # Knowledge graphs (auto-generated)
 graphify-out/
 .code-review-graph/

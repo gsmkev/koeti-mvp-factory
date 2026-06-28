@@ -1,0 +1,28 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write|Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cat >/dev/null || true; git rev-parse --git-dir >/dev/null 2>&1 && CRG_TOOLS=find_definition,find_callers,get_file_context,get_impact_radius,get_community_summary,search_graph,get_architecture_overview,traverse_graph /home/kevin/projects/koeti-mvp-factory/.venv/bin/code-review-graph update --skip-flows --repo \"/home/kevin/projects/koeti-mvp-factory\" || true",
+            "timeout": 30
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cat >/dev/null || true; git rev-parse --git-dir >/dev/null 2>&1 && /home/kevin/projects/koeti-mvp-factory/.venv/bin/code-review-graph status --repo \"/home/kevin/projects/koeti-mvp-factory\" || echo 'Not a git repo, skipping'",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}
