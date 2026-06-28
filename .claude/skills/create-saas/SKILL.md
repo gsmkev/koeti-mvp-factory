@@ -1,4 +1,5 @@
 ---
+name: create-saas
 description: Implement a new SaaS app in this monorepo from a spec + plan. Run this after pnpm create-mvp has scaffolded the app and the spec/plan are written.
 argument-hint: <saas-name>
 ---
