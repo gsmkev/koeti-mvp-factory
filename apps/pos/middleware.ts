@@ -1,6 +1,8 @@
 import { createAuthMiddleware } from '@koeti/auth'
 
-const { middleware: _middleware } = createAuthMiddleware({ protectedRoutes: ['/dashboard'] })
+const { middleware: _middleware } = createAuthMiddleware({
+  protectedRoutes: ['/dashboard', '/pos', '/sales', '/inventory', '/suppliers'],
+})
 
 export const middleware = _middleware
 

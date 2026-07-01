@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Button } from '@koeti/ui';
-import { Users, Settings, Shield, Activity, Menu } from 'lucide-react';
+import { BarChart2, Settings, Shield, Activity, Menu } from 'lucide-react';
 
 export default function DashboardLayout({
   children
@@ -15,10 +15,10 @@ export default function DashboardLayout({
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const navItems = [
-    { href: '/dashboard', icon: Users, label: 'Team' },
-    { href: '/dashboard/general', icon: Settings, label: 'General' },
-    { href: '/dashboard/activity', icon: Activity, label: 'Activity' },
-    { href: '/dashboard/security', icon: Shield, label: 'Security' }
+    { href: '/dashboard', icon: BarChart2, label: 'Resumen' },
+    { href: '/dashboard/general', icon: Settings, label: 'Cuenta' },
+    { href: '/dashboard/activity', icon: Activity, label: 'Actividad' },
+    { href: '/dashboard/security', icon: Shield, label: 'Seguridad' }
   ];
 
   return (
