@@ -69,3 +69,5 @@ export {
   DialogTitle,
   DialogTrigger,
 } from './components/dialog'
+export { Toaster } from './components/sonner'
+export { toast } from 'sonner'

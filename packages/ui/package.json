@@ -12,6 +12,7 @@
     "clsx": "^2.1.1",
     "lucide-react": "^0.511.0",
     "radix-ui": "^1.4.2",
+    "sonner": "^2.0.7",
     "tailwind-merge": "^3.3.0",
     "tw-animate-css": "^1.3.0"
   },
