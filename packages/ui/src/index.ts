@@ -42,3 +42,4 @@ export {
 } from './components/table'
 export { Badge, badgeVariants } from './components/badge'
 export { Textarea } from './components/textarea'
+export { Skeleton } from './components/skeleton'
