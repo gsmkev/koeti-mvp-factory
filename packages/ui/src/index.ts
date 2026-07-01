@@ -58,3 +58,14 @@ export {
   SelectTrigger,
   SelectValue,
 } from './components/select'
+export {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogOverlay,
+  DialogTitle,
+  DialogTrigger,
+} from './components/dialog'
