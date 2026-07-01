@@ -21,3 +21,4 @@ dist/
 # Knowledge graphs (auto-generated)
 graphify-out/
 .code-review-graph/
+.vercel
