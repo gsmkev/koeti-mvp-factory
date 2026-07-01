@@ -1,6 +1,15 @@
 import { checkoutAction } from '@/lib/payments/actions';
 import { Check } from 'lucide-react';
 import { getStripePrices, getStripeProducts } from '@/lib/payments/stripe';
+import {
+  Badge,
+  Card,
+  CardAction,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@koeti/ui';
 import { SubmitButton } from './submit-button';
 
 // Prices are fresh for one hour max
@@ -19,17 +28,31 @@ export default async function PricingPage() {
   const plusPrice = prices.find((price) => price.productId === plusPlan?.id);
 
   return (
-    <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      <div className="grid md:grid-cols-2 gap-8 max-w-xl mx-auto">
+    <main className="mx-auto max-w-6xl px-6 py-16 sm:px-8 sm:py-20">
+      <div className="max-w-2xl">
+        <p className="font-mono text-xs uppercase tracking-widest text-muted-foreground">
+          Scaffold // 02
+        </p>
+        <h1 className="mt-4 text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl">
+          One foundation. Pick your plan.
+        </h1>
+        <p className="mt-4 max-w-lg text-lg text-muted-foreground">
+          Every plan ships with the full scaffold — auth, billing, and team
+          accounts included. Plus adds priority support and early access as
+          your team grows.
+        </p>
+      </div>
+
+      <div className="mt-12 grid gap-6 md:grid-cols-2">
         <PricingCard
           name={basePlan?.name || 'Base'}
           price={basePrice?.unitAmount || 800}
           interval={basePrice?.interval || 'month'}
           trialDays={basePrice?.trialPeriodDays || 7}
           features={[
-            'Unlimited Usage',
-            'Unlimited Workspace Members',
-            'Email Support',
+            'Unlimited usage',
+            'Unlimited workspace members',
+            'Email support',
           ]}
           priceId={basePrice?.id}
         />
@@ -40,10 +63,11 @@ export default async function PricingPage() {
           trialDays={plusPrice?.trialPeriodDays || 7}
           features={[
             'Everything in Base, and:',
-            'Early Access to New Features',
-            '24/7 Support + Slack Access',
+            'Early access to new features',
+            '24/7 support + Slack access',
           ]}
           priceId={plusPrice?.id}
+          highlight
         />
       </div>
     </main>
@@ -57,6 +81,7 @@ function PricingCard({
   trialDays,
   features,
   priceId,
+  highlight = false,
 }: {
   name: string;
   price: number;
@@ -64,31 +89,48 @@ function PricingCard({
   trialDays: number;
   features: string[];
   priceId?: string;
+  highlight?: boolean;
 }) {
   return (
-    <div className="pt-6">
-      <h2 className="text-2xl font-medium text-gray-900 mb-2">{name}</h2>
-      <p className="text-sm text-gray-600 mb-4">
-        with {trialDays} day free trial
-      </p>
-      <p className="text-4xl font-medium text-gray-900 mb-6">
-        ${price / 100}{' '}
-        <span className="text-xl font-normal text-gray-600">
-          per user / {interval}
-        </span>
-      </p>
-      <ul className="space-y-4 mb-8">
-        {features.map((feature, index) => (
-          <li key={index} className="flex items-start">
-            <Check className="h-5 w-5 text-orange-500 mr-2 mt-0.5 flex-shrink-0" />
-            <span className="text-gray-700">{feature}</span>
-          </li>
-        ))}
-      </ul>
-      <form action={checkoutAction}>
-        <input type="hidden" name="priceId" value={priceId} />
-        <SubmitButton />
-      </form>
-    </div>
+    <Card className={highlight ? 'border-foreground/30 shadow-md' : undefined}>
+      <CardHeader>
+        <div>
+          <span className="font-mono text-xs text-muted-foreground">
+            [{name.toLowerCase()}]
+          </span>
+          <CardTitle className="mt-1 text-2xl">{name}</CardTitle>
+          <p className="mt-1 text-sm text-muted-foreground">
+            {trialDays}-day free trial
+          </p>
+        </div>
+        {highlight && (
+          <CardAction>
+            <Badge>Recommended</Badge>
+          </CardAction>
+        )}
+      </CardHeader>
+      <CardContent>
+        <p className="text-4xl font-bold text-foreground">
+          ${price / 100}
+          <span className="ml-2 text-base font-normal text-muted-foreground">
+            per user / {interval}
+          </span>
+        </p>
+        <ul className="mt-8 space-y-4 border-t border-border pt-8">
+          {features.map((feature, index) => (
+            <li key={index} className="flex items-start">
+              <Check className="mr-2 mt-0.5 h-5 w-5 flex-shrink-0 text-foreground" />
+              <span className="text-sm text-muted-foreground">{feature}</span>
+            </li>
+          ))}
+        </ul>
+      </CardContent>
+      <CardFooter>
+        <form action={checkoutAction} className="w-full">
+          <input type="hidden" name="priceId" value={priceId} />
+          <SubmitButton />
+        </form>
+      </CardFooter>
+    </Card>
   );
 }
