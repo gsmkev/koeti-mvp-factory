@@ -9,14 +9,20 @@ paths:
 
 # Auth pattern
 
-## `proxy.ts` (every app root — Next.js renamed the `middleware.ts` convention to `proxy.ts`; same exports, same behavior)
+## `proxy.ts` (every app root — Next.js renamed the `middleware.ts` convention to `proxy.ts`)
+
+`proxy.ts` requires a **default export** for the handler (unlike the old `middleware.ts`,
+which used a named `export const middleware`). `config` stays a named export.
 
 ```ts
 import { createAuthMiddleware } from '@koeti/auth'
 
-export const { middleware, config } = createAuthMiddleware({
+const { middleware, config: authConfig } = createAuthMiddleware({
   protectedRoutes: ['/dashboard'],
 })
+
+export default middleware
+export const config = authConfig
 ```
 
 ## Server actions — use wrappers from the app's own `lib/auth/middleware.ts`

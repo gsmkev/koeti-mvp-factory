@@ -4,7 +4,8 @@ const { middleware: _middleware } = createAuthMiddleware({
   protectedRoutes: ['/dashboard', '/pos', '/sales', '/inventory', '/suppliers'],
 })
 
-export const middleware = _middleware
+// proxy.ts (unlike the old middleware.ts) requires a default export
+export default _middleware
 
 // ponytail: static literal required by Turbopack — cannot be dynamic reference
 export const config = {
