@@ -1,5 +1,5 @@
 {
   "extends": "@koeti/config/tsconfig/base",
-  "compilerOptions": { "outDir": "dist" },
+  "compilerOptions": { "outDir": "dist", "rootDir": "src" },
   "include": ["src/**/*"]
 }
