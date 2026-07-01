@@ -10,7 +10,6 @@ import { getUser, getTeamForUser } from '@/lib/db/queries'
 const saleItemSchema = z.object({
   productId: z.number(),
   qty: z.number().int().positive(),
-  unitPrice: z.number().positive(),
 })
 
 const createSaleSchema = z.object({
@@ -18,7 +17,7 @@ const createSaleSchema = z.object({
 })
 
 export async function createSale(
-  items: { productId: number; qty: number; unitPrice: number }[]
+  items: { productId: number; qty: number }[]
 ): Promise<{ error?: string; saleId?: number }> {
   const user = await getUser()
   if (!user) return { error: 'No autenticado' }
@@ -30,17 +29,20 @@ export async function createSale(
 
   try {
     const saleId = await db.transaction(async (tx) => {
+      // Price and stock always come from the DB row, never the client.
+      const priced: { productId: number; qty: number; unitPrice: number }[] = []
       for (const item of items) {
         const [product] = await tx
-          .select({ stock: products.stock, name: products.name, teamId: products.teamId })
+          .select({ stock: products.stock, name: products.name, teamId: products.teamId, price: products.price })
           .from(products)
           .where(eq(products.id, item.productId))
           .for('update')
         if (!product || product.teamId !== team.id) throw new Error(`Producto ${item.productId} no encontrado`)
         if (product.stock < item.qty) throw new Error(`Stock insuficiente para "${product.name}"`)
+        priced.push({ productId: item.productId, qty: item.qty, unitPrice: parseFloat(product.price) })
       }
 
-      const total = items.reduce((sum, i) => sum + i.qty * i.unitPrice, 0)
+      const total = priced.reduce((sum, i) => sum + i.qty * i.unitPrice, 0)
 
       const [sale] = await tx
         .insert(sales)
@@ -48,7 +50,7 @@ export async function createSale(
         .returning({ id: sales.id })
 
       await tx.insert(saleItems).values(
-        items.map(i => ({
+        priced.map(i => ({
           saleId: sale.id,
           productId: i.productId,
           qty: i.qty,
@@ -56,7 +58,7 @@ export async function createSale(
         }))
       )
 
-      for (const item of items) {
+      for (const item of priced) {
         await tx
           .update(products)
           .set({ stock: sql`${products.stock} - ${item.qty}` })

@@ -1,7 +1,7 @@
 'use server'
 
 import { z } from 'zod'
-import { eq, sql } from 'drizzle-orm'
+import { and, eq, sql } from 'drizzle-orm'
 import { revalidatePath } from 'next/cache'
 import { db } from '@/lib/db/drizzle'
 import { products } from '@/lib/db/schema'
@@ -21,10 +21,12 @@ export const upsertProduct = validatedActionWithUser(productSchema, async (data)
   if (!team) return { error: 'No se encontró el equipo' }
 
   if (data.id) {
-    await db
+    const result = await db
       .update(products)
       .set({ name: data.name, sku: data.sku || null, price: String(data.price), stock: data.stock })
-      .where(eq(products.id, data.id))
+      .where(and(eq(products.id, data.id), eq(products.teamId, team.id)))
+      .returning({ id: products.id })
+    if (result.length === 0) return { error: 'Producto no encontrado' }
   } else {
     await db.insert(products).values({
       teamId: team.id,
@@ -44,10 +46,16 @@ const adjustSchema = z.object({
 })
 
 export const adjustStock = validatedActionWithUser(adjustSchema, async (data) => {
-  await db
+  const team = await getTeamForUser()
+  if (!team) return { error: 'No se encontró el equipo' }
+
+  const result = await db
     .update(products)
     .set({ stock: sql`GREATEST(0, ${products.stock} + ${data.delta})` })
-    .where(eq(products.id, data.productId))
+    .where(and(eq(products.id, data.productId), eq(products.teamId, team.id)))
+    .returning({ id: products.id })
+  if (result.length === 0) return { error: 'Producto no encontrado' }
+
   revalidatePath('/inventory')
   return { success: 'Stock actualizado' }
 })

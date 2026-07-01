@@ -50,7 +50,6 @@ export default function PosPage() {
     const result = await createSale(cart.map(i => ({
       productId: i.id,
       qty: i.qty,
-      unitPrice: parseFloat(i.price),
     })))
     setPending(false)
     if (result.error) { setError(result.error); return }

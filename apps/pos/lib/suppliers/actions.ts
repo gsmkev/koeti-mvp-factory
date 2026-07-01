@@ -1,7 +1,7 @@
 'use server'
 
 import { z } from 'zod'
-import { eq } from 'drizzle-orm'
+import { and, eq } from 'drizzle-orm'
 import { revalidatePath } from 'next/cache'
 import { db } from '@/lib/db/drizzle'
 import { suppliers, supplierPayments } from '@/lib/db/schema'
@@ -19,7 +19,12 @@ export const upsertSupplier = validatedActionWithUser(supplierSchema, async (dat
   if (!team) return { error: 'No se encontró el equipo' }
 
   if (data.id) {
-    await db.update(suppliers).set({ name: data.name, contact: data.contact || null }).where(eq(suppliers.id, data.id))
+    const result = await db
+      .update(suppliers)
+      .set({ name: data.name, contact: data.contact || null })
+      .where(and(eq(suppliers.id, data.id), eq(suppliers.teamId, team.id)))
+      .returning({ id: suppliers.id })
+    if (result.length === 0) return { error: 'Proveedor no encontrado' }
   } else {
     await db.insert(suppliers).values({ teamId: team.id, name: data.name, contact: data.contact || null })
   }
@@ -39,15 +44,26 @@ export const upsertPayment = validatedActionWithUser(paymentSchema, async (data)
   const team = await getTeamForUser()
   if (!team) return { error: 'No se encontró el equipo' }
 
+  const [supplier] = await db
+    .select({ id: suppliers.id })
+    .from(suppliers)
+    .where(and(eq(suppliers.id, data.supplierId), eq(suppliers.teamId, team.id)))
+  if (!supplier) return { error: 'Proveedor inválido' }
+
   const paidAt = data.paidAt ? new Date(data.paidAt) : new Date()
 
   if (data.id) {
-    await db.update(supplierPayments).set({
-      supplierId: data.supplierId,
-      amount: String(data.amount),
-      description: data.description,
-      paidAt,
-    }).where(eq(supplierPayments.id, data.id))
+    const result = await db
+      .update(supplierPayments)
+      .set({
+        supplierId: data.supplierId,
+        amount: String(data.amount),
+        description: data.description,
+        paidAt,
+      })
+      .where(and(eq(supplierPayments.id, data.id), eq(supplierPayments.teamId, team.id)))
+      .returning({ id: supplierPayments.id })
+    if (result.length === 0) return { error: 'Pago no encontrado' }
   } else {
     await db.insert(supplierPayments).values({
       teamId: team.id,
