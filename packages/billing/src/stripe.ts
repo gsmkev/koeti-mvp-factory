@@ -2,8 +2,19 @@ import Stripe from 'stripe'
 import { redirect } from 'next/navigation'
 import type { Team } from '@koeti/db'
 
-export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2025-08-27.basil',
+// Lazy: constructing eagerly at module load crashes the build for any app
+// importing this package in an environment without STRIPE_SECRET_KEY set,
+// even on routes that never touch Stripe.
+let _stripe: Stripe | undefined
+export const stripe = new Proxy({} as Stripe, {
+  get(_target, prop, receiver) {
+    if (!_stripe) {
+      _stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+        apiVersion: '2025-08-27.basil',
+      })
+    }
+    return Reflect.get(_stripe, prop, receiver)
+  },
 })
 
 export async function createCheckoutSession({

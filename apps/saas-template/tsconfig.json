@@ -1,7 +1,6 @@
 {
   "extends": "@koeti/config/tsconfig/nextjs",
   "compilerOptions": {
-    "baseUrl": ".",
     "paths": { "@/*": ["./*"] }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],

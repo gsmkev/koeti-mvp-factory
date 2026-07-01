@@ -22,3 +22,7 @@ dist/
 graphify-out/
 .code-review-graph/
 .vercel
+
+# Playwright MCP test artifacts
+.playwright-mcp/
+/*.png

@@ -1,6 +1,25 @@
 {
   "$schema": "https://turbo.build/schema.json",
   "ui": "tui",
+  "globalPassThroughEnv": [
+    "POSTGRES_PRISMA_URL",
+    "POSTGRES_PASSWORD",
+    "NEON_AUTH_BASE_URL",
+    "DATABASE_URL_UNPOOLED",
+    "DATABASE_URL",
+    "POSTGRES_DATABASE",
+    "NEON_PROJECT_ID",
+    "POSTGRES_URL_NON_POOLING",
+    "POSTGRES_URL_NO_SSL",
+    "PGUSER",
+    "PGHOST",
+    "PGHOST_UNPOOLED",
+    "PGPASSWORD",
+    "PGDATABASE",
+    "POSTGRES_HOST",
+    "POSTGRES_USER",
+    "VITE_NEON_AUTH_URL"
+  ],
   "tasks": {
     "build": {
       "dependsOn": ["^build"],

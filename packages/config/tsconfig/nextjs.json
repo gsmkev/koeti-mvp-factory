@@ -7,7 +7,6 @@
     "incremental": true,
     "jsx": "preserve",
     "plugins": [{ "name": "next" }],
-    "baseUrl": ".",
     "paths": { "@/*": ["./*"] }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],

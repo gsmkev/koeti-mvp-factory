@@ -1,5 +1,6 @@
 ---
 paths:
+  - "**/proxy.ts"
   - "**/middleware.ts"
   - "**/lib/auth/**"
   - "**/lib/actions/**"
@@ -8,7 +9,7 @@ paths:
 
 # Auth pattern
 
-## `middleware.ts` (every app root)
+## `proxy.ts` (every app root — Next.js renamed the `middleware.ts` convention to `proxy.ts`; same exports, same behavior)
 
 ```ts
 import { createAuthMiddleware } from '@koeti/auth'
