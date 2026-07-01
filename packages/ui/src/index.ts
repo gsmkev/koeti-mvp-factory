@@ -46,3 +46,15 @@ export { Skeleton } from './components/skeleton'
 export { Separator } from './components/separator'
 export { Switch } from './components/switch'
 export { Tabs, TabsList, TabsTrigger, TabsContent } from './components/tabs'
+export {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectScrollDownButton,
+  SelectScrollUpButton,
+  SelectSeparator,
+  SelectTrigger,
+  SelectValue,
+} from './components/select'
