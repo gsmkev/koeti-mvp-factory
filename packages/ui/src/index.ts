@@ -40,3 +40,4 @@ export {
   TableCell,
   TableCaption,
 } from './components/table'
+export { Badge, badgeVariants } from './components/badge'
