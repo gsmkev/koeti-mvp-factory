@@ -128,6 +128,9 @@ export async function handleSubscriptionChange(
 }
 
 export async function getStripePrices() {
+  // ponytail: no key (CI, fresh scaffold) → empty catalog instead of a failed build;
+  // with a real key, real API errors still fail loudly
+  if (!process.env.STRIPE_SECRET_KEY) return []
   const prices = await stripe.prices.list({ expand: ['data.product'], active: true, type: 'recurring' })
   return prices.data.map((price) => ({
     id: price.id,
@@ -140,6 +143,7 @@ export async function getStripePrices() {
 }
 
 export async function getStripeProducts() {
+  if (!process.env.STRIPE_SECRET_KEY) return []
   const products = await stripe.products.list({ active: true, expand: ['data.default_price'] })
   return products.data.map((product) => ({
     id: product.id,

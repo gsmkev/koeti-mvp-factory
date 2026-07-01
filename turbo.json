@@ -44,6 +44,7 @@
     "lint": {
       "dependsOn": ["^lint"]
     },
+    "typecheck": {},
     "db:migrate": {
       "cache": false
     },

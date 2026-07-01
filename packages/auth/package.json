@@ -20,5 +20,8 @@
     "@koeti/config": "workspace:*",
     "@types/bcryptjs": "^2.4.6",
     "typescript": "^5.8.3"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit"
   }
 }
