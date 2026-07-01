@@ -2,7 +2,18 @@ import { compare, hash } from 'bcryptjs'
 import { SignJWT, jwtVerify } from 'jose'
 import { cookies } from 'next/headers'
 
-const key = new TextEncoder().encode(process.env.AUTH_SECRET)
+// Lazy: read at first use (not module load) so a missing secret fails with a
+// clear message instead of jose's cryptic "Zero-length key is not supported".
+let _key: Uint8Array | undefined
+function key() {
+  if (!_key) {
+    if (!process.env.AUTH_SECRET) {
+      throw new Error('AUTH_SECRET environment variable is not set')
+    }
+    _key = new TextEncoder().encode(process.env.AUTH_SECRET)
+  }
+  return _key
+}
 const SALT_ROUNDS = 10
 
 export async function hashPassword(password: string) {
@@ -23,11 +34,11 @@ export async function signToken(payload: SessionData) {
     .setProtectedHeader({ alg: 'HS256' })
     .setIssuedAt()
     .setExpirationTime('1 day from now')
-    .sign(key)
+    .sign(key())
 }
 
 export async function verifyToken(input: string) {
-  const { payload } = await jwtVerify(input, key, { algorithms: ['HS256'] })
+  const { payload } = await jwtVerify(input, key(), { algorithms: ['HS256'] })
   return payload as SessionData
 }
 

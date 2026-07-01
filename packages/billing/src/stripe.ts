@@ -110,11 +110,22 @@ export async function handleSubscriptionChange(
   }
   const status = subscription.status
   if (status === 'active' || status === 'trialing') {
-    const plan = subscription.items.data[0]?.plan
+    // Webhook payloads carry product as an unexpanded string id; expanded
+    // objects only appear when the caller asked for them. Handle both.
+    const product = subscription.items.data[0]?.plan?.product
+    let stripeProductId: string | null = null
+    let planName: string | null = null
+    if (typeof product === 'string') {
+      stripeProductId = product
+      planName = (await stripe.products.retrieve(product)).name
+    } else if (product && !product.deleted) {
+      stripeProductId = product.id
+      planName = product.name
+    }
     await deps.updateTeamSubscription(team.id, {
       stripeSubscriptionId: subscription.id,
-      stripeProductId: plan?.product as string,
-      planName: (plan?.product as Stripe.Product).name,
+      stripeProductId,
+      planName,
       subscriptionStatus: status,
     })
   } else if (status === 'canceled' || status === 'unpaid') {

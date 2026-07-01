@@ -5,17 +5,16 @@ on:
     branches: [main]
   pull_request:
 
-env:
-  # Dummy values so `next build` survives module-scope env checks.
-  # STRIPE_SECRET_KEY is deliberately unset — @koeti/billing returns an
-  # empty catalog without it instead of calling the live API at build time.
-  POSTGRES_URL: postgresql://ci:ci@localhost:5432/ci
-  AUTH_SECRET: ci-dummy-secret
-  BASE_URL: http://localhost:3000
-
 jobs:
   ci:
     runs-on: ubuntu-latest
+    env:
+      # Dummy values so `next build` survives module-scope env checks.
+      # STRIPE_SECRET_KEY is deliberately unset — @koeti/billing returns an
+      # empty catalog without it instead of calling the live API at build time.
+      POSTGRES_URL: postgresql://ci:ci@localhost:5432/ci
+      AUTH_SECRET: ci-dummy-secret
+      BASE_URL: http://localhost:3000
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -25,4 +24,30 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm typecheck
+      - run: pnpm test
       - run: pnpm build
+
+  smoke:
+    # Full factory loop against a real Postgres: scaffold → migrate → build → serve → HTTP
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_PASSWORD: localdev
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm smoke

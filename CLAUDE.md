@@ -5,12 +5,22 @@ SaaS factory. Each `apps/<name>/` models business logic only. Shared infrastruct
 ## Commands
 
 ```bash
-pnpm create-mvp <name>                   # scaffold new SaaS
+pnpm bootstrap                           # fresh clone/worktree: env files + local Postgres
+pnpm create-mvp <name>                   # scaffold new SaaS (also provisions DB + installs)
 pnpm --filter @koeti/<name> dev          # dev one app
 pnpm dev                                  # dev all apps
 pnpm --filter @koeti/<name> db:migrate   # run migrations
 pnpm build                                # build all (Turbo cached)
+pnpm typecheck                            # tsc --noEmit, all workspaces
+pnpm test                                 # vitest, all workspaces with tests
+pnpm smoke                                # full factory loop: scaffold→migrate→build→serve
 ```
+
+## Definition of done
+
+Before claiming any change works: `pnpm typecheck && pnpm test && pnpm build` must pass.
+If you touched `apps/saas-template/` or `scripts/create-mvp.mjs`, also run `pnpm smoke`.
+Working in a fresh worktree? Run `pnpm bootstrap` first — `.env.local` files don't follow git.
 
 ## Core rules
 
@@ -34,7 +44,7 @@ import { track, identify } from '@koeti/analytics/server'
 
 ## Knowledge graph
 
-Before grepping the codebase or tracing call chains, read `docs/agent/knowledge-graph.md` and use CRG tools. 5–10x cheaper than grep.
+If CRG MCP tools are available in your session, prefer them over grep for tracing call chains (see `docs/agent/knowledge-graph.md`). If they're not available, use normal search tools — don't go looking for them.
 
 ## Frontend
 

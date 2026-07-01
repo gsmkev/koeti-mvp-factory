@@ -88,19 +88,33 @@ NEXT_PUBLIC_POSTHOG_HOST=https://app.posthog.com
 const initSqlPath = join(root, 'docker', 'postgres', 'init.sql')
 appendFileSync(initSqlPath, `\n-- ${name}\nCREATE USER ${dbName} WITH PASSWORD 'localdev';\nCREATE DATABASE ${dbName} OWNER ${dbName};\n`)
 
-// Provision on live postgres if already running
-try {
-  // ponytail: two -c flags — CREATE DATABASE can't run in a transaction (implicit when multiple stmts in one -c)
-  execFileSync(
-    'docker',
-    ['compose', 'exec', '-T', 'postgres', 'psql', '-U', 'postgres',
-      '-c', `CREATE USER ${dbName} WITH PASSWORD 'localdev';`,
-      '-c', `CREATE DATABASE ${dbName} OWNER ${dbName};`],
-    { cwd: root, stdio: 'pipe' }
-  )
-  console.log(`  ✅ Postgres: database '${dbName}' created live`)
-} catch {
-  console.log(`  ℹ️  Postgres offline — '${dbName}' will be created on next 'docker compose up'`)
+// Provision on live postgres if reachable (docker compose locally, service container in CI)
+await provisionDatabase(dbName)
+
+async function provisionDatabase(dbName) {
+  const adminUrl =
+    process.env.POSTGRES_ADMIN_URL ?? 'postgresql://postgres:localdev@localhost:5432/postgres'
+  let sql
+  try {
+    const { default: postgres } = await import('postgres')
+    sql = postgres(adminUrl, { connect_timeout: 3, onnotice: () => {} })
+    // ignore "already exists" (42710 user, 42P04 database) so re-runs are safe
+    for (const stmt of [
+      `CREATE USER ${dbName} WITH PASSWORD 'localdev'`,
+      `CREATE DATABASE ${dbName} OWNER ${dbName}`,
+    ]) {
+      try {
+        await sql.unsafe(stmt)
+      } catch (err) {
+        if (err.code !== '42710' && err.code !== '42P04') throw err
+      }
+    }
+    console.log(`  ✅ Postgres: database '${dbName}' created live`)
+  } catch {
+    console.log(`  ℹ️  Postgres offline — '${dbName}' will be created on next 'docker compose up'`)
+  } finally {
+    await sql?.end()
+  }
 }
 
 // Link the new workspace so db:migrate / dev work immediately

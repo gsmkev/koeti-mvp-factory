@@ -6,8 +6,8 @@ SaaS factory monorepo. Each `apps/<name>/` is a full SaaS (Next.js + Postgres + 
 
 ```bash
 pnpm install
-docker compose up -d          # local Postgres (databases auto-created from docker/postgres/init.sql)
-pnpm create-mvp my-saas       # scaffold apps/my-saas with its own DB, env, and migrations dir
+pnpm bootstrap                # env files for all apps + local Postgres via docker compose
+pnpm create-mvp my-saas       # scaffold apps/my-saas with its own DB, env, and deps installed
 pnpm --filter @koeti/my-saas db:migrate
 pnpm --filter @koeti/my-saas dev
 ```
@@ -19,6 +19,8 @@ pnpm --filter @koeti/my-saas dev
 ```bash
 pnpm build        # build all apps (Turbo cached)
 pnpm typecheck    # tsc --noEmit across all apps and packages
+pnpm test         # vitest across all workspaces with tests
+pnpm smoke        # full factory loop: scaffold → migrate → build → serve → HTTP 200 → cleanup
 pnpm dev          # dev all apps
 pnpm --filter @koeti/<name> db:generate   # generate migration from schema changes
 pnpm --filter @koeti/<name> db:migrate    # apply migrations

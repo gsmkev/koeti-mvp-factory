@@ -19,9 +19,11 @@
   "devDependencies": {
     "@koeti/config": "workspace:*",
     "@types/bcryptjs": "^2.4.6",
-    "typescript": "^5.8.3"
+    "typescript": "^5.8.3",
+    "vitest": "^3.2.4"
   },
   "scripts": {
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
   }
 }
