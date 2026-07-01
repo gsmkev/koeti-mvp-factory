@@ -30,3 +30,13 @@ export {
 export { Input } from './components/input'
 export { Label } from './components/label'
 export { RadioGroup, RadioGroupItem } from './components/radio-group'
+export {
+  Table,
+  TableHeader,
+  TableBody,
+  TableFooter,
+  TableHead,
+  TableRow,
+  TableCell,
+  TableCaption,
+} from './components/table'
