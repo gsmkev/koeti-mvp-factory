@@ -3,6 +3,7 @@ import type { Metadata, Viewport } from 'next';
 import { Lexend, Source_Sans_3 } from 'next/font/google';
 import { getUser, getTeamForUser } from '@/lib/db/queries';
 import { SWRConfig } from 'swr';
+import { Analytics } from '@koeti/analytics/client';
 
 export const metadata: Metadata = {
   title: 'Gastos — control de gastos para equipos',
@@ -37,6 +38,7 @@ export default function RootLayout({
         >
           {children}
         </SWRConfig>
+        <Analytics />
       </body>
     </html>
   );
