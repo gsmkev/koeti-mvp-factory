@@ -26,3 +26,12 @@ graphify-out/
 # Playwright MCP test artifacts
 .playwright-mcp/
 /*.png
+
+# Local self-hosted PostHog stack (machine-local: vendored repo, GeoLite data,
+# service creds — docker-compose.yml references these, so that change stays local too)
+/posthog/
+/share/
+.env.services
+
+# Local agent worktrees
+.claude/worktrees/
