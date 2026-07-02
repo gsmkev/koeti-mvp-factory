@@ -1,6 +1,5 @@
 'use client';
 
-import { Button } from '@koeti/ui';
 import { Avatar, AvatarFallback, AvatarImage } from '@koeti/ui';
 import {
   Card,
@@ -17,8 +16,8 @@ import useSWR from 'swr';
 import { Suspense } from 'react';
 import { Input } from '@koeti/ui';
 import { RadioGroup, RadioGroupItem } from '@koeti/ui';
-import { Label } from '@koeti/ui';
-import { Loader2, PlusCircle } from 'lucide-react';
+import { Label, PageHeader, SubmitButton } from '@koeti/ui';
+import { PlusCircle } from 'lucide-react';
 
 type ActionState = {
   error?: string;
@@ -61,9 +60,9 @@ function ManageSubscription() {
               </p>
             </div>
             <form action={customerPortalAction}>
-              <Button type="submit" variant="outline">
+              <SubmitButton variant="outline" pendingText="Opening...">
                 Manage Subscription
-              </Button>
+              </SubmitButton>
             </form>
           </div>
         </div>
@@ -95,10 +94,10 @@ function TeamMembersSkeleton() {
 
 function TeamMembers() {
   const { data: teamData } = useSWR<TeamDataWithMembers>('/api/team', fetcher);
-  const [removeState, removeAction, isRemovePending] = useActionState<
-    ActionState,
-    FormData
-  >(removeTeamMember, {});
+  const [removeState, removeAction] = useActionState<ActionState, FormData>(
+    removeTeamMember,
+    {}
+  );
 
   const getUserDisplayName = (user: Pick<User, 'id' | 'name' | 'email'>) => {
     return user.name || user.email || 'Unknown User';
@@ -156,14 +155,9 @@ function TeamMembers() {
               {index > 1 ? (
                 <form action={removeAction}>
                   <input type="hidden" name="memberId" value={member.id} />
-                  <Button
-                    type="submit"
-                    variant="outline"
-                    size="sm"
-                    disabled={isRemovePending}
-                  >
-                    {isRemovePending ? 'Removing...' : 'Remove'}
-                  </Button>
+                  <SubmitButton variant="outline" size="sm" pendingText="Removing...">
+                    Remove
+                  </SubmitButton>
                 </form>
               ) : null}
             </li>
@@ -190,10 +184,10 @@ function InviteTeamMemberSkeleton() {
 function InviteTeamMember() {
   const { data: user } = useSWR<User>('/api/user', fetcher);
   const isOwner = user?.role === 'owner';
-  const [inviteState, inviteAction, isInvitePending] = useActionState<
-    ActionState,
-    FormData
-  >(inviteTeamMember, {});
+  const [inviteState, inviteAction] = useActionState<ActionState, FormData>(
+    inviteTeamMember,
+    {}
+  );
 
   return (
     <Card>
@@ -239,23 +233,14 @@ function InviteTeamMember() {
           {inviteState?.success && (
             <p className="text-green-500">{inviteState.success}</p>
           )}
-          <Button
-            type="submit"
+          <SubmitButton
             className="bg-orange-500 hover:bg-orange-600 text-white"
-            disabled={isInvitePending || !isOwner}
+            pendingText="Inviting..."
+            disabled={!isOwner}
           >
-            {isInvitePending ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Inviting...
-              </>
-            ) : (
-              <>
-                <PlusCircle className="mr-2 h-4 w-4" />
-                Invite Member
-              </>
-            )}
-          </Button>
+            <PlusCircle className="mr-2 h-4 w-4" />
+            Invite Member
+          </SubmitButton>
         </form>
       </CardContent>
       {!isOwner && (
@@ -271,8 +256,8 @@ function InviteTeamMember() {
 
 export default function SettingsPage() {
   return (
-    <section className="flex-1 p-4 lg:p-8">
-      <h1 className="text-lg lg:text-2xl font-medium mb-6">Team Settings</h1>
+    <section className="flex-1 space-y-6 p-4 lg:p-8">
+      <PageHeader title="Team Settings" />
       <Suspense fallback={<SubscriptionSkeleton />}>
         <ManageSubscription />
       </Suspense>

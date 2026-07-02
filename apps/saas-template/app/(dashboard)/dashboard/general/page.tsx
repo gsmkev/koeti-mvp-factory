@@ -1,11 +1,9 @@
 'use client';
 
 import { useActionState } from 'react';
-import { Button } from '@koeti/ui';
 import { Input } from '@koeti/ui';
 import { Card, CardContent, CardHeader, CardTitle } from '@koeti/ui';
-import { Label } from '@koeti/ui';
-import { Loader2 } from 'lucide-react';
+import { Label, PageHeader, SubmitButton } from '@koeti/ui';
 import { updateAccount } from '@/app/(login)/actions';
 import { User } from '@/lib/db/schema';
 import useSWR from 'swr';
@@ -73,16 +71,14 @@ function AccountFormWithData({ state }: { state: ActionState }) {
 }
 
 export default function GeneralPage() {
-  const [state, formAction, isPending] = useActionState<ActionState, FormData>(
+  const [state, formAction] = useActionState<ActionState, FormData>(
     updateAccount,
     {}
   );
 
   return (
-    <section className="flex-1 p-4 lg:p-8">
-      <h1 className="text-lg lg:text-2xl font-medium text-gray-900 mb-6">
-        General Settings
-      </h1>
+    <section className="flex-1 space-y-6 p-4 lg:p-8">
+      <PageHeader title="General Settings" />
 
       <Card>
         <CardHeader>
@@ -99,20 +95,12 @@ export default function GeneralPage() {
             {state.success && (
               <p className="text-green-500 text-sm">{state.success}</p>
             )}
-            <Button
-              type="submit"
+            <SubmitButton
               className="bg-orange-500 hover:bg-orange-600 text-white"
-              disabled={isPending}
+              pendingText="Saving..."
             >
-              {isPending ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Saving...
-                </>
-              ) : (
-                'Save Changes'
-              )}
-            </Button>
+              Save Changes
+            </SubmitButton>
           </form>
         </CardContent>
       </Card>

@@ -1,10 +1,9 @@
 'use client';
 
-import { Button } from '@koeti/ui';
 import { Input } from '@koeti/ui';
 import { Card, CardContent, CardHeader, CardTitle } from '@koeti/ui';
-import { Label } from '@koeti/ui';
-import { Lock, Trash2, Loader2 } from 'lucide-react';
+import { Label, PageHeader, SubmitButton } from '@koeti/ui';
+import { Lock, Trash2 } from 'lucide-react';
 import { useActionState } from 'react';
 import { updatePassword, deleteAccount } from '@/app/(login)/actions';
 
@@ -23,22 +22,20 @@ type DeleteState = {
 };
 
 export default function SecurityPage() {
-  const [passwordState, passwordAction, isPasswordPending] = useActionState<
+  const [passwordState, passwordAction] = useActionState<
     PasswordState,
     FormData
   >(updatePassword, {});
 
-  const [deleteState, deleteAction, isDeletePending] = useActionState<
-    DeleteState,
-    FormData
-  >(deleteAccount, {});
+  const [deleteState, deleteAction] = useActionState<DeleteState, FormData>(
+    deleteAccount,
+    {}
+  );
 
   return (
-    <section className="flex-1 p-4 lg:p-8">
-      <h1 className="text-lg lg:text-2xl font-medium bold text-gray-900 mb-6">
-        Security Settings
-      </h1>
-      <Card className="mb-8">
+    <section className="flex-1 space-y-6 p-4 lg:p-8">
+      <PageHeader title="Security Settings" />
+      <Card>
         <CardHeader>
           <CardTitle>Password</CardTitle>
         </CardHeader>
@@ -94,23 +91,13 @@ export default function SecurityPage() {
             {passwordState.success && (
               <p className="text-green-500 text-sm">{passwordState.success}</p>
             )}
-            <Button
-              type="submit"
+            <SubmitButton
               className="bg-orange-500 hover:bg-orange-600 text-white"
-              disabled={isPasswordPending}
+              pendingText="Updating..."
             >
-              {isPasswordPending ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Updating...
-                </>
-              ) : (
-                <>
-                  <Lock className="mr-2 h-4 w-4" />
-                  Update Password
-                </>
-              )}
-            </Button>
+              <Lock className="mr-2 h-4 w-4" />
+              Update Password
+            </SubmitButton>
           </form>
         </CardContent>
       </Card>
@@ -141,24 +128,14 @@ export default function SecurityPage() {
             {deleteState.error && (
               <p className="text-red-500 text-sm">{deleteState.error}</p>
             )}
-            <Button
-              type="submit"
+            <SubmitButton
               variant="destructive"
               className="bg-red-600 hover:bg-red-700"
-              disabled={isDeletePending}
+              pendingText="Deleting..."
             >
-              {isDeletePending ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Deleting...
-                </>
-              ) : (
-                <>
-                  <Trash2 className="mr-2 h-4 w-4" />
-                  Delete Account
-                </>
-              )}
-            </Button>
+              <Trash2 className="mr-2 h-4 w-4" />
+              Delete Account
+            </SubmitButton>
           </form>
         </CardContent>
       </Card>

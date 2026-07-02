@@ -1,5 +1,5 @@
 import { checkoutAction } from '@/lib/payments/actions';
-import { Check } from 'lucide-react';
+import { ArrowRight, Check } from 'lucide-react';
 import { getStripePrices, getStripeProducts } from '@/lib/payments/stripe';
 import {
   Badge,
@@ -9,8 +9,8 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
+  SubmitButton,
 } from '@koeti/ui';
-import { SubmitButton } from './submit-button';
 
 // Prices are fresh for one hour max
 export const revalidate = 3600;
@@ -128,7 +128,14 @@ function PricingCard({
       <CardFooter>
         <form action={checkoutAction} className="w-full">
           <input type="hidden" name="priceId" value={priceId} />
-          <SubmitButton />
+          <SubmitButton
+            variant="outline"
+            className="w-full rounded-full"
+            pendingText="Loading..."
+          >
+            Get Started
+            <ArrowRight className="ml-2 h-4 w-4" />
+          </SubmitButton>
         </form>
       </CardFooter>
     </Card>
