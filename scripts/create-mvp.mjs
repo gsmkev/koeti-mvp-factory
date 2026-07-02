@@ -117,9 +117,11 @@ async function provisionDatabase(dbName) {
   }
 }
 
-// Link the new workspace so db:migrate / dev work immediately
+// Link the new workspace so db:migrate / dev work immediately.
+// --no-frozen-lockfile: a scaffold adds a lockfile importer by definition,
+// and CI environments default to frozen.
 console.log(`  📦 Installing workspace dependencies...`)
-execFileSync('pnpm', ['install'], { cwd: root, stdio: 'inherit' })
+execFileSync('pnpm', ['install', '--no-frozen-lockfile'], { cwd: root, stdio: 'inherit' })
 
 console.log(`✅ Created apps/${name}/\n`)
 console.log(`Next steps:`)

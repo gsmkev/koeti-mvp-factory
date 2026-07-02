@@ -68,7 +68,7 @@ try {
   rmSync(dest, { recursive: true, force: true })
   writeFileSync(initSqlPath, initSqlSnapshot)
   await dropDatabase()
-  run('pnpm install') // prune the smoke app from the lockfile
+  run('pnpm install --no-frozen-lockfile') // prune the smoke app from the lockfile (CI defaults to frozen)
 }
 process.exit(failed ? 1 : 0)
 
