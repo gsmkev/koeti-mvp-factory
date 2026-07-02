@@ -22,6 +22,7 @@ pnpm typecheck    # tsc --noEmit across all apps and packages
 pnpm test         # vitest across all workspaces with tests
 pnpm smoke        # full factory loop: scaffold → migrate → build → serve → HTTP 200 → cleanup
 pnpm verify-app <name>  # boot one app and render every page with a real session (SSR crash check)
+pnpm e2e-app <name>     # E2E in headless Chromium: sign-up + create/delete through the real forms
 pnpm dev          # dev all apps
 pnpm --filter @koeti/<name> db:generate   # generate migration from schema changes
 pnpm --filter @koeti/<name> db:migrate    # apply migrations
@@ -36,6 +37,7 @@ pnpm --filter @koeti/<name> db:migrate    # apply migrations
 | `packages/auth,db,billing,ui,email,analytics,config` | Shared infrastructure (`@koeti/*`) |
 | `scripts/create-mvp.mjs` | Scaffolder |
 | `scripts/verify-app.mjs` | Per-app runtime verification (public + authenticated pages) |
+| `scripts/e2e-app.mjs` | Per-app browser E2E (sign-up + CRUD via ResourcePanel forms) |
 
 ## AFK mode
 

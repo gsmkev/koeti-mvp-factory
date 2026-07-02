@@ -43,9 +43,10 @@ pnpm --filter @koeti/$ARGUMENTS db:generate   # then COMMIT any new migration fi
 pnpm --filter @koeti/$ARGUMENTS db:migrate
 pnpm --filter @koeti/$ARGUMENTS build
 pnpm verify-app $ARGUMENTS                    # renders every page with a real session
+pnpm e2e-app $ARGUMENTS                       # real browser: sign-up + CRUD through the UI
 ```
 
-All six must pass before reporting done. CI also fails if `db:generate`
+All seven must pass before reporting done. CI also fails if `db:generate`
 produces uncommitted migration files, so never edit `lib/db/schema.ts`
 without generating and committing the migration.
 

@@ -70,9 +70,10 @@ pnpm --filter @koeti/<name> typecheck
 pnpm --filter @koeti/<name> test
 pnpm --filter @koeti/<name> build
 pnpm verify-app <name>          # boots the app, renders every page authenticated
+pnpm e2e-app <name>             # real browser: sign-up + create/delete through every ResourcePanel
 ```
 
-All four must pass. On failure use `superpowers:systematic-debugging` — fix,
+All five must pass. On failure use `superpowers:systematic-debugging` — fix,
 re-run, repeat. Never weaken a check to get past it. If you touched anything
 under `packages/` or `scripts/`, also run the root `pnpm typecheck && pnpm test
 && pnpm build && pnpm smoke`.

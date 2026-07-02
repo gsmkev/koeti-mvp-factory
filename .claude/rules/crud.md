@@ -107,5 +107,7 @@ Add the entry to the dashboard nav (`app/(dashboard)/dashboard/layout.tsx` `navI
 ## Verify
 
 `pnpm --filter @koeti/<app> typecheck && pnpm --filter @koeti/<app> build`, then
-`pnpm verify-app <app>` — it renders every page with a real session and catches
-SSR crashes that build can't see.
+`pnpm verify-app <app>` (renders every page with a real session, catches SSR
+crashes) and `pnpm e2e-app <app>` (headless Chromium signs up and exercises
+create/delete through every ResourcePanel form — keep the panel's `data-slot`
+attributes intact for this to work).

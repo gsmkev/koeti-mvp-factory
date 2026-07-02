@@ -15,6 +15,7 @@ pnpm typecheck                            # tsc --noEmit, all workspaces
 pnpm test                                 # vitest, all workspaces with tests
 pnpm smoke                                # full factory loop: scaffold→migrate→build→serve
 pnpm verify-app <name>                    # boot the app + render EVERY page with a real session
+pnpm e2e-app <name>                       # E2E in headless Chromium: sign-up + CRUD via ResourcePanel forms
 ```
 
 ## AFK loop
@@ -27,7 +28,7 @@ spec/plan a human already wrote.
 ## Definition of done
 
 Before claiming any change works: `pnpm typecheck && pnpm test && pnpm build` must pass.
-If you touched an app's pages/actions/schema, also run `pnpm verify-app <name>`.
+If you touched an app's pages/actions/schema, also run `pnpm verify-app <name>` and `pnpm e2e-app <name>`.
 If you touched `apps/saas-template/` or `scripts/create-mvp.mjs`, also run `pnpm smoke`.
 Working in a fresh worktree? Run `pnpm bootstrap` first — `.env.local` files don't follow git.
 

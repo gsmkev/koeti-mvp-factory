@@ -88,7 +88,7 @@ function ResourcePanel<T>({
           header: "",
           className: "w-12 text-right",
           cell: (row) => (
-            <form action={onDelete as (formData: FormData) => void}>
+            <form data-slot="resource-delete-form" action={onDelete as (formData: FormData) => void}>
               <input type="hidden" name="id" value={String(rowKey(row))} />
               <SubmitButton variant="ghost" size="icon" aria-label="Delete">
                 <Trash2 className="size-4 text-muted-foreground" />
@@ -108,7 +108,7 @@ function ResourcePanel<T>({
       {onCreate && fields && fields.length > 0 && (
         <Card>
           <CardContent>
-            <form action={onCreate as (formData: FormData) => void} className="flex flex-wrap items-end gap-3">
+            <form data-slot="resource-create-form" action={onCreate as (formData: FormData) => void} className="flex flex-wrap items-end gap-3">
               {fields.map((field) => (
                 <div key={field.name} className="grid min-w-40 flex-1 gap-1.5">
                   <Label htmlFor={`resource-${field.name}`}>{field.label}</Label>
