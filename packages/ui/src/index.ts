@@ -71,3 +71,8 @@ export {
 } from './components/dialog'
 export { Toaster } from './components/sonner'
 export { toast } from 'sonner'
+export { DataTable, type DataTableColumn } from './components/data-table'
+export { EmptyState } from './components/empty-state'
+export { StatCard } from './components/stat-card'
+export { SubmitButton } from './components/submit-button'
+export { PageHeader } from './components/page-header'

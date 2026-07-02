@@ -38,6 +38,7 @@ import { baseSchema } from '@koeti/db'
 import type { User, Team, TeamMember } from '@koeti/db'
 import { createCheckoutSession, handleSubscriptionChange, stripe } from '@koeti/billing'
 import { Button, Input, Card, cn } from '@koeti/ui'
+import { PageHeader, DataTable, EmptyState, StatCard, SubmitButton } from '@koeti/ui' // dashboard composites
 import { sendEmail, WelcomeEmail } from '@koeti/email'
 import { track, identify } from '@koeti/analytics/server'
 ```
@@ -48,4 +49,6 @@ If CRG MCP tools are available in your session, prefer them over grep for tracin
 
 ## Frontend
 
-Before implementing any UI (page, component, dashboard, landing), invoke `design-taste-frontend`. Pass the SaaS spec as context so it infers the right aesthetic.
+Before implementing any UI (page, component, dashboard, landing), invoke the `frontend-design` skill. Pass the SaaS spec as context so it infers the right aesthetic.
+
+For team-scoped CRUD features, follow `.claude/rules/crud.md` — schema → queries → actions → page → nav, using the `@koeti/ui` composites.

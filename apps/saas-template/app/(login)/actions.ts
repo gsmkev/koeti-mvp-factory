@@ -25,6 +25,8 @@ import {
   validatedAction,
   validatedActionWithUser
 } from '@/lib/auth/middleware';
+import { sendEmail, WelcomeEmail } from '@koeti/email';
+import { track } from '@koeti/analytics/server';
 
 async function logActivity(
   teamId: number | null | undefined,
@@ -211,6 +213,12 @@ export const signUp = validatedAction(signUpSchema, async (data, formData) => {
     logActivity(teamId, createdUser.id, ActivityType.SIGN_UP),
     setSession(createdUser)
   ]);
+
+  // Fire-and-forget: email/analytics must never block or fail sign-up.
+  // Both are no-ops when their keys aren't configured.
+  sendEmail({ to: email, subject: 'Welcome!', react: WelcomeEmail({ name: email }) })
+    .catch((err) => console.error('welcome email failed:', err));
+  track('user_signed_up', { userId: String(createdUser.id) });
 
   const redirectTo = formData.get('redirect') as string | null;
   if (redirectTo === 'checkout') {

@@ -30,7 +30,7 @@ export const config = authConfig
 ```ts
 'use server'
 import { validatedActionWithUser } from '@/lib/auth/middleware'
-import { db } from '@/lib/db'
+import { db } from '@/lib/db/drizzle'
 import { z } from 'zod'
 
 const schema = z.object({ name: z.string().min(1) })

@@ -31,17 +31,26 @@ Use `superpowers:executing-plans` or `superpowers:subagent-driven-development` t
 - DB work → `.claude/rules/db.md`
 - Auth/actions → `.claude/rules/auth.md`
 - Billing/Stripe → `.claude/rules/billing.md`
-- Any UI → invoke `design-taste-frontend` first, then `.claude/rules/ui.md`
+- Any UI → invoke the `frontend-design` skill first, then `.claude/rules/ui.md`
+- Team-scoped entity (list/create/delete) → follow `.claude/rules/crud.md` step by step
 
 ## Step 4 — Verify
 
 ```bash
-pnpm --filter @koeti/$ARGUMENTS exec tsc --noEmit
+pnpm --filter @koeti/$ARGUMENTS typecheck
+pnpm --filter @koeti/$ARGUMENTS test
+pnpm --filter @koeti/$ARGUMENTS db:generate   # then COMMIT any new migration files
 pnpm --filter @koeti/$ARGUMENTS db:migrate
-pnpm --filter @koeti/$ARGUMENTS dev
+pnpm --filter @koeti/$ARGUMENTS build
 ```
 
-Fix any TypeScript errors before reporting done.
+All five must pass before reporting done. CI also fails if `db:generate`
+produces uncommitted migration files, so never edit `lib/db/schema.ts`
+without generating and committing the migration.
+
+To see it running: `pnpm --filter @koeti/$ARGUMENTS dev`, then
+`pnpm --filter @koeti/$ARGUMENTS db:seed` for a test login
+(test@test.com / admin123).
 
 ## What this app should NOT contain
 

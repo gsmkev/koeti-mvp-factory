@@ -26,6 +26,14 @@ jobs:
       - run: pnpm typecheck
       - run: pnpm test
       - run: pnpm build
+      - name: Check migrations are committed
+        run: |
+          pnpm --filter './apps/*' db:generate
+          if [ -n "$(git status --porcelain -- 'apps/*/lib/db/migrations')" ]; then
+            echo '::error::schema.ts changed without a generated/committed migration:'
+            git status --porcelain -- 'apps/*/lib/db/migrations'
+            exit 1
+          fi
 
   smoke:
     # Full factory loop against a real Postgres: scaffold → migrate → build → serve → HTTP
