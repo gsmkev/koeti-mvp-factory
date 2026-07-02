@@ -21,6 +21,7 @@ pnpm build        # build all apps (Turbo cached)
 pnpm typecheck    # tsc --noEmit across all apps and packages
 pnpm test         # vitest across all workspaces with tests
 pnpm smoke        # full factory loop: scaffold → migrate → build → serve → HTTP 200 → cleanup
+pnpm verify-app <name>  # boot one app and render every page with a real session (SSR crash check)
 pnpm dev          # dev all apps
 pnpm --filter @koeti/<name> db:generate   # generate migration from schema changes
 pnpm --filter @koeti/<name> db:migrate    # apply migrations
@@ -34,5 +35,12 @@ pnpm --filter @koeti/<name> db:migrate    # apply migrations
 | `apps/<name>/` | One SaaS per directory, owns `lib/db/schema.ts` for its tables |
 | `packages/auth,db,billing,ui,email,analytics,config` | Shared infrastructure (`@koeti/*`) |
 | `scripts/create-mvp.mjs` | Scaffolder |
+| `scripts/verify-app.mjs` | Per-app runtime verification (public + authenticated pages) |
+
+## AFK mode
+
+With Claude Code: `/factory <name> — <business logic>` runs spec → plan →
+scaffold → implement → verify → draft PR autonomously. See
+`.claude/skills/factory/SKILL.md`.
 
 Conventions and agent rules: see `CLAUDE.md` and `.claude/rules/`.
