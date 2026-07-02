@@ -1,6 +1,18 @@
 import Stripe from 'stripe'
 import { redirect } from 'next/navigation'
+import { headers } from 'next/headers'
 import type { Team } from '@koeti/db'
+
+// Redirect URLs must point at the origin the *browser* is using (forwarded
+// port, public IP, prod domain) — a static BASE_URL breaks checkout the
+// moment they differ. Derive from the request; BASE_URL is only a fallback.
+async function requestOrigin() {
+  const h = await headers()
+  const host = h.get('x-forwarded-host') ?? h.get('host')
+  if (!host) return process.env.BASE_URL
+  const proto = h.get('x-forwarded-proto') ?? 'http'
+  return `${proto}://${host}`
+}
 
 // Lazy: constructing eagerly at module load crashes the build for any app
 // importing this package in an environment without STRIPE_SECRET_KEY set,
@@ -30,12 +42,13 @@ export async function createCheckoutSession({
   if (!team || !user) {
     redirect(`/sign-up?redirect=checkout&priceId=${priceId}`)
   }
+  const origin = await requestOrigin()
   const session = await stripe.checkout.sessions.create({
     payment_method_types: ['card'],
     line_items: [{ price: priceId, quantity: 1 }],
     mode: 'subscription',
-    success_url: `${process.env.BASE_URL}/api/stripe/checkout?session_id={CHECKOUT_SESSION_ID}`,
-    cancel_url: `${process.env.BASE_URL}/pricing`,
+    success_url: `${origin}/api/stripe/checkout?session_id={CHECKOUT_SESSION_ID}`,
+    cancel_url: `${origin}/pricing`,
     customer: team.stripeCustomerId || undefined,
     client_reference_id: String(user.id),
     allow_promotion_codes: true,
@@ -80,7 +93,7 @@ export async function createCustomerPortalSession(team: Team) {
   }
   return stripe.billingPortal.sessions.create({
     customer: team.stripeCustomerId,
-    return_url: `${process.env.BASE_URL}/dashboard`,
+    return_url: `${await requestOrigin()}/dashboard`,
     configuration: configuration.id,
   })
 }
