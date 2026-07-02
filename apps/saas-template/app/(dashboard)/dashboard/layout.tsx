@@ -1,10 +1,100 @@
 'use client';
 
-import { useState } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { Button } from '@koeti/ui';
-import { Users, Settings, Shield, Activity, Menu } from 'lucide-react';
+import { usePathname, useRouter } from 'next/navigation';
+import { Activity, LogOut, Settings, Shield, Users } from 'lucide-react';
+import {
+  AppShell,
+  Avatar,
+  AvatarFallback,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  type AppShellNavGroup
+} from '@koeti/ui';
+import { signOut } from '@/app/(login)/actions';
+import { User } from '@/lib/db/schema';
+import useSWR, { mutate } from 'swr';
+
+const APP_NAME = 'ACME';
+
+const NAV: AppShellNavGroup[] = [
+  {
+    items: [{ href: '/dashboard', label: 'Team', icon: <Users /> }]
+  },
+  {
+    label: 'Settings',
+    items: [
+      { href: '/dashboard/general', label: 'General', icon: <Settings /> },
+      { href: '/dashboard/security', label: 'Security', icon: <Shield /> },
+      { href: '/dashboard/activity', label: 'Activity', icon: <Activity /> }
+    ]
+  }
+];
+
+const fetcher = (url: string) => fetch(url).then((res) => res.json());
+
+function Brand() {
+  return (
+    <Link href="/" className="flex items-center gap-2.5">
+      <span
+        className="flex size-7 items-center justify-center rounded-md bg-sidebar-primary font-display text-sm font-bold text-sidebar-primary-foreground"
+        aria-hidden
+      >
+        {APP_NAME[0]}
+      </span>
+      <span className="font-display text-base font-semibold text-sidebar-primary">
+        {APP_NAME}
+      </span>
+    </Link>
+  );
+}
+
+function SidebarUser() {
+  const { data: user } = useSWR<User>('/api/user', fetcher);
+  const router = useRouter();
+
+  async function handleSignOut() {
+    await signOut();
+    mutate('/api/user');
+    router.push('/');
+  }
+
+  if (!user) return null;
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger className="flex w-full cursor-pointer items-center gap-2.5 rounded-md px-2 py-1.5 text-left transition-colors hover:bg-sidebar-accent">
+        <Avatar className="size-8">
+          <AvatarFallback>
+            {(user.name || user.email).slice(0, 1).toUpperCase()}
+          </AvatarFallback>
+        </Avatar>
+        <span className="min-w-0 flex-1">
+          <span className="block truncate text-sm font-medium text-sidebar-primary">
+            {user.name || user.email}
+          </span>
+          {user.name && (
+            <span className="block truncate text-xs text-sidebar-foreground/60">
+              {user.email}
+            </span>
+          )}
+        </span>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="start" side="top" className="w-56">
+        <form action={handleSignOut} className="w-full">
+          <button type="submit" className="flex w-full">
+            <DropdownMenuItem className="w-full flex-1 cursor-pointer">
+              <LogOut className="mr-2 h-4 w-4" />
+              <span>Sign out</span>
+            </DropdownMenuItem>
+          </button>
+        </form>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
 
 export default function DashboardLayout({
   children
@@ -12,62 +102,16 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-
-  const navItems = [
-    { href: '/dashboard', icon: Users, label: 'Team' },
-    { href: '/dashboard/general', icon: Settings, label: 'General' },
-    { href: '/dashboard/activity', icon: Activity, label: 'Activity' },
-    { href: '/dashboard/security', icon: Shield, label: 'Security' }
-  ];
 
   return (
-    <div className="flex flex-col min-h-[calc(100dvh-68px)] max-w-7xl mx-auto w-full">
-      {/* Mobile header */}
-      <div className="lg:hidden flex items-center justify-between bg-white border-b border-gray-200 p-4">
-        <div className="flex items-center">
-          <span className="font-medium">Settings</span>
-        </div>
-        <Button
-          className="-mr-3"
-          variant="ghost"
-          onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-        >
-          <Menu className="h-6 w-6" />
-          <span className="sr-only">Toggle sidebar</span>
-        </Button>
-      </div>
-
-      <div className="flex flex-1 overflow-hidden h-full">
-        {/* Sidebar */}
-        <aside
-          className={`w-64 bg-white lg:bg-gray-50 border-r border-gray-200 lg:block ${
-            isSidebarOpen ? 'block' : 'hidden'
-          } lg:relative absolute inset-y-0 left-0 z-40 transform transition-transform duration-300 ease-in-out lg:translate-x-0 ${
-            isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
-          }`}
-        >
-          <nav className="h-full overflow-y-auto p-4">
-            {navItems.map((item) => (
-              <Link key={item.href} href={item.href} passHref>
-                <Button
-                  variant={pathname === item.href ? 'secondary' : 'ghost'}
-                  className={`shadow-none my-1 w-full justify-start ${
-                    pathname === item.href ? 'bg-gray-100' : ''
-                  }`}
-                  onClick={() => setIsSidebarOpen(false)}
-                >
-                  <item.icon className="h-4 w-4" />
-                  {item.label}
-                </Button>
-              </Link>
-            ))}
-          </nav>
-        </aside>
-
-        {/* Main content */}
-        <main className="flex-1 overflow-y-auto p-0 lg:p-4">{children}</main>
-      </div>
-    </div>
+    <AppShell
+      brand={<Brand />}
+      nav={NAV}
+      pathname={pathname}
+      linkComponent={Link}
+      footer={<SidebarUser />}
+    >
+      {children}
+    </AppShell>
   );
 }

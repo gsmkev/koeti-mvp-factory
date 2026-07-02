@@ -1,19 +1,20 @@
 import './globals.css';
 import type { Metadata, Viewport } from 'next';
-import { Manrope } from 'next/font/google';
+import { Lexend, Source_Sans_3 } from 'next/font/google';
 import { getUser, getTeamForUser } from '@/lib/db/queries';
 import { SWRConfig } from 'swr';
 
 export const metadata: Metadata = {
-  title: 'Next.js SaaS Starter',
-  description: 'Get started quickly with Next.js, Postgres, and Stripe.'
+  title: 'ACME — SaaS Starter',
+  description: 'Auth, billing, and team accounts wired in before your first feature.'
 };
 
 export const viewport: Viewport = {
   maximumScale: 1
 };
 
-const manrope = Manrope({ subsets: ['latin'] });
+const lexend = Lexend({ subsets: ['latin'], variable: '--font-heading' });
+const sourceSans = Source_Sans_3({ subsets: ['latin'], variable: '--font-body' });
 
 export default function RootLayout({
   children
@@ -21,11 +22,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html
-      lang="en"
-      className={`bg-white dark:bg-gray-950 text-black dark:text-white ${manrope.className}`}
-    >
-      <body className="min-h-[100dvh] bg-gray-50">
+    <html lang="en" className={`${lexend.variable} ${sourceSans.variable}`}>
+      <body className="min-h-[100dvh]">
         <SWRConfig
           value={{
             fallback: {

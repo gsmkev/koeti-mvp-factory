@@ -3,64 +3,55 @@ import { Button, Card, CardContent, CardHeader, CardTitle } from '@koeti/ui';
 
 const MODULES = [
   {
-    tag: 'auth',
-    title: 'Sign-in that just works',
+    tag: 'registro',
+    title: 'Cada gasto, en segundos',
     description:
-      'Email and password, sessions, and sign-out are ready on day one. Swap the copy, not the plumbing.',
+      'Monto, categoría, descripción y fecha. Un formulario directo, sin pasos de más.',
   },
   {
-    tag: 'billing',
-    title: 'Subscriptions, handled',
+    tag: 'categorías',
+    title: 'Clasificado desde el inicio',
     description:
-      'Checkout, plan changes, and webhooks connect straight to Stripe — no billing code to write.',
+      'Viáticos, materiales, software y otros. Cada registro queda ordenado para revisarlo después.',
   },
   {
-    tag: 'teams',
-    title: 'Built for teams',
+    tag: 'equipo',
+    title: 'Todo el equipo, una cuenta',
     description:
-      'Every account starts inside a team, with roles and invites ready before your first user signs up.',
+      'Los gastos viven en el equipo, no en la laptop de alguien. Invita a tu gente con roles claros.',
   },
 ] as const;
 
-function CornerMark({ className }: { className: string }) {
+function LedgerPreview() {
+  const rows = [
+    { cat: 'viáticos', desc: 'Viaje CDMX — cliente', amount: '$2,450.00' },
+    { cat: 'software', desc: 'Licencias anuales', amount: '$1,180.00' },
+    { cat: 'materiales', desc: 'Impresiones y papelería', amount: '$312.50' },
+  ];
   return (
-    <span
-      aria-hidden
-      className={`pointer-events-none absolute font-mono text-xs text-muted-foreground/50 ${className}`}
-    >
-      +
-    </span>
-  );
-}
-
-function SchemaDiagram() {
-  return (
-    <div className="relative mx-auto w-full max-w-xs font-mono text-sm lg:mx-0">
-      <div className="relative pl-6">
-        <span
-          aria-hidden
-          className="absolute left-0 top-2 bottom-12 border-l border-dashed border-border"
-        />
-        {MODULES.map((mod) => (
-          <div key={mod.tag} className="relative mb-4 flex items-center">
-            <span
-              aria-hidden
-              className="absolute -left-6 top-1/2 h-px w-6 -translate-y-1/2 bg-border"
-            />
-            <span className="rounded-md border border-border bg-card px-3 py-1.5 text-foreground">
-              {mod.tag}
-            </span>
-          </div>
-        ))}
-        <div className="relative mt-2 flex items-center">
-          <span
-            aria-hidden
-            className="absolute -left-6 top-1/2 h-px w-6 -translate-y-1/2 bg-border"
-          />
-          <span className="rounded-md border border-foreground bg-foreground px-3 py-1.5 text-background">
-            your app
+    <div className="mx-auto w-full max-w-sm lg:mx-0">
+      <div className="overflow-hidden rounded-lg border border-border bg-card shadow-sm">
+        <div className="flex items-center justify-between border-b border-border bg-muted/60 px-4 py-2.5">
+          <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+            Este mes
+          </span>
+          <span className="font-display text-sm font-semibold tabular-nums text-success">
+            $3,942.50
           </span>
         </div>
+        <ul className="divide-y divide-border">
+          {rows.map((row) => (
+            <li key={row.desc} className="flex items-center gap-3 px-4 py-3">
+              <span className="rounded-md bg-accent px-2 py-0.5 text-xs font-medium text-accent-foreground">
+                {row.cat}
+              </span>
+              <span className="min-w-0 flex-1 truncate text-sm text-foreground">
+                {row.desc}
+              </span>
+              <span className="text-sm font-medium tabular-nums">{row.amount}</span>
+            </li>
+          ))}
+        </ul>
       </div>
     </div>
   );
@@ -79,36 +70,30 @@ export default function HomePage() {
             backgroundSize: '32px 32px',
           }}
         />
-        <CornerMark className="left-4 top-4 sm:left-6 sm:top-6" />
-        <CornerMark className="right-4 top-4 sm:right-6 sm:top-6" />
-        <CornerMark className="left-4 bottom-4 sm:left-6 sm:bottom-6" />
-        <CornerMark className="right-4 bottom-4 sm:right-6 sm:bottom-6" />
 
         <div className="relative mx-auto grid max-w-6xl gap-16 px-6 py-24 sm:px-8 lg:grid-cols-2 lg:items-center lg:py-32">
           <div>
             <p className="font-mono text-xs uppercase tracking-widest text-muted-foreground">
-              Scaffold // 01
+              Control de gastos
             </p>
             <h1 className="mt-4 text-5xl font-extrabold tracking-tight text-foreground sm:text-6xl">
-              Ship the boring part
-              <br />
-              once.
+              Los gastos de tu equipo, bajo control.
             </h1>
             <p className="mt-6 max-w-md text-lg text-muted-foreground">
-              Authentication, billing, and team accounts — wired in before you
-              write your first feature.
+              Registra cada gasto, clasifícalo por categoría y consulta el total
+              del mes sin abrir una hoja de cálculo.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <Button size="lg" asChild>
-                <Link href="/sign-up">Get started</Link>
+                <Link href="/sign-up">Empezar gratis</Link>
               </Button>
               <Button size="lg" variant="outline" asChild>
-                <Link href="/pricing">View pricing</Link>
+                <Link href="/pricing">Ver precios</Link>
               </Button>
             </div>
           </div>
 
-          <SchemaDiagram />
+          <LedgerPreview />
         </div>
       </section>
 
@@ -137,21 +122,21 @@ export default function HomePage() {
       <section className="py-20">
         <div className="mx-auto max-w-6xl px-6 text-center sm:px-8">
           <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-            Your product starts on page one.
+            Deja la hoja de cálculo hoy.
           </h2>
           <p className="mx-auto mt-3 max-w-xl text-lg text-muted-foreground">
-            Everything above ships with every app in the factory. What you
-            build on top of it is yours.
+            Tu equipo registra, Gastos suma. Al cierre del mes ya sabes en qué
+            se fue el dinero.
           </p>
           <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
             <Button size="lg" asChild>
-              <Link href="/sign-up">Create your account</Link>
+              <Link href="/sign-up">Crear cuenta</Link>
             </Button>
             <Link
               href="/sign-in"
               className="text-sm font-medium text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
             >
-              Already using it? Sign in
+              ¿Ya tienes cuenta? Inicia sesión
             </Link>
           </div>
         </div>

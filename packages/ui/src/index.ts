@@ -77,3 +77,8 @@ export { StatCard } from './components/stat-card'
 export { SubmitButton } from './components/submit-button'
 export { PageHeader } from './components/page-header'
 export { ResourcePanel, type ResourceField } from './components/resource-panel'
+export {
+  AppShell,
+  type AppShellNavGroup,
+  type AppShellNavItem,
+} from './components/app-shell'
