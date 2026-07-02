@@ -58,7 +58,9 @@ export async function setSession(user: { id: number }) {
   ;(await cookies()).set('session', encryptedSession, {
     expires: expiresInOneDay,
     httpOnly: true,
-    secure: true,
+    // Secure cookies over plain http are dropped by Safari even on localhost,
+    // and by every browser when the app is reached by IP/tunnel — dev stays http.
+    secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax',
   })
 }
