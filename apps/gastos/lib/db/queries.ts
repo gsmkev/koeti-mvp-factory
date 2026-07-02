@@ -1,8 +1,9 @@
-import { desc, and, eq, isNull } from 'drizzle-orm'
+import { desc, and, eq, isNull, sql } from 'drizzle-orm'
 import { db } from './drizzle'
 import { verifyToken } from '@koeti/auth'
 import { cookies } from 'next/headers'
 import { activityLogs, teamMembers, teams, users } from '@koeti/db'
+import { expenses } from './schema'
 
 export async function getUser() {
   const sessionCookie = (await cookies()).get('session')
@@ -79,4 +80,21 @@ export async function getTeamForUser() {
     },
   })
   return result?.team ?? null
+}
+
+// --- expenses ---
+export async function getExpenses(teamId: number) {
+  return db
+    .select()
+    .from(expenses)
+    .where(eq(expenses.teamId, teamId))
+    .orderBy(desc(expenses.spentAt), desc(expenses.id))
+}
+
+export async function getMonthTotal(teamId: number) {
+  const [row] = await db
+    .select({ total: sql<string>`coalesce(sum(${expenses.amount}), 0)` })
+    .from(expenses)
+    .where(and(eq(expenses.teamId, teamId), sql`${expenses.spentAt} >= date_trunc('month', now())::date`))
+  return Number(row?.total ?? 0)
 }
