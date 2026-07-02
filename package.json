@@ -8,7 +8,8 @@
     "test": "turbo test",
     "create-mvp": "node scripts/create-mvp.mjs",
     "smoke": "node scripts/smoke.mjs",
-    "bootstrap": "node scripts/bootstrap.mjs"
+    "bootstrap": "node scripts/bootstrap.mjs",
+    "verify-app": "node scripts/verify-app.mjs"
   },
   "devDependencies": {
     "turbo": "^2.5.4",

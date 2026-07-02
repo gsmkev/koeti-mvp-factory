@@ -1,12 +1,13 @@
 ---
 paths:
   - "**/lib/db/schema.ts"
+  - "**/lib/crud.ts"
   - "**/app/(dashboard)/**"
 ---
 
 # CRUD recipe
 
-Adding a team-scoped entity (the 90% case for MVP features)? Follow these 5 steps in order. Don't invent a different structure.
+Adding a team-scoped entity (the 90% case for MVP features)? Follow these 5 steps in order — a whole entity is ~40 lines. Don't invent a different structure.
 
 ## 1. Schema
 
@@ -21,13 +22,12 @@ export const projects = pgTable('projects', {
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
 })
 export type Project = typeof projects.$inferSelect
-export type NewProject = typeof projects.$inferInsert
 ```
 
 Then: `pnpm --filter @koeti/<app> db:generate && pnpm --filter @koeti/<app> db:migrate`.
 **Commit the generated migration files** — CI fails on migration drift.
 
-## 2. Queries
+## 2. Query
 
 In `lib/db/queries.ts`. Every query on a team-scoped table filters by `teamId` — no exceptions:
 
@@ -37,41 +37,38 @@ export async function getProjects(teamId: number) {
 }
 ```
 
-## 3. Server actions
+## 3. Actions — use the factory
 
-In `app/(dashboard)/<entity>/actions.ts` (`'use server'`). Use `withTeam` from `@/lib/auth/middleware` — it resolves the user's team and rejects unauthenticated calls:
+`app/(dashboard)/<entity>/actions.ts`. `crudActions` (from `@/lib/crud`) scopes every mutation by `teamId` automatically:
 
 ```ts
 'use server'
 
-import { revalidatePath } from 'next/cache'
-import { withTeam } from '@/lib/auth/middleware'
-import { db } from '@/lib/db/drizzle'
+import { z } from 'zod'
+import { crudActions } from '@/lib/crud'
 import { projects } from '@/lib/db/schema'
 
-export const createProject = withTeam(async (formData, team) => {
-  const name = String(formData.get('name') ?? '').trim()
-  if (!name) return { error: 'Name is required' }
-  await db.insert(projects).values({ teamId: team.id, name })
-  revalidatePath('/projects')
+const actions = crudActions(projects, {
+  path: '/projects',
+  schema: z.object({ name: z.string().min(1, 'Name is required') }),
 })
+export const createProject = actions.create
+export const deleteProject = actions.remove
 ```
 
-Delete/update actions must scope the `where` to `team.id` too — never trust an id from the form alone:
+Use `z.coerce.number()` / `z.coerce.date()` for non-string fields. Logic beyond
+validated insert/update/delete (state transitions, totals, external calls) gets a
+hand-written action in the same file using `withTeam` — scope its `where` by
+`team.id`, never trust an id from the form alone.
 
-```ts
-await db.delete(projects).where(and(eq(projects.id, id), eq(projects.teamId, team.id)))
-```
+## 4. Page — use ResourcePanel
 
-## 4. Page
-
-`app/(dashboard)/<entity>/page.tsx` — a server component using the `@koeti/ui` composites:
+`app/(dashboard)/<entity>/page.tsx` — a server component:
 
 ```tsx
-import { DataTable, EmptyState, PageHeader, SubmitButton, Card, CardContent, Input } from '@koeti/ui'
-import { getTeamForUser } from '@/lib/db/queries'
-import { getProjects } from '@/lib/db/queries'
-import { createProject } from './actions'
+import { ResourcePanel } from '@koeti/ui'
+import { getTeamForUser, getProjects } from '@/lib/db/queries'
+import { createProject, deleteProject } from './actions'
 
 export default async function ProjectsPage() {
   const team = await getTeamForUser()
@@ -79,44 +76,36 @@ export default async function ProjectsPage() {
   const rows = await getProjects(team.id)
 
   return (
-    <section className="flex-1 space-y-6 p-4 lg:p-8">
-      <PageHeader title="Projects" description="Your team's projects." />
-      <Card>
-        <CardContent>
-          <form action={createProject} className="flex gap-2">
-            <Input name="name" placeholder="New project name" required />
-            <SubmitButton pendingText="Creating…">Create</SubmitButton>
-          </form>
-        </CardContent>
-      </Card>
-      <DataTable
-        columns={[
-          { header: 'Name', cell: (p) => p.name },
-          { header: 'Created', cell: (p) => p.createdAt.toLocaleDateString() },
-        ]}
-        rows={rows}
-        rowKey={(p) => p.id}
-        empty={<EmptyState title="No projects yet" description="Create your first project above." />}
-      />
-    </section>
+    <ResourcePanel
+      title="Projects"
+      description="Your team's projects."
+      fields={[{ name: 'name', label: 'Name', placeholder: 'New project', required: true }]}
+      onCreate={createProject}
+      createLabel="Create"
+      columns={[
+        { header: 'Name', cell: (p) => p.name },
+        { header: 'Created', cell: (p) => p.createdAt.toLocaleDateString() },
+      ]}
+      rows={rows}
+      rowKey={(p) => p.id}
+      onDelete={deleteProject}
+      emptyTitle="No projects yet"
+    />
   )
 }
 ```
+
+Field types: `text` (default), `number`, `date`, `email`, `textarea`, `select`
+(pass `options`). A page that outgrows ResourcePanel (inline editing, drag,
+charts) drops down to the base composites: `PageHeader`, `DataTable`,
+`EmptyState`, `StatCard`, `SubmitButton`.
 
 ## 5. Navigation
 
 Add the entry to the dashboard nav (`app/(dashboard)/dashboard/layout.tsx` `navItems`).
 
-## Composites cheat sheet
-
-| Component | Use for |
-|---|---|
-| `PageHeader` | Title + description + action buttons at top of every dashboard page |
-| `DataTable<T>` | Any list of records; pass `empty` slot instead of hand-rolling zero states |
-| `EmptyState` | Zero-state boxes (also standalone, e.g. before onboarding) |
-| `StatCard` | KPI tiles on overview/dashboard pages |
-| `SubmitButton` | Every `<form action={...}>` submit — pending spinner for free |
-
 ## Verify
 
-`pnpm --filter @koeti/<app> typecheck && pnpm --filter @koeti/<app> build` before claiming done.
+`pnpm --filter @koeti/<app> typecheck && pnpm --filter @koeti/<app> build`, then
+`pnpm verify-app <app>` — it renders every page with a real session and catches
+SSR crashes that build can't see.

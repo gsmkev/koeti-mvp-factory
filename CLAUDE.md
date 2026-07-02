@@ -14,11 +14,20 @@ pnpm build                                # build all (Turbo cached)
 pnpm typecheck                            # tsc --noEmit, all workspaces
 pnpm test                                 # vitest, all workspaces with tests
 pnpm smoke                                # full factory loop: scaffold→migrate→build→serve
+pnpm verify-app <name>                    # boot the app + render EVERY page with a real session
 ```
+
+## AFK loop
+
+`/factory <name> — <business logic>` runs the whole loop autonomously:
+spec → plan → scaffold → implement → verify → draft PR, no questions asked.
+See `.claude/skills/factory/SKILL.md`. `/create-saas` is the variant for a
+spec/plan a human already wrote.
 
 ## Definition of done
 
 Before claiming any change works: `pnpm typecheck && pnpm test && pnpm build` must pass.
+If you touched an app's pages/actions/schema, also run `pnpm verify-app <name>`.
 If you touched `apps/saas-template/` or `scripts/create-mvp.mjs`, also run `pnpm smoke`.
 Working in a fresh worktree? Run `pnpm bootstrap` first — `.env.local` files don't follow git.
 
@@ -38,7 +47,8 @@ import { baseSchema } from '@koeti/db'
 import type { User, Team, TeamMember } from '@koeti/db'
 import { createCheckoutSession, handleSubscriptionChange, stripe } from '@koeti/billing'
 import { Button, Input, Card, cn } from '@koeti/ui'
-import { PageHeader, DataTable, EmptyState, StatCard, SubmitButton } from '@koeti/ui' // dashboard composites
+import { PageHeader, DataTable, EmptyState, StatCard, SubmitButton, ResourcePanel } from '@koeti/ui' // dashboard composites
+import { crudActions } from '@/lib/crud' // team-scoped CRUD actions factory (per app)
 import { sendEmail, WelcomeEmail } from '@koeti/email'
 import { track, identify } from '@koeti/analytics/server'
 ```
