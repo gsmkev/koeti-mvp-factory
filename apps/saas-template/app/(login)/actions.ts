@@ -17,16 +17,37 @@ import {
   ActivityType,
 } from '@koeti/db';
 import { comparePasswords, hashPassword, setSession } from '@/lib/auth/session';
+import { rateLimit, signOneTimeToken, verifyOneTimeToken } from '@koeti/auth';
 import { redirect } from 'next/navigation';
-import { cookies } from 'next/headers';
+import { cookies, headers } from 'next/headers';
 import { createCheckoutSession } from '@/lib/payments/stripe';
 import { getUser, getUserWithTeam } from '@/lib/db/queries';
 import {
   validatedAction,
   validatedActionWithUser
 } from '@/lib/auth/middleware';
-import { sendEmail, WelcomeEmail } from '@koeti/email';
+import { sendEmail, WelcomeEmail, PasswordResetEmail, InvitationEmail } from '@koeti/email';
 import { track } from '@koeti/analytics/server';
+import { APP_NAME } from '@/lib/site';
+
+async function clientIp() {
+  const h = await headers();
+  return h.get('x-forwarded-for')?.split(',')[0]?.trim() || 'local';
+}
+
+// Browser-facing links in emails follow the request origin in dev (tunnels,
+// port forwards); in production the canonical BASE_URL wins — Host headers
+// are client-suppliable.
+async function requestOrigin() {
+  if (process.env.NODE_ENV === 'production' && process.env.BASE_URL) {
+    return process.env.BASE_URL;
+  }
+  const h = await headers();
+  const host = h.get('x-forwarded-host') ?? h.get('host');
+  if (!host) return process.env.BASE_URL ?? 'http://localhost:3000';
+  const proto = h.get('x-forwarded-proto') ?? 'http';
+  return `${proto}://${host}`;
+}
 
 async function logActivity(
   teamId: number | null | undefined,
@@ -53,6 +74,10 @@ const signInSchema = z.object({
 
 export const signIn = validatedAction(signInSchema, async (data, formData) => {
   const { email, password } = data;
+
+  if (!rateLimit(`signin:${await clientIp()}`, { limit: 10 })) {
+    return { error: 'Too many attempts. Please wait a minute and try again.', email, password };
+  }
 
   const userWithTeam = await db
     .select({
@@ -110,6 +135,10 @@ const signUpSchema = z.object({
 
 export const signUp = validatedAction(signUpSchema, async (data, formData) => {
   const { email, password, inviteId } = data;
+
+  if (!rateLimit(`signup:${await clientIp()}`, { limit: 5 })) {
+    return { error: 'Too many attempts. Please wait a minute and try again.', email, password };
+  }
 
   const existingUser = await db
     .select()
@@ -235,6 +264,79 @@ export async function signOut() {
   await logActivity(userWithTeam?.teamId, user.id, ActivityType.SIGN_OUT);
   (await cookies()).delete('session');
 }
+
+const forgotPasswordSchema = z.object({
+  email: z.string().email()
+});
+
+export const forgotPassword = validatedAction(
+  forgotPasswordSchema,
+  async (data) => {
+    if (!rateLimit(`forgot:${await clientIp()}`, { limit: 5 })) {
+      return { error: 'Too many attempts. Please wait a minute and try again.' };
+    }
+
+    const [user] = await db
+      .select()
+      .from(users)
+      .where(eq(users.email, data.email))
+      .limit(1);
+
+    if (user && !user.deletedAt) {
+      const token = await signOneTimeToken({
+        purpose: 'password-reset',
+        userId: user.id,
+        // Tied to the current hash: the link dies as soon as the password changes.
+        fingerprint: user.passwordHash.slice(-16)
+      });
+      const resetLink = `${await requestOrigin()}/reset-password?token=${token}`;
+      sendEmail({
+        to: user.email,
+        subject: `Reset your ${APP_NAME} password`,
+        react: PasswordResetEmail({ resetLink })
+      }).catch((err) => console.error('password reset email failed:', err));
+    }
+
+    // Same response either way — don't leak which emails have accounts.
+    return { success: 'If that email has an account, a reset link is on its way.' };
+  }
+);
+
+const resetPasswordSchema = z.object({
+  token: z.string().min(1, 'Missing reset token'),
+  password: z.string().min(8).max(100),
+  confirmPassword: z.string().min(8).max(100)
+});
+
+export const resetPassword = validatedAction(
+  resetPasswordSchema,
+  async (data) => {
+    if (data.password !== data.confirmPassword) {
+      return { error: 'Passwords do not match.' };
+    }
+
+    const invalid = { error: 'This reset link is invalid or has expired. Request a new one.' };
+    const payload = await verifyOneTimeToken(data.token, 'password-reset');
+    if (!payload) return invalid;
+
+    const [user] = await db
+      .select()
+      .from(users)
+      .where(eq(users.id, payload.userId))
+      .limit(1);
+    if (!user || user.deletedAt || user.passwordHash.slice(-16) !== payload.fingerprint) {
+      return invalid;
+    }
+
+    const passwordHash = await hashPassword(data.password);
+    await db.update(users).set({ passwordHash }).where(eq(users.id, user.id));
+
+    const userWithTeam = await getUserWithTeam(user.id);
+    await logActivity(userWithTeam?.teamId, user.id, ActivityType.UPDATE_PASSWORD);
+
+    return { success: 'Password updated. You can sign in with it now.' };
+  }
+);
 
 const updatePasswordSchema = z.object({
   currentPassword: z.string().min(8).max(100),
@@ -445,13 +547,16 @@ export const inviteTeamMember = validatedActionWithUser(
     }
 
     // Create a new invitation
-    await db.insert(invitations).values({
-      teamId: userWithTeam.teamId,
-      email,
-      role,
-      invitedBy: user.id,
-      status: 'pending'
-    });
+    const [invitation] = await db
+      .insert(invitations)
+      .values({
+        teamId: userWithTeam.teamId,
+        email,
+        role,
+        invitedBy: user.id,
+        status: 'pending'
+      })
+      .returning();
 
     await logActivity(
       userWithTeam.teamId,
@@ -459,8 +564,22 @@ export const inviteTeamMember = validatedActionWithUser(
       ActivityType.INVITE_TEAM_MEMBER
     );
 
-    // TODO: Send invitation email and include ?inviteId={id} to sign-up URL
-    // await sendInvitationEmail(email, userWithTeam.team.name, role)
+    const [team] = await db
+      .select()
+      .from(teams)
+      .where(eq(teams.id, userWithTeam.teamId))
+      .limit(1);
+    const inviteLink = `${await requestOrigin()}/sign-up?inviteId=${invitation.id}`;
+    // Fire-and-forget: a no-op without RESEND_API_KEY, must never block the action.
+    sendEmail({
+      to: email,
+      subject: `You've been invited to ${team?.name ?? APP_NAME}`,
+      react: InvitationEmail({
+        teamName: team?.name ?? APP_NAME,
+        inviterEmail: user.email,
+        inviteLink
+      })
+    }).catch((err) => console.error('invitation email failed:', err));
 
     return { success: 'Invitation sent successfully' };
   }

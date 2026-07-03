@@ -42,6 +42,36 @@ export async function verifyToken(input: string) {
   return payload as SessionData
 }
 
+// Purpose-scoped short-lived tokens (password reset, email verification).
+// The fingerprint ties the token to the current credential (e.g. a slice of
+// the password hash), so it stops verifying once that credential changes —
+// effectively single-use without a token table.
+type OneTimeTokenData = { purpose: string; userId: number; fingerprint: string }
+
+export async function signOneTimeToken(
+  data: OneTimeTokenData,
+  expiresIn: string = '1 hour'
+) {
+  return await new SignJWT(data)
+    .setProtectedHeader({ alg: 'HS256' })
+    .setIssuedAt()
+    .setExpirationTime(expiresIn)
+    .sign(key())
+}
+
+export async function verifyOneTimeToken(
+  token: string,
+  purpose: string
+): Promise<OneTimeTokenData | null> {
+  try {
+    const { payload } = await jwtVerify(token, key(), { algorithms: ['HS256'] })
+    const data = payload as unknown as OneTimeTokenData
+    return data.purpose === purpose ? data : null
+  } catch {
+    return null
+  }
+}
+
 export async function getSession() {
   const session = (await cookies()).get('session')?.value
   if (!session) return null

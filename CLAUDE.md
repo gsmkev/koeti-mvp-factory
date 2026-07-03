@@ -44,6 +44,7 @@ Working in a fresh worktree? Run `pnpm bootstrap` first — `.env.local` files d
 
 ```ts
 import { getSession, setSession, hashPassword, verifyToken, validatedAction, createAuthMiddleware } from '@koeti/auth'
+import { rateLimit, signOneTimeToken, verifyOneTimeToken } from '@koeti/auth' // brute-force guard + purpose-scoped tokens (password reset)
 import { baseSchema } from '@koeti/db'
 import type { User, Team, TeamMember } from '@koeti/db'
 import { createCheckoutSession, handleSubscriptionChange, stripe } from '@koeti/billing'
@@ -51,7 +52,7 @@ import { Button, Input, Card, cn } from '@koeti/ui'
 import { PageHeader, DataTable, EmptyState, StatCard, SubmitButton, ResourcePanel } from '@koeti/ui' // dashboard composites
 import { createLoader, parseAsStringEnum } from 'nuqs/server' // typed URL state — see .claude/rules/url-state.md
 import { crudActions } from '@/lib/crud' // team-scoped CRUD actions factory (per app)
-import { sendEmail, WelcomeEmail } from '@koeti/email'
+import { sendEmail, WelcomeEmail, PasswordResetEmail, InvitationEmail } from '@koeti/email'
 import { track, identify } from '@koeti/analytics/server'
 ```
 
