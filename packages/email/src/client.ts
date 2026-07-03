@@ -5,7 +5,7 @@ export async function sendEmail({
   to,
   subject,
   react,
-  from = 'noreply@koeti.io',
+  from = process.env.EMAIL_FROM ?? 'staff@koeti.com.py',
 }: {
   to: string
   subject: string
