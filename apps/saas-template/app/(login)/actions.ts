@@ -30,16 +30,19 @@ import { sendEmail, WelcomeEmail, PasswordResetEmail, InvitationEmail } from '@k
 import { track } from '@koeti/analytics/server';
 import { APP_NAME } from '@/lib/site';
 
+// ponytail: XFF is client-suppliable, so IP keys are best-effort — the
+// per-email rate-limit keys alongside them are what header rotation can't bypass.
 async function clientIp() {
   const h = await headers();
   return h.get('x-forwarded-for')?.split(',')[0]?.trim() || 'local';
 }
 
 // Browser-facing links in emails follow the request origin in dev (tunnels,
-// port forwards); in production the canonical BASE_URL wins — Host headers
-// are client-suppliable.
+// port forwards); in production ONLY the canonical BASE_URL is used — Host
+// headers are client-suppliable (reset-link poisoning otherwise).
 async function requestOrigin() {
-  if (process.env.NODE_ENV === 'production' && process.env.BASE_URL) {
+  if (process.env.NODE_ENV === 'production') {
+    if (!process.env.BASE_URL) throw new Error('BASE_URL must be set in production');
     return process.env.BASE_URL;
   }
   const h = await headers();
@@ -75,7 +78,10 @@ const signInSchema = z.object({
 export const signIn = validatedAction(signInSchema, async (data, formData) => {
   const { email, password } = data;
 
-  if (!rateLimit(`signin:${await clientIp()}`, { limit: 10 })) {
+  if (
+    !rateLimit(`signin:${await clientIp()}`, { limit: 10 }) ||
+    !rateLimit(`signin:${email.toLowerCase()}`, { limit: 10 })
+  ) {
     return { error: 'Too many attempts. Please wait a minute and try again.', email, password };
   }
 
@@ -272,7 +278,10 @@ const forgotPasswordSchema = z.object({
 export const forgotPassword = validatedAction(
   forgotPasswordSchema,
   async (data) => {
-    if (!rateLimit(`forgot:${await clientIp()}`, { limit: 5 })) {
+    if (
+      !rateLimit(`forgot:${await clientIp()}`, { limit: 5 }) ||
+      !rateLimit(`forgot:${data.email.toLowerCase()}`, { limit: 5 })
+    ) {
       return { error: 'Too many attempts. Please wait a minute and try again.' };
     }
 

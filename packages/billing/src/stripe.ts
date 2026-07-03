@@ -7,6 +7,12 @@ import type { Team } from '@koeti/db'
 // port, public IP, prod domain) — a static BASE_URL breaks checkout the
 // moment they differ. Derive from the request; BASE_URL is only a fallback.
 async function requestOrigin() {
+  // In production the canonical domain is configured — never trust
+  // client-suppliable Host headers to decide where Stripe redirects.
+  if (process.env.NODE_ENV === 'production') {
+    if (!process.env.BASE_URL) throw new Error('BASE_URL must be set in production')
+    return process.env.BASE_URL
+  }
   const h = await headers()
   const host = h.get('x-forwarded-host') ?? h.get('host')
   if (!host) return process.env.BASE_URL
