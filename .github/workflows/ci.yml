@@ -36,7 +36,7 @@ jobs:
           fi
 
   smoke:
-    # Full factory loop against a real Postgres: scaffold → migrate → build → serve → HTTP
+    # Full factory loop against a real Postgres: scaffold → verify every page renders
     runs-on: ubuntu-latest
     services:
       postgres:
@@ -59,3 +59,32 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm smoke
+
+  e2e:
+    # Scaffold a fresh app, then drive sign-up + CRUD through a real browser —
+    # proves the generated ResourcePanel forms actually work, not just render.
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_PASSWORD: localdev
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec playwright install --with-deps chromium
+      - run: node scripts/create-mvp.mjs e2e-check
+      - run: pnpm --filter @koeti/e2e-check db:generate
+      - run: pnpm e2e-app e2e-check
