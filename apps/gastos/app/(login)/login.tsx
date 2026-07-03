@@ -8,7 +8,7 @@ import { Loader2 } from 'lucide-react';
 import { signIn, signUp } from './actions';
 import { ActionState } from '@/lib/auth/middleware';
 
-const APP_NAME = 'Gastos';
+import { APP_NAME } from '@/lib/site';
 
 export function Login({ mode = 'signin' }: { mode?: 'signin' | 'signup' }) {
   const searchParams = useSearchParams();
@@ -64,7 +64,17 @@ export function Login({ mode = 'signin' }: { mode?: 'signin' | 'signup' }) {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="password">Contraseña</Label>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="password">Contraseña</Label>
+                {mode === 'signin' && (
+                  <Link
+                    href="/forgot-password"
+                    className="text-sm font-medium text-primary underline-offset-4 hover:underline"
+                  >
+                    ¿Olvidaste tu contraseña?
+                  </Link>
+                )}
+              </div>
               <Input
                 id="password"
                 name="password"

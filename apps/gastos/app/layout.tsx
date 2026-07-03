@@ -5,11 +5,15 @@ import { getUser, getTeamForUser } from '@/lib/db/queries';
 import { SWRConfig } from 'swr';
 import { Analytics } from '@koeti/analytics/client';
 import { NuqsAdapter } from 'nuqs/adapters/next/app';
+import { APP_NAME, APP_TAGLINE } from '@/lib/site';
 
 export const metadata: Metadata = {
-  title: 'Gastos — control de gastos para equipos',
-  description:
-    'Registra, clasifica y consulta los gastos de tu equipo con totales por mes.'
+  metadataBase: new URL(process.env.BASE_URL ?? 'http://localhost:3000'),
+  title: {
+    default: `${APP_NAME} — control de gastos para equipos`,
+    template: `%s | ${APP_NAME}`
+  },
+  description: APP_TAGLINE
 };
 
 export const viewport: Viewport = {
