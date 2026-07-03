@@ -6,3 +6,4 @@ export {
   getStripePrices,
   getStripeProducts,
 } from './stripe'
+export { isSubscribed } from './plan'

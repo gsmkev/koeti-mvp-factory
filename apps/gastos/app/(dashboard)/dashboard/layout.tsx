@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import {
   Activity,
+  KeyRound,
   LayoutDashboard,
   LogOut,
   Receipt,
@@ -40,6 +41,7 @@ const NAV: AppShellNavGroup[] = [
       { href: '/dashboard/team', label: 'Equipo', icon: <Users /> },
       { href: '/dashboard/general', label: 'General', icon: <Settings /> },
       { href: '/dashboard/security', label: 'Seguridad', icon: <Shield /> },
+      { href: '/dashboard/api-keys', label: 'API Keys', icon: <KeyRound /> },
       { href: '/dashboard/activity', label: 'Actividad', icon: <Activity /> }
     ]
   }

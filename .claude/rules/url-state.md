@@ -53,5 +53,7 @@ parsers from `nuqs/server` in shared/server files, from `nuqs` in client files.
   way if the page opts in (`field.defaultValue` from a search param).
 - **Data**: consume the other MVP's `app/api/*` route handlers over HTTP.
   Never import from another app (`apps/*`) — that rule still holds. If an MVP
-  needs to expose data, add a route handler; the caller authenticates like any
-  external client.
+  needs to expose data, add a route handler; the caller authenticates with a
+  team API key minted at `/dashboard/api-keys` (`Authorization: Bearer koeti_…`)
+  — see the API keys section of `.claude/rules/auth.md`. Worked example:
+  `apps/gastos/app/api/gastos/export/route.ts`.

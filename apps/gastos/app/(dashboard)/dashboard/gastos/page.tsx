@@ -1,7 +1,9 @@
 import Link from 'next/link'
 import type { SearchParams } from 'nuqs/server'
-import { Badge, ResourcePanel, StatCard, cn, type ResourceField } from '@koeti/ui'
-import { getExpenses, getMonthTotal, getTeamForUser } from '@/lib/db/queries'
+import { Download } from 'lucide-react'
+import { Badge, Button, ResourcePanel, StatCard, cn, type ResourceField } from '@koeti/ui'
+import { requireRole } from '@/lib/auth/middleware'
+import { getExpenses, getMonthTotal } from '@/lib/db/queries'
 import { createExpense, deleteExpense, updateExpense } from './actions'
 import { CATEGORIES, loadGastosSearchParams } from './search-params'
 
@@ -29,8 +31,9 @@ export default async function GastosPage({
 }: {
   searchParams: Promise<SearchParams>
 }) {
-  const team = await getTeamForUser()
-  if (!team) throw new Error('Team not found')
+  // RBAC en una línea: cualquier rol del equipo puede ver; las mutaciones
+  // exigen 'member' vía crudActions (los viewers son solo lectura).
+  const { team } = await requireRole('viewer')
   // URL = estado: ?categoria=software filtra y es deep-linkable desde otro MVP
   const { categoria } = await loadGastosSearchParams(searchParams)
   const [rows, monthTotal] = await Promise.all([
@@ -59,6 +62,12 @@ export default async function GastosPage({
             </Badge>
           </Link>
         ))}
+        <Button variant="outline" size="sm" className="ml-auto" asChild>
+          <a href={`/api/gastos/export${categoria ? `?categoria=${categoria}` : ''}`} download>
+            <Download />
+            Exportar CSV
+          </a>
+        </Button>
       </nav>
       <ResourcePanel
         className="p-0 lg:p-0"

@@ -183,7 +183,8 @@ function InviteTeamMemberSkeleton() {
 
 function InviteTeamMember() {
   const { data: user } = useSWR<User>('/api/user', fetcher);
-  const isOwner = user?.role === 'owner';
+  // Cosmetic gate only — the server action enforces the admin requirement.
+  const canInvite = user?.role === 'owner' || user?.role === 'admin' || user?.role === 'superadmin';
   const [inviteState, inviteAction] = useActionState<ActionState, FormData>(
     inviteTeamMember,
     {}
@@ -206,7 +207,7 @@ function InviteTeamMember() {
               type="email"
               placeholder="Enter email"
               required
-              disabled={!isOwner}
+              disabled={!canInvite}
             />
           </div>
           <div>
@@ -214,12 +215,20 @@ function InviteTeamMember() {
             <RadioGroup
               defaultValue="member"
               name="role"
-              className="flex space-x-4"
-              disabled={!isOwner}
+              className="flex flex-wrap gap-x-4"
+              disabled={!canInvite}
             >
+              <div className="flex items-center space-x-2 mt-2">
+                <RadioGroupItem value="viewer" id="viewer" />
+                <Label htmlFor="viewer">Viewer</Label>
+              </div>
               <div className="flex items-center space-x-2 mt-2">
                 <RadioGroupItem value="member" id="member" />
                 <Label htmlFor="member">Member</Label>
+              </div>
+              <div className="flex items-center space-x-2 mt-2">
+                <RadioGroupItem value="admin" id="admin" />
+                <Label htmlFor="admin">Admin</Label>
               </div>
               <div className="flex items-center space-x-2 mt-2">
                 <RadioGroupItem value="owner" id="owner" />
@@ -235,17 +244,17 @@ function InviteTeamMember() {
           )}
           <SubmitButton
             pendingText="Inviting..."
-            disabled={!isOwner}
+            disabled={!canInvite}
           >
             <PlusCircle className="mr-2 h-4 w-4" />
             Invite Member
           </SubmitButton>
         </form>
       </CardContent>
-      {!isOwner && (
+      {!canInvite && (
         <CardFooter>
           <p className="text-sm text-muted-foreground">
-            You must be a team owner to invite new members.
+            You must be a team admin to invite new members.
           </p>
         </CardFooter>
       )}

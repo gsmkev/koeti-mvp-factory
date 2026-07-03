@@ -45,13 +45,18 @@ Working in a fresh worktree? Run `pnpm bootstrap` first — `.env.local` files d
 ```ts
 import { getSession, setSession, hashPassword, verifyToken, validatedAction, createAuthMiddleware } from '@koeti/auth'
 import { rateLimit, signOneTimeToken, verifyOneTimeToken } from '@koeti/auth' // brute-force guard + purpose-scoped tokens (password reset)
+import { roleAtLeast, isSuperadmin, type TeamRole } from '@koeti/auth' // RBAC: viewer<member<admin<owner + SUPERADMIN_EMAIL — see .claude/rules/auth.md
+import { generateApiKey, hashApiKey, apiKeyPrefix } from '@koeti/auth' // team API keys for MVP-to-MVP auth
 import { baseSchema } from '@koeti/db'
-import type { User, Team, TeamMember } from '@koeti/db'
-import { createCheckoutSession, handleSubscriptionChange, stripe } from '@koeti/billing'
+import type { User, Team, TeamMember, ApiKey } from '@koeti/db'
+import { createCheckoutSession, handleSubscriptionChange, stripe, isSubscribed } from '@koeti/billing' // isSubscribed = plan gating
 import { Button, Input, Card, cn } from '@koeti/ui'
 import { PageHeader, DataTable, EmptyState, StatCard, SubmitButton, ResourcePanel } from '@koeti/ui' // dashboard composites
 import { createLoader, parseAsStringEnum } from 'nuqs/server' // typed URL state — see .claude/rules/url-state.md
-import { crudActions } from '@/lib/crud' // team-scoped CRUD actions factory (per app)
+import { crudActions } from '@/lib/crud' // team-scoped CRUD actions factory (per app; optional minRole)
+import { requireRole, withTeam, teamRoleFor } from '@/lib/auth/middleware' // per-app RBAC: requireRole('viewer') in pages, withTeam(fn, 'admin') in actions
+import { getTeamFromApiKey } from '@/lib/auth/api-key' // Bearer koeti_… auth for app/api routes (per app)
+import { toCsv, csvResponse } from '@/lib/csv' // CSV export helper (per app)
 import { sendEmail, WelcomeEmail, PasswordResetEmail, InvitationEmail } from '@koeti/email'
 import { track, identify } from '@koeti/analytics/server'
 ```

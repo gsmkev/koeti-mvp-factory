@@ -28,8 +28,15 @@ these defaults and record each assumption in a "Decisions" section:
   `ResourcePanel`, one nav entry. Entities with workflow beyond CRUD
   (state transitions, computed totals, external calls) get hand-written
   actions next to the generated ones.
-- Auth, teams, billing, email, analytics come from the template — never respec
-  them. Stripe stays wired but keyless (app must build and run without keys).
+- Auth, teams, billing, email, analytics, RBAC, API keys come from the template —
+  never respec them. Stripe stays wired but keyless (app must build and run
+  without keys).
+- Per screen, record the minimum role (`viewer` read-only, `member` mutations,
+  `admin` settings/destructive) — enforcement is `requireRole()` +
+  `crudActions minRole`, see `.claude/rules/auth.md`.
+- Entities users report on (lists with amounts/dates) get the CSV export route
+  from `.claude/rules/crud.md` step 6. Premium features gate with
+  `isSubscribed(team)` (`.claude/rules/billing.md`).
 - Landing + pricing pages: keep the template's, reworded for the product.
 - Cut scope aggressively: an MVP is 2–5 entities and 1–3 custom pages. Park
   everything else in an "Out of scope" section.

@@ -17,7 +17,7 @@ import {
   ActivityType,
 } from '@koeti/db';
 import { comparePasswords, hashPassword, setSession } from '@/lib/auth/session';
-import { rateLimit, signOneTimeToken, verifyOneTimeToken } from '@koeti/auth';
+import { rateLimit, signOneTimeToken, verifyOneTimeToken, isSuperadmin, roleAtLeast, type TeamRole } from '@koeti/auth';
 import { redirect } from 'next/navigation';
 import { cookies, headers } from 'next/headers';
 import { createCheckoutSession } from '@/lib/payments/stripe';
@@ -477,8 +477,19 @@ export const updateAccount = validatedActionWithUser(
   }
 );
 
+// Server-side RBAC for team management — hiding buttons in the UI is cosmetic.
+async function hasTeamRole(user: User, teamId: number, min: TeamRole) {
+  if (isSuperadmin(user)) return true;
+  const [m] = await db
+    .select({ role: teamMembers.role })
+    .from(teamMembers)
+    .where(and(eq(teamMembers.userId, user.id), eq(teamMembers.teamId, teamId)))
+    .limit(1);
+  return roleAtLeast(m?.role, min);
+}
+
 const removeTeamMemberSchema = z.object({
-  memberId: z.number()
+  memberId: z.coerce.number()
 });
 
 export const removeTeamMember = validatedActionWithUser(
@@ -489,6 +500,10 @@ export const removeTeamMember = validatedActionWithUser(
 
     if (!userWithTeam?.teamId) {
       return { error: 'User is not part of a team' };
+    }
+
+    if (!(await hasTeamRole(user, userWithTeam.teamId, 'admin'))) {
+      return { error: 'Only team admins can remove members' };
     }
 
     await db
@@ -512,7 +527,7 @@ export const removeTeamMember = validatedActionWithUser(
 
 const inviteTeamMemberSchema = z.object({
   email: z.string().email('Invalid email address'),
-  role: z.enum(['member', 'owner'])
+  role: z.enum(['viewer', 'member', 'admin', 'owner'])
 });
 
 export const inviteTeamMember = validatedActionWithUser(
@@ -523,6 +538,10 @@ export const inviteTeamMember = validatedActionWithUser(
 
     if (!userWithTeam?.teamId) {
       return { error: 'User is not part of a team' };
+    }
+
+    if (!(await hasTeamRole(user, userWithTeam.teamId, 'admin'))) {
+      return { error: 'Only team admins can invite members' };
     }
 
     const existingMember = await db
