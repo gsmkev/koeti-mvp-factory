@@ -1,0 +1,40 @@
+# Charts — visual reports on any dashboard
+
+Charts live in `@koeti/ui` as **zero-dependency SVG**. No chart library, no
+client bundle cost, and they render in **server components** — pass data
+straight from a `teamId`-scoped query, no `'use client'`, no `useEffect`.
+Colors come from the theme's `--chart-1..5` tokens, so they track light/dark
+automatically. Hover tooltips are native (`<title>`), so accessibility is free.
+
+```tsx
+import { BarChart, LineChart, DonutChart, Sparkline } from '@koeti/ui'
+
+// Every chart takes the same shape: { label, value }[]
+<LineChart title="Revenue this week" data={rows} valueFormat={(v) => `$${v}`} />
+<BarChart title="Signups by plan" data={rows} />
+<DonutChart title="Spend by category" data={rows} centerLabel="total" />
+```
+
+## Which one
+
+| Data's job | Component |
+|---|---|
+| A metric over ordered time | `LineChart` (set `area={false}` for a bare line) |
+| Compare magnitudes across categories | `BarChart` |
+| Part-to-whole breakdown | `DonutChart` (renders its own legend) |
+| Trend inside a `StatCard` / table row | `Sparkline` (takes `number[]`) |
+
+## Rules
+
+- **Single series only.** The API is deliberately `{ label, value }[]`. Two
+  metrics of different scale → two charts, never a second Y-axis.
+- **Feed it real, scoped data.** `const rows = await getThings(team.id)` then
+  `data={rows.map(r => ({ label: r.name, value: r.total }))}`.
+- **`valueFormat`** formats every number (axis labels, tooltips, legend). Pass a
+  currency/percent formatter instead of post-processing.
+- Wrap in a `Card` + `CardContent` for the standard dashboard panel look; the
+  charts fill their container width (`viewBox`, `height` prop sets the aspect).
+- Pair charts with a **CSV export** route (`.claude/rules/crud.md` §6) so every
+  visual report is also downloadable — that's the "exportable reports" promise.
+
+Worked example: `apps/saas-template/app/(dashboard)/dashboard/page.tsx`.

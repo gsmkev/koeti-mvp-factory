@@ -83,3 +83,10 @@ export {
   type AppShellNavGroup,
   type AppShellNavItem,
 } from './components/app-shell'
+export {
+  BarChart,
+  LineChart,
+  DonutChart,
+  Sparkline,
+  type ChartDatum,
+} from './components/chart'

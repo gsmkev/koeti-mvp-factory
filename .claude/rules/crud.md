@@ -107,7 +107,8 @@ URL-driven filters on the list (e.g. `?category=x`)? Follow
 Field types: `text` (default), `number`, `date`, `email`, `textarea`, `select`
 (pass `options`). A page that outgrows ResourcePanel (inline editing, drag,
 charts) drops down to the base composites: `PageHeader`, `DataTable`,
-`EmptyState`, `StatCard`, `SubmitButton`.
+`EmptyState`, `StatCard`, `SubmitButton`, and the SVG charts
+(`BarChart`/`LineChart`/`DonutChart`/`Sparkline` — see `.claude/rules/charts.md`).
 
 ## 5. Navigation
 
