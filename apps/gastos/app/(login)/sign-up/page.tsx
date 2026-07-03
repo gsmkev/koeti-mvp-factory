@@ -1,10 +1,11 @@
 import { Suspense } from 'react';
+import { googleConfigured } from '@koeti/auth';
 import { Login } from '../login';
 
 export default function SignUpPage() {
   return (
     <Suspense>
-      <Login mode="signup" />
+      <Login mode="signup" googleEnabled={googleConfigured()} />
     </Suspense>
   );
 }
