@@ -24,6 +24,10 @@ import { BarChart, LineChart, DonutChart, Sparkline } from '@koeti/ui'
 | Part-to-whole breakdown | `DonutChart` (renders its own legend) |
 | Trend inside a `StatCard` / table row | `Sparkline` (takes `number[]`) |
 
+`StatCard` takes it further: pass `delta={8}` for a colored ▲/▼ change badge
+(`deltaGoodDirection="down"` when less is better, e.g. expenses/churn) and
+`trend={[…]}` for an inline sparkline — a full KPI tile in one component.
+
 ## Raw rows → chart data (one line)
 
 Don't hand-roll `reduce`. `@koeti/ui` ships pure shapers that return the exact

@@ -45,6 +45,13 @@ export default async function OverviewPage() {
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <StatCard label="Team members" value={team.teamMembers.length} />
         <StatCard label="Plan" value={team.planName ?? 'Free'} />
+        <StatCard
+          label="Activity this week"
+          value={trend.reduce((s, d) => s + d.value, 0)}
+          delta={18}
+          hint="vs last week"
+          trend={trend.map((d) => d.value)}
+        />
       </div>
       <div className="grid gap-4 lg:grid-cols-3">
         <Card className="lg:col-span-2">

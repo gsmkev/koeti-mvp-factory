@@ -43,6 +43,16 @@ export default async function ResumenPage() {
   const monthCount = expenses.filter((e) => e.spentAt.startsWith(monthKey)).length
   const recent = expenses.slice(0, 5)
 
+  // Month-over-month delta (for expenses, spending less is good → deltaGoodDirection="down").
+  const prevMonth = new Date(monthStart)
+  prevMonth.setMonth(prevMonth.getMonth() - 1)
+  const prevKey = prevMonth.toISOString().slice(0, 7)
+  const prevTotal = expenses
+    .filter((e) => e.spentAt.startsWith(prevKey))
+    .reduce((s, e) => s + Number(e.amount), 0)
+  const monthDelta =
+    prevTotal > 0 ? Math.round(((monthTotal - prevTotal) / prevTotal) * 100) : undefined
+
   // Raw rows → chart data in one line each (helpers scope nothing — the query did).
   const byCategory = topN(
     groupSum(
@@ -77,7 +87,14 @@ export default async function ResumenPage() {
       />
 
       <div className="grid gap-4 sm:grid-cols-3">
-        <StatCard label="Total del mes" value={money(monthTotal)} />
+        <StatCard
+          label="Total del mes"
+          value={money(monthTotal)}
+          delta={monthDelta}
+          deltaGoodDirection="down"
+          hint="vs. mes anterior"
+          trend={byDay.map((d) => d.value)}
+        />
         <StatCard label="Gastos este mes" value={monthCount} />
         <StatCard label="Registros totales" value={expenses.length} />
       </div>
