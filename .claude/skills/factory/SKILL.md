@@ -37,6 +37,11 @@ these defaults and record each assumption in a "Decisions" section:
 - Entities users report on (lists with amounts/dates) get the CSV export route
   from `.claude/rules/crud.md` step 6. Premium features gate with
   `isSubscribed(team)` (`.claude/rules/billing.md`).
+- The overview page (`dashboard/page.tsx`) is a **visual report**, not a bare
+  list: KPI `StatCard`s (add `delta`/`trend` when there's a prior period) plus a
+  `LineChart`/`BarChart`/`DonutChart` over the main entity, and a `<PrintButton>`
+  in its `PageHeader`. Shape rows with `groupSum`/`countBy`/`topN` — one line
+  each. Full recipe: `.claude/rules/charts.md`. `apps/gastos` is the worked example.
 - Landing + pricing pages: keep the template's, reworded for the product.
 - Cut scope aggressively: an MVP is 2–5 entities and 1–3 custom pages. Park
   everything else in an "Out of scope" section.

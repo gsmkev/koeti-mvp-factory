@@ -34,6 +34,9 @@ Use `superpowers:executing-plans` or `superpowers:subagent-driven-development` t
 - Any UI → invoke the `ui-ux-pro-max` skill first (fallback: `frontend-design`), then `.claude/rules/ui.md`
 - URL-persistent page state (filters, tabs) → `.claude/rules/url-state.md`
 - Team-scoped entity (list/create/delete) → follow `.claude/rules/crud.md` step by step
+- Overview/dashboard page → make it a visual report: KPI `StatCard`s + a chart over
+  the main entity + `<PrintButton>`, data shaped with `groupSum`/`topN`. See
+  `.claude/rules/charts.md` (worked example: `apps/gastos`)
 
 ## Step 4 — Verify
 
