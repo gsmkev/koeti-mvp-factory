@@ -13,6 +13,7 @@ import {
   groupSum,
   LineChart,
   PageHeader,
+  PrintButton,
   StatCard,
   topN,
 } from '@koeti/ui'
@@ -63,12 +64,15 @@ export default async function ResumenPage() {
         title="Resumen"
         description="El estado de los gastos de tu equipo, de un vistazo."
         actions={
-          <Button asChild>
-            <Link href="/dashboard/gastos">
-              Registrar gasto
-              <ArrowRight className="ml-2 h-4 w-4" />
-            </Link>
-          </Button>
+          <>
+            <PrintButton>Descargar PDF</PrintButton>
+            <Button asChild>
+              <Link href="/dashboard/gastos">
+                Registrar gasto
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Link>
+            </Button>
+          </>
         }
       />
 

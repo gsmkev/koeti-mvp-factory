@@ -53,6 +53,8 @@ import { createCheckoutSession, handleSubscriptionChange, stripe, isSubscribed }
 import { Button, Input, Card, cn } from '@koeti/ui'
 import { PageHeader, DataTable, EmptyState, StatCard, SubmitButton, ResourcePanel } from '@koeti/ui' // dashboard composites
 import { BarChart, LineChart, DonutChart, Sparkline, type ChartDatum } from '@koeti/ui' // zero-dep SVG charts (RSC-safe) — see .claude/rules/charts.md
+import { groupSum, countBy, topN } from '@koeti/ui' // rows → {label,value}[] for charts (topN folds extras into "Other")
+import { PrintButton } from '@koeti/ui' // one-click dashboard → PDF via native print (styled by @media print)
 import { createLoader, parseAsStringEnum } from 'nuqs/server' // typed URL state — see .claude/rules/url-state.md
 import { crudActions } from '@/lib/crud' // team-scoped CRUD actions factory (per app; optional minRole)
 import { requireRole, withTeam, teamRoleFor } from '@/lib/auth/middleware' // per-app RBAC: requireRole('viewer') in pages, withTeam(fn, 'admin') in actions

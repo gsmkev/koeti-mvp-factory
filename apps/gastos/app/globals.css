@@ -145,3 +145,31 @@
     letter-spacing: -0.015em;
   }
 }
+
+/* Print / Save-as-PDF: turn the current dashboard into a clean visual report.
+   Drops the chrome, forces a light color-exact render (SVG charts stay crisp),
+   and keeps cards from splitting across pages. Add data-print-hide to anything
+   else that shouldn't appear on paper (a <PrintButton> carries it already). */
+@media print {
+  [data-slot="app-shell"] {
+    display: block !important;
+  }
+  [data-slot="app-shell"] > aside,
+  [data-slot="app-shell"] > header,
+  [data-print-hide] {
+    display: none !important;
+  }
+  main {
+    width: 100% !important;
+  }
+  [data-slot="card"],
+  [data-slot="stat-card"] {
+    break-inside: avoid;
+    box-shadow: none !important;
+  }
+  body {
+    background: #fff;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}

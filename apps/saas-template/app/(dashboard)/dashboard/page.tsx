@@ -8,6 +8,7 @@ import {
   DonutChart,
   LineChart,
   PageHeader,
+  PrintButton,
   StatCard,
 } from '@koeti/ui'
 import { getTeamForUser } from '@/lib/db/queries'
@@ -39,6 +40,7 @@ export default async function OverviewPage() {
       <PageHeader
         title="Overview"
         description="What's happening across your workspace."
+        actions={<PrintButton />}
       />
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <StatCard label="Team members" value={team.teamMembers.length} />

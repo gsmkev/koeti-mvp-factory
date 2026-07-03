@@ -55,4 +55,12 @@ categorical palette only has ~5 safe colors (never render a 9th series).
 - Pair charts with a **CSV export** route (`.claude/rules/crud.md` §6) so every
   visual report is also downloadable — that's the "exportable reports" promise.
 
+## Export the whole dashboard as a PDF
+
+Drop a `<PrintButton />` in the page's `PageHeader actions`. It calls the
+browser's native print dialog (→ Save as PDF) — no PDF library. The `@media
+print` rules in `globals.css` strip the sidebar/header, force a light
+color-exact render (SVG charts stay crisp), and keep cards from splitting
+across pages. Add `data-print-hide` to anything else that shouldn't print.
+
 Worked example: `apps/saas-template/app/(dashboard)/dashboard/page.tsx`.

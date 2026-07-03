@@ -91,3 +91,4 @@ export {
   type ChartDatum,
 } from './components/chart'
 export { groupSum, countBy, topN } from './components/chart-data'
+export { PrintButton } from './components/print-button'
