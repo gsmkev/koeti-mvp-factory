@@ -2,7 +2,14 @@
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { Activity, LogOut, Settings, Shield, Users } from 'lucide-react';
+import {
+  Activity,
+  LayoutDashboard,
+  LogOut,
+  Settings,
+  Shield,
+  Users
+} from 'lucide-react';
 import {
   AppShell,
   Avatar,
@@ -15,17 +22,20 @@ import {
 } from '@koeti/ui';
 import { signOut } from '@/app/(login)/actions';
 import { User } from '@/lib/db/schema';
+import { APP_NAME } from '@/lib/site';
 import useSWR, { mutate } from 'swr';
 
-const APP_NAME = 'ACME';
-
+// Add one nav entry per domain entity to the first group (see .claude/rules/crud.md).
 const NAV: AppShellNavGroup[] = [
   {
-    items: [{ href: '/dashboard', label: 'Team', icon: <Users /> }]
+    items: [
+      { href: '/dashboard', label: 'Overview', icon: <LayoutDashboard /> }
+    ]
   },
   {
     label: 'Settings',
     items: [
+      { href: '/dashboard/team', label: 'Team', icon: <Users /> },
       { href: '/dashboard/general', label: 'General', icon: <Settings /> },
       { href: '/dashboard/security', label: 'Security', icon: <Shield /> },
       { href: '/dashboard/activity', label: 'Activity', icon: <Activity /> }

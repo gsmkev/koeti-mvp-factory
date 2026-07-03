@@ -18,7 +18,7 @@ import { useRouter } from 'next/navigation';
 import { User } from '@/lib/db/schema';
 import useSWR, { mutate } from 'swr';
 
-const APP_NAME = 'ACME';
+import { APP_NAME } from '@/lib/site';
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 

@@ -6,7 +6,9 @@ paths:
 
 # UI rules
 
-**Invoke the `frontend-design` skill before implementing any new page or component.** Pass the SaaS spec summary so it infers the right aesthetic. Do not skip this step.
+**Invoke the `ui-ux-pro-max` skill before implementing any new page or component** — it is the primary design skill (styles, palettes, font pairings, UX guidelines per product type). Pass the SaaS spec summary so it picks the right direction. If `ui-ux-pro-max` is not available in the session, fall back to `frontend-design`. Do not skip this step.
+
+URL-persistent page state (filters, tabs, search) → nuqs, see `.claude/rules/url-state.md`.
 
 ## Component imports
 

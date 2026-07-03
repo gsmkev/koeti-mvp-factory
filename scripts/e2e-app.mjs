@@ -132,9 +132,22 @@ try {
     const marker = `E2E-${stamp}`
     await fillCreateForm(form, marker)
     await form.locator('button[type="submit"]').click()
-    const row = page.locator('tbody tr', { hasText: marker })
+    let row = page.locator('tbody tr', { hasText: marker })
     await row.waitFor()
     console.log(`  ✅ ${route} create → row visible`)
+
+    // edit through the dialog when the panel exposes it
+    if ((await row.locator('[data-slot="resource-edit-trigger"]').count()) > 0) {
+      await row.locator('[data-slot="resource-edit-trigger"]').click()
+      const editForm = page.locator('[data-slot="resource-edit-form"]')
+      const textField = editForm.locator('input[type="text"], textarea').first()
+      const edited = `${marker}-EDITED`
+      await textField.fill(edited)
+      await editForm.locator('button[type="submit"]').click()
+      row = page.locator('tbody tr', { hasText: edited })
+      await row.waitFor()
+      console.log(`  ✅ ${route} edit → row updated`)
+    }
 
     // delete the row we just created
     if ((await row.locator('[data-slot="resource-delete-form"] button').count()) > 0) {

@@ -49,6 +49,7 @@ import type { User, Team, TeamMember } from '@koeti/db'
 import { createCheckoutSession, handleSubscriptionChange, stripe } from '@koeti/billing'
 import { Button, Input, Card, cn } from '@koeti/ui'
 import { PageHeader, DataTable, EmptyState, StatCard, SubmitButton, ResourcePanel } from '@koeti/ui' // dashboard composites
+import { createLoader, parseAsStringEnum } from 'nuqs/server' // typed URL state — see .claude/rules/url-state.md
 import { crudActions } from '@/lib/crud' // team-scoped CRUD actions factory (per app)
 import { sendEmail, WelcomeEmail } from '@koeti/email'
 import { track, identify } from '@koeti/analytics/server'
@@ -60,9 +61,11 @@ If CRG MCP tools are available in your session, prefer them over grep for tracin
 
 ## Frontend
 
-Before implementing any UI (page, component, dashboard, landing), invoke the `frontend-design` skill. Pass the SaaS spec as context so it infers the right aesthetic.
+Before implementing any UI (page, component, dashboard, landing), invoke the `ui-ux-pro-max` skill (primary design skill — pass the SaaS spec as context so it picks the right style, palette, and UX patterns). If it's not available in the session, fall back to `frontend-design`.
 
 For team-scoped CRUD features, follow `.claude/rules/crud.md` — schema → queries → actions → page → nav, using the `@koeti/ui` composites.
+
+Page state that survives a reload (filters, tabs, search) lives in the URL via nuqs — see `.claude/rules/url-state.md`. This is also how MVPs integrate with each other: deep links for features, `app/api/*` route handlers over HTTP for data.
 
 <!-- code-review-graph MCP tools -->
 ## MCP Tools: code-review-graph

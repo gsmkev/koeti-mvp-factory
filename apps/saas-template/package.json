@@ -13,11 +13,11 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@koeti/analytics": "workspace:*",
     "@koeti/auth": "workspace:*",
     "@koeti/billing": "workspace:*",
     "@koeti/db": "workspace:*",
     "@koeti/email": "workspace:*",
-    "@koeti/analytics": "workspace:*",
     "@koeti/ui": "workspace:*",
     "@tailwindcss/postcss": "4.1.7",
     "dotenv": "^16.5.0",
@@ -25,6 +25,7 @@
     "drizzle-orm": "^0.43.1",
     "lucide-react": "^0.511.0",
     "next": "15.6.0-canary.59",
+    "nuqs": "^2.9.0",
     "postcss": "^8.5.3",
     "postgres": "^3.4.5",
     "react": "19.1.0",
@@ -40,8 +41,8 @@
     "@types/node": "^22.15.18",
     "@types/react": "19.1.4",
     "@types/react-dom": "19.1.5",
+    "tsx": "^4.19.4",
     "typescript": "^5.8.3",
-    "vitest": "^3.2.4",
-    "tsx": "^4.19.4"
+    "vitest": "^3.2.4"
   }
 }

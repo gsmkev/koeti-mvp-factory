@@ -57,7 +57,8 @@ Execute the plan task by task (`superpowers:executing-plans` or
 
 - CRUD entity → follow `.claude/rules/crud.md` exactly (crudActions +
   ResourcePanel — an entity is ~40 lines total).
-- Custom UI → invoke `frontend-design` with the spec, then `.claude/rules/ui.md`.
+- Custom UI → invoke `ui-ux-pro-max` with the spec (fallback: `frontend-design`),
+  then `.claude/rules/ui.md`. URL-persistent state → `.claude/rules/url-state.md`.
 - DB / auth / billing → the matching `.claude/rules/*.md`.
 - After every schema change: `db:generate` + `db:migrate` and **commit the
   migration files** (CI fails on drift).

@@ -53,6 +53,7 @@ const actions = crudActions(projects, {
   schema: z.object({ name: z.string().min(1, 'Name is required') }),
 })
 export const createProject = actions.create
+export const updateProject = actions.update
 export const deleteProject = actions.remove
 ```
 
@@ -88,12 +89,17 @@ export default async function ProjectsPage() {
       ]}
       rows={rows}
       rowKey={(p) => p.id}
+      onUpdate={updateProject}   // per-row edit dialog, prefilled from the row via `fields`
       onDelete={deleteProject}
       emptyTitle="No projects yet"
     />
   )
 }
 ```
+
+Wire `onUpdate` by default — edit is part of the expected MVP experience.
+URL-driven filters on the list (e.g. `?category=x`)? Follow
+`.claude/rules/url-state.md` (worked example: `apps/gastos`).
 
 Field types: `text` (default), `number`, `date`, `email`, `textarea`, `select`
 (pass `options`). A page that outgrows ResourcePanel (inline editing, drag,
@@ -109,5 +115,5 @@ Add the entry to the dashboard nav (`app/(dashboard)/dashboard/layout.tsx` `navI
 `pnpm --filter @koeti/<app> typecheck && pnpm --filter @koeti/<app> build`, then
 `pnpm verify-app <app>` (renders every page with a real session, catches SSR
 crashes) and `pnpm e2e-app <app>` (headless Chromium signs up and exercises
-create/delete through every ResourcePanel form — keep the panel's `data-slot`
+create/edit/delete through every ResourcePanel form — keep the panel's `data-slot`
 attributes intact for this to work).

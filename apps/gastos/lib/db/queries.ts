@@ -83,11 +83,16 @@ export async function getTeamForUser() {
 }
 
 // --- expenses ---
-export async function getExpenses(teamId: number) {
+export async function getExpenses(teamId: number, category?: string) {
   return db
     .select()
     .from(expenses)
-    .where(eq(expenses.teamId, teamId))
+    .where(
+      and(
+        eq(expenses.teamId, teamId),
+        category ? eq(expenses.category, category) : undefined
+      )
+    )
     .orderBy(desc(expenses.spentAt), desc(expenses.id))
 }
 

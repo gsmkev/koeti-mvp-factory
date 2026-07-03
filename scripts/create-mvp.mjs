@@ -69,6 +69,11 @@ for (const file of filesToPatch) {
   writeFileSync(filePath, patched)
 }
 
+// App identity lives in one file — swap the placeholder name for the real one
+const sitePath = join(dest, 'lib', 'site.ts')
+const displayName = name.split('-').map((w) => w[0].toUpperCase() + w.slice(1)).join(' ')
+writeFileSync(sitePath, readFileSync(sitePath, 'utf-8').replaceAll("'ACME'", `'${displayName}'`))
+
 // Ensure migrations directory exists (excluded from copy above)
 mkdirSync(join(dest, 'lib', 'db', 'migrations'), { recursive: true })
 
