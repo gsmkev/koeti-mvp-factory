@@ -119,11 +119,12 @@ Add the entry to the dashboard nav (`app/(dashboard)/dashboard/layout.tsx` `navI
 `app/api/<entity>/export/route.ts` — session OR API key auth, same filters as the page:
 
 ```ts
-import { getTeamFromApiKey } from '@/lib/auth/api-key'
+import { apiRateLimitOk, getTeamFromApiKey } from '@/lib/auth/api-key'
 import { csvResponse, toCsv } from '@/lib/csv'
 import { getProjects, getTeamForUser } from '@/lib/db/queries'
 
 export async function GET(request: Request) {
+  if (!apiRateLimitOk(request)) return new Response('Too many requests', { status: 429 })
   const team = (await getTeamFromApiKey(request)) ?? (await getTeamForUser())
   if (!team) return new Response('Unauthorized', { status: 401 })
   return csvResponse(toCsv(await getProjects(team.id)), 'projects.csv')

@@ -3,6 +3,10 @@ import { hashApiKey } from '@koeti/auth'
 import { apiKeys, teams, type Team } from '@koeti/db'
 import { db } from '@/lib/db/drizzle'
 
+// Re-exported so routes can `import { apiRateLimitOk, getTeamFromApiKey }` from
+// one place; the implementation lives in api-rate-limit.ts (db-free, testable).
+export { apiRateLimitOk } from './api-rate-limit'
+
 // Authenticates an external caller (another MVP, a script) sending
 // `Authorization: Bearer koeti_...`. Returns the key's team, or null.
 // Route handlers that expose data over HTTP accept this OR the session cookie:

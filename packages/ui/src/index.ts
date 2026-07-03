@@ -92,3 +92,4 @@ export {
 } from './components/chart'
 export { groupSum, countBy, topN } from './components/chart-data'
 export { PrintButton } from './components/print-button'
+export { ThemeToggle, ThemeScript } from './components/theme-toggle'

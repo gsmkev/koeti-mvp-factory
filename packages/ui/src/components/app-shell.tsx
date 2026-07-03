@@ -5,6 +5,7 @@ import { Menu, X } from 'lucide-react'
 
 import { cn } from '../utils'
 import { Button } from './button'
+import { ThemeToggle } from './theme-toggle'
 
 export type AppShellNavItem = {
   href: string
@@ -97,8 +98,9 @@ function AppShell({
 
   const sidebarContent = (
     <>
-      <div className="flex h-16 shrink-0 items-center border-b border-sidebar-border px-5">
+      <div className="flex h-16 shrink-0 items-center justify-between border-b border-sidebar-border px-5">
         {brand}
+        <ThemeToggle />
       </div>
       <NavList nav={nav} pathname={pathname} Link={Link} onNavigate={close} />
       {footer && <div className="border-t border-sidebar-border p-3">{footer}</div>}

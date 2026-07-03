@@ -73,10 +73,11 @@ stored. A route handler that exposes data accepts session OR key:
 
 ```ts
 // app/api/<thing>/route.ts
-import { getTeamFromApiKey } from '@/lib/auth/api-key'
+import { apiRateLimitOk, getTeamFromApiKey } from '@/lib/auth/api-key'
 import { getTeamForUser } from '@/lib/db/queries'
 
 export async function GET(request: Request) {
+  if (!apiRateLimitOk(request)) return new Response('Too many requests', { status: 429 })
   const team = (await getTeamFromApiKey(request)) ?? (await getTeamForUser())
   if (!team) return new Response('Unauthorized', { status: 401 })
   // ...queries scoped by team.id, as always
@@ -84,6 +85,8 @@ export async function GET(request: Request) {
 ```
 
 Caller side: `fetch(url, { headers: { authorization: 'Bearer koeti_...' } })`.
+`apiRateLimitOk` only throttles Bearer callers (per-IP, 60/min), so session/
+dashboard traffic to the same route is never limited.
 
 ## What comes from `@koeti/auth` vs per-app `lib/auth/middleware.ts`
 

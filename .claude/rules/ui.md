@@ -26,6 +26,16 @@ For team-scoped CRUD pages, follow the full recipe in `.claude/rules/crud.md`.
 - App-specific components go in `apps/<name>/components/`. They import primitives from `@koeti/ui`.
 - Never run `npx shadcn add` — the package is pre-populated.
 
+## Dark mode
+
+Every app already supports it — no wiring needed. The `.dark` token set ships in
+`globals.css`, `<ThemeScript/>` (in the root layout `<head>`) applies the saved/
+system preference before paint, and `AppShell` renders a `<ThemeToggle/>` in the
+sidebar header. Style new UI with the semantic tokens (`bg-background`,
+`text-foreground`, `bg-card`, `text-muted-foreground`, `border`) and it themes
+for free — never hard-code `bg-white`/`text-black`. Marketing pages honor the
+preference too (same script on every page).
+
 ## Route structure
 
 ```

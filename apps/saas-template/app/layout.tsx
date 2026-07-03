@@ -5,6 +5,7 @@ import { getUser, getTeamForUser } from '@/lib/db/queries';
 import { SWRConfig } from 'swr';
 import { Analytics } from '@koeti/analytics/client';
 import { NuqsAdapter } from 'nuqs/adapters/next/app';
+import { ThemeScript } from '@koeti/ui';
 import { APP_NAME, APP_TAGLINE } from '@/lib/site';
 
 export const metadata: Metadata = {
@@ -26,7 +27,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`${lexend.variable} ${sourceSans.variable}`}>
+    <html
+      lang="en"
+      className={`${lexend.variable} ${sourceSans.variable}`}
+      suppressHydrationWarning
+    >
+      <head>
+        <ThemeScript />
+      </head>
       <body className="min-h-[100dvh]">
         <NuqsAdapter>
           <SWRConfig
