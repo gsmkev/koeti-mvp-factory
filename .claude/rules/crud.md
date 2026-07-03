@@ -51,8 +51,11 @@ import { projects } from '@/lib/db/schema'
 const actions = crudActions(projects, {
   path: '/projects',
   schema: z.object({ name: z.string().min(1, 'Name is required') }),
+  // minRole: 'member' is the default — viewers are read-only. Use 'admin'
+  // for entities only admins should touch.
 })
 export const createProject = actions.create
+export const updateProject = actions.update
 export const deleteProject = actions.remove
 ```
 
@@ -67,12 +70,13 @@ hand-written action in the same file using `withTeam` — scope its `where` by
 
 ```tsx
 import { ResourcePanel } from '@koeti/ui'
-import { getTeamForUser, getProjects } from '@/lib/db/queries'
+import { requireRole } from '@/lib/auth/middleware'
+import { getProjects } from '@/lib/db/queries'
 import { createProject, deleteProject } from './actions'
 
 export default async function ProjectsPage() {
-  const team = await getTeamForUser()
-  if (!team) throw new Error('Team not found')
+  // One-line RBAC (see .claude/rules/auth.md): 'viewer' = any team member can see.
+  const { team } = await requireRole('viewer')
   const rows = await getProjects(team.id)
 
   return (
@@ -88,12 +92,17 @@ export default async function ProjectsPage() {
       ]}
       rows={rows}
       rowKey={(p) => p.id}
+      onUpdate={updateProject}   // per-row edit dialog, prefilled from the row via `fields`
       onDelete={deleteProject}
       emptyTitle="No projects yet"
     />
   )
 }
 ```
+
+Wire `onUpdate` by default — edit is part of the expected MVP experience.
+URL-driven filters on the list (e.g. `?category=x`)? Follow
+`.claude/rules/url-state.md` (worked example: `apps/gastos`).
 
 Field types: `text` (default), `number`, `date`, `email`, `textarea`, `select`
 (pass `options`). A page that outgrows ResourcePanel (inline editing, drag,
@@ -104,10 +113,30 @@ charts) drops down to the base composites: `PageHeader`, `DataTable`,
 
 Add the entry to the dashboard nav (`app/(dashboard)/dashboard/layout.tsx` `navItems`).
 
+## 6. CSV export (optional, ~15 lines — add it when the entity is a list users report on)
+
+`app/api/<entity>/export/route.ts` — session OR API key auth, same filters as the page:
+
+```ts
+import { getTeamFromApiKey } from '@/lib/auth/api-key'
+import { csvResponse, toCsv } from '@/lib/csv'
+import { getProjects, getTeamForUser } from '@/lib/db/queries'
+
+export async function GET(request: Request) {
+  const team = (await getTeamFromApiKey(request)) ?? (await getTeamForUser())
+  if (!team) return new Response('Unauthorized', { status: 401 })
+  return csvResponse(toCsv(await getProjects(team.id)), 'projects.csv')
+}
+```
+
+Then a download button next to the page's filters:
+`<Button variant="outline" size="sm" asChild><a href="/api/projects/export" download><Download />Export CSV</a></Button>`.
+Worked example: `apps/gastos/app/api/gastos/export/route.ts`.
+
 ## Verify
 
 `pnpm --filter @koeti/<app> typecheck && pnpm --filter @koeti/<app> build`, then
 `pnpm verify-app <app>` (renders every page with a real session, catches SSR
 crashes) and `pnpm e2e-app <app>` (headless Chromium signs up and exercises
-create/delete through every ResourcePanel form — keep the panel's `data-slot`
+create/edit/delete through every ResourcePanel form — keep the panel's `data-slot`
 attributes intact for this to work).

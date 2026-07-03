@@ -41,6 +41,50 @@ export const myAction = validatedActionWithUser(schema, async (data, _, user) =>
 })
 ```
 
+## RBAC — one ordered role list, one line per surface
+
+Tenant roles: `viewer < member < admin < owner` (`TEAM_ROLES` in `@koeti/auth`).
+Global superadmin (the factory owner): set `SUPERADMIN_EMAIL` in the app's env —
+that account passes every team check as owner and unlocks `/dashboard/admin`.
+
+```ts
+// Page (server component) — redirects to /dashboard if below the minimum:
+const { user, team, role } = await requireRole('viewer')       // from '@/lib/auth/middleware'
+
+// Server action:
+export const dangerousThing = withTeam(async (formData, team) => { ... }, 'admin')
+
+// crudActions (default minRole 'member' — viewers are read-only):
+crudActions(things, { path: '/things', schema, minRole: 'member' })
+
+// Conditional UI / custom checks:
+import { roleAtLeast, isSuperadmin } from '@koeti/auth'
+roleAtLeast(role, 'admin') && <DangerButton />
+```
+
+Pick the minimum role per screen: `viewer` for read-only pages, `member` for
+normal mutations, `admin` for settings/invites/API keys/destructive bulk ops.
+UI hiding is cosmetic — the action/page check is the enforcement.
+
+## API keys — how other MVPs and scripts authenticate
+
+Teams mint keys at `/dashboard/api-keys` (admin+). Only the SHA-256 hash is
+stored. A route handler that exposes data accepts session OR key:
+
+```ts
+// app/api/<thing>/route.ts
+import { getTeamFromApiKey } from '@/lib/auth/api-key'
+import { getTeamForUser } from '@/lib/db/queries'
+
+export async function GET(request: Request) {
+  const team = (await getTeamFromApiKey(request)) ?? (await getTeamForUser())
+  if (!team) return new Response('Unauthorized', { status: 401 })
+  // ...queries scoped by team.id, as always
+}
+```
+
+Caller side: `fetch(url, { headers: { authorization: 'Bearer koeti_...' } })`.
+
 ## What comes from `@koeti/auth` vs per-app `lib/auth/middleware.ts`
 
 | Function | Import from |
@@ -50,7 +94,11 @@ export const myAction = validatedActionWithUser(schema, async (data, _, user) =>
 | `signToken`, `verifyToken` | `@koeti/auth` |
 | `validatedAction` | `@koeti/auth` |
 | `createAuthMiddleware` | `@koeti/auth` |
+| `roleAtLeast`, `isSuperadmin`, `TEAM_ROLES`, `TeamRole` | `@koeti/auth` |
+| `generateApiKey`, `hashApiKey`, `apiKeyPrefix` | `@koeti/auth` |
 | `validatedActionWithUser` | `@/lib/auth/middleware` |
-| `withTeam` | `@/lib/auth/middleware` |
+| `withTeam` (optional `minRole` 2nd arg) | `@/lib/auth/middleware` |
+| `requireRole`, `teamRoleFor` | `@/lib/auth/middleware` |
+| `getTeamFromApiKey` | `@/lib/auth/api-key` |
 | `getUser` | `@/lib/db/queries` |
 | `getTeamForUser` | `@/lib/db/queries` |

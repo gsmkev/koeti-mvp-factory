@@ -6,12 +6,19 @@ import { NextRequest, NextResponse } from 'next/server'
 import { stripe } from '@/lib/payments/stripe'
 import Stripe from 'stripe'
 
+
+// Relative Location keeps the browser on whatever origin it is actually
+// using (forwarded port, public IP) — request.url reports the server's own
+// hostname and breaks behind port forwards.
+const redirectTo = (path: string) =>
+  new NextResponse(null, { status: 307, headers: { Location: path } })
+
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams
   const sessionId = searchParams.get('session_id')
 
   if (!sessionId) {
-    return NextResponse.redirect(new URL('/pricing', request.url))
+    return redirectTo('/pricing')
   }
 
   try {
@@ -89,9 +96,9 @@ export async function GET(request: NextRequest) {
       .where(eq(teams.id, userTeam[0].teamId))
 
     await setSession(user[0])
-    return NextResponse.redirect(new URL('/dashboard', request.url))
+    return redirectTo('/dashboard')
   } catch (error) {
     console.error('Error handling successful checkout:', error)
-    return NextResponse.redirect(new URL('/error', request.url))
+    return redirectTo('/error')
   }
 }

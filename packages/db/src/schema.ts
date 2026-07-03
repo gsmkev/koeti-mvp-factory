@@ -68,10 +68,29 @@ export const invitations = pgTable('invitations', {
   status: varchar('status', { length: 20 }).notNull().default('pending'),
 });
 
+// Per-team API keys for MVP-to-MVP / external integrations.
+// Only a SHA-256 hash of the key is stored; the plaintext is shown once at creation.
+export const apiKeys = pgTable('api_keys', {
+  id: serial('id').primaryKey(),
+  teamId: integer('team_id')
+    .notNull()
+    .references(() => teams.id),
+  name: varchar('name', { length: 100 }).notNull(),
+  keyHash: text('key_hash').notNull().unique(),
+  keyPrefix: varchar('key_prefix', { length: 16 }).notNull(),
+  createdBy: integer('created_by')
+    .notNull()
+    .references(() => users.id),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  lastUsedAt: timestamp('last_used_at'),
+  revokedAt: timestamp('revoked_at'),
+});
+
 export const teamsRelations = relations(teams, ({ many }) => ({
   teamMembers: many(teamMembers),
   activityLogs: many(activityLogs),
   invitations: many(invitations),
+  apiKeys: many(apiKeys),
 }));
 
 export const usersRelations = relations(users, ({ many }) => ({
@@ -101,6 +120,13 @@ export const teamMembersRelations = relations(teamMembers, ({ one }) => ({
   }),
 }));
 
+export const apiKeysRelations = relations(apiKeys, ({ one }) => ({
+  team: one(teams, {
+    fields: [apiKeys.teamId],
+    references: [teams.id],
+  }),
+}));
+
 export const activityLogsRelations = relations(activityLogs, ({ one }) => ({
   team: one(teams, {
     fields: [activityLogs.teamId],
@@ -122,6 +148,8 @@ export type ActivityLog = typeof activityLogs.$inferSelect;
 export type NewActivityLog = typeof activityLogs.$inferInsert;
 export type Invitation = typeof invitations.$inferSelect;
 export type NewInvitation = typeof invitations.$inferInsert;
+export type ApiKey = typeof apiKeys.$inferSelect;
+export type NewApiKey = typeof apiKeys.$inferInsert;
 export type TeamDataWithMembers = Team & {
   teamMembers: (TeamMember & {
     user: Pick<User, 'id' | 'name' | 'email'>;

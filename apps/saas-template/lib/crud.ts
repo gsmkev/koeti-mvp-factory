@@ -17,6 +17,7 @@ import { and, eq } from 'drizzle-orm'
 import type { AnyPgColumn, PgTable } from 'drizzle-orm/pg-core'
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
+import type { TeamRole } from '@koeti/auth'
 import { db } from '@/lib/db/drizzle'
 import { withTeam } from '@/lib/auth/middleware'
 
@@ -24,9 +25,9 @@ type TeamScopedTable = PgTable & { id: AnyPgColumn; teamId: AnyPgColumn }
 
 export function crudActions<T extends TeamScopedTable>(
   table: T,
-  opts: { path: string; schema: z.ZodObject<z.ZodRawShape> }
+  opts: { path: string; schema: z.ZodObject<z.ZodRawShape>; minRole?: TeamRole }
 ) {
-  const { path, schema } = opts
+  const { path, schema, minRole = 'member' } = opts
 
   const create = withTeam(async (formData, team) => {
     const parsed = schema.safeParse(Object.fromEntries(formData))
@@ -34,7 +35,7 @@ export function crudActions<T extends TeamScopedTable>(
     // zod validated the shape at runtime; drizzle can't see through a generic table
     await db.insert(table).values({ ...parsed.data, teamId: team.id } as T['$inferInsert'])
     revalidatePath(path)
-  })
+  }, minRole)
 
   const update = withTeam(async (formData, team) => {
     const id = Number(formData.get('id'))
@@ -43,19 +44,21 @@ export function crudActions<T extends TeamScopedTable>(
     delete values.id
     const parsed = schema.partial().safeParse(values)
     if (!parsed.success) return { error: parsed.error.errors[0].message }
+    const patch = parsed.data as Record<string, unknown>
+    if ('updatedAt' in table) patch.updatedAt = new Date()
     await db
       .update(table)
-      .set(parsed.data as Partial<T['$inferInsert']>)
+      .set(patch as Partial<T['$inferInsert']>)
       .where(and(eq(table.id, id), eq(table.teamId, team.id)))
     revalidatePath(path)
-  })
+  }, minRole)
 
   const remove = withTeam(async (formData, team) => {
     const id = Number(formData.get('id'))
     if (!Number.isInteger(id)) return { error: 'Missing record id' }
     await db.delete(table).where(and(eq(table.id, id), eq(table.teamId, team.id)))
     revalidatePath(path)
-  })
+  }, minRole)
 
   return { create, update, remove }
 }

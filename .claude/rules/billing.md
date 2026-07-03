@@ -58,3 +58,19 @@ export const customerPortalAction = withTeam(async (_, team) => {
 
 - Never `new Stripe(...)` in an app. Always use `stripe` from `@koeti/billing`.
 - `handleSubscriptionChange` requires DI: pass `getTeamByStripeCustomerId` and `updateTeamSubscription` from `lib/db/queries`.
+
+## Plan gating
+
+```ts
+import { isSubscribed } from '@koeti/billing'   // true for active | trialing
+
+// Server page / action
+if (!isSubscribed(team)) redirect('/pricing')
+
+// UI
+{isSubscribed(team) ? <Feature /> : <UpgradeNudge />}
+```
+
+Gate whole premium screens in the page (redirect) and premium mutations in
+their hand-written action (return `{ error: 'Upgrade required' }`). Free-tier
+limits (e.g. max N records) are one count query + `isSubscribed` in the action.

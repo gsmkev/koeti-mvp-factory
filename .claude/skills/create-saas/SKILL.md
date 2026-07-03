@@ -31,7 +31,8 @@ Use `superpowers:executing-plans` or `superpowers:subagent-driven-development` t
 - DB work → `.claude/rules/db.md`
 - Auth/actions → `.claude/rules/auth.md`
 - Billing/Stripe → `.claude/rules/billing.md`
-- Any UI → invoke the `frontend-design` skill first, then `.claude/rules/ui.md`
+- Any UI → invoke the `ui-ux-pro-max` skill first (fallback: `frontend-design`), then `.claude/rules/ui.md`
+- URL-persistent page state (filters, tabs) → `.claude/rules/url-state.md`
 - Team-scoped entity (list/create/delete) → follow `.claude/rules/crud.md` step by step
 
 ## Step 4 — Verify

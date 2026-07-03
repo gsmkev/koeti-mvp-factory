@@ -1,8 +1,8 @@
-import { desc, and, eq, isNull } from 'drizzle-orm'
+import { desc, and, eq, isNull, sql } from 'drizzle-orm'
 import { db } from './drizzle'
 import { verifyToken } from '@koeti/auth'
 import { cookies } from 'next/headers'
-import { activityLogs, teamMembers, teams, users } from '@koeti/db'
+import { activityLogs, apiKeys, teamMembers, teams, users } from '@koeti/db'
 
 export async function getUser() {
   const sessionCookie = (await cookies()).get('session')
@@ -61,6 +61,31 @@ export async function getActivityLogs() {
     .where(eq(activityLogs.userId, user.id))
     .orderBy(desc(activityLogs.timestamp))
     .limit(10)
+}
+
+// Cross-tenant by design — callers MUST gate with isSuperadmin() first.
+export async function getAdminTeamsOverview() {
+  return db
+    .select({
+      id: teams.id,
+      name: teams.name,
+      planName: teams.planName,
+      subscriptionStatus: teams.subscriptionStatus,
+      createdAt: teams.createdAt,
+      memberCount: sql<number>`count(${teamMembers.id})::int`,
+    })
+    .from(teams)
+    .leftJoin(teamMembers, eq(teams.id, teamMembers.teamId))
+    .groupBy(teams.id)
+    .orderBy(desc(teams.createdAt))
+}
+
+export async function getApiKeys(teamId: number) {
+  return db
+    .select()
+    .from(apiKeys)
+    .where(eq(apiKeys.teamId, teamId))
+    .orderBy(desc(apiKeys.createdAt))
 }
 
 export async function getTeamForUser() {

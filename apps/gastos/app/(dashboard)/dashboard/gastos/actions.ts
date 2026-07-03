@@ -14,4 +14,5 @@ const actions = crudActions(expenses, {
   }),
 })
 export const createExpense = actions.create
+export const updateExpense = actions.update
 export const deleteExpense = actions.remove
