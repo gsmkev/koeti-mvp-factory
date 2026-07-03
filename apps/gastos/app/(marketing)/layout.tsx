@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { Suspense } from 'react';
-import { Button } from '@koeti/ui';
+import { Button, ThemeToggle } from '@koeti/ui';
 import { LayoutDashboard, LogOut } from 'lucide-react';
 import {
   Avatar,
@@ -107,7 +107,8 @@ export default function MarketingLayout({
               {APP_NAME}
             </span>
           </Link>
-          <div className="flex items-center gap-5">
+          <div className="flex items-center gap-3 sm:gap-5">
+            <ThemeToggle />
             <Suspense fallback={<div className="h-9" />}>
               <UserMenu />
             </Suspense>

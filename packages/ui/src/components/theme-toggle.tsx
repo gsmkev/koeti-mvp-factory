@@ -38,7 +38,9 @@ export function ThemeToggle({ className }: { className?: string }) {
       onClick={toggle}
       aria-label={dark ? 'Switch to light mode' : 'Switch to dark mode'}
       className={cn(
-        'inline-flex size-8 shrink-0 items-center justify-center rounded-md text-current/70 transition-colors hover:bg-white/10 hover:text-current',
+        // text-current + foreground/10 hover so it reads correctly in both the
+        // dark sidebar and a light marketing header.
+        'inline-flex size-8 shrink-0 items-center justify-center rounded-md text-current/70 transition-colors hover:bg-foreground/10 hover:text-current',
         className
       )}
     >
