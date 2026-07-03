@@ -24,6 +24,24 @@ import { BarChart, LineChart, DonutChart, Sparkline } from '@koeti/ui'
 | Part-to-whole breakdown | `DonutChart` (renders its own legend) |
 | Trend inside a `StatCard` / table row | `Sparkline` (takes `number[]`) |
 
+## Raw rows → chart data (one line)
+
+Don't hand-roll `reduce`. `@koeti/ui` ships pure shapers that return the exact
+`{ label, value }[]` charts want:
+
+```ts
+import { groupSum, countBy, topN } from '@koeti/ui'
+
+const rows = await getExpenses(team.id)                       // teamId-scoped query
+groupSum(rows, r => r.category, r => Number(r.amount))        // sum a metric per group
+countBy(rows, r => r.status)                                  // count rows per group
+topN(groupSum(rows, …), 5, 'Other')                           // keep top 5, fold the rest
+```
+
+`groupSum` keeps first-seen order — for a time series, `.sort()` by the date
+label. `topN` folds everything past `n` into one "Other" slice, because a
+categorical palette only has ~5 safe colors (never render a 9th series).
+
 ## Rules
 
 - **Single series only.** The API is deliberately `{ label, value }[]`. Two

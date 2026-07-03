@@ -90,3 +90,4 @@ export {
   Sparkline,
   type ChartDatum,
 } from './components/chart'
+export { groupSum, countBy, topN } from './components/chart-data'

@@ -8,9 +8,13 @@ import {
   CardHeader,
   CardTitle,
   DataTable,
+  DonutChart,
   EmptyState,
+  groupSum,
+  LineChart,
   PageHeader,
   StatCard,
+  topN,
 } from '@koeti/ui'
 import { getExpenses, getMonthTotal, getTeamForUser } from '@/lib/db/queries'
 
@@ -38,6 +42,21 @@ export default async function ResumenPage() {
   const monthCount = expenses.filter((e) => e.spentAt.startsWith(monthKey)).length
   const recent = expenses.slice(0, 5)
 
+  // Raw rows → chart data in one line each (helpers scope nothing — the query did).
+  const byCategory = topN(
+    groupSum(
+      expenses,
+      (e) => CATEGORY_LABELS[e.category] ?? e.category,
+      (e) => Number(e.amount),
+    ),
+    5,
+    'Otros',
+  )
+  const byDay = groupSum(expenses, (e) => e.spentAt.slice(0, 10), (e) => Number(e.amount))
+    .sort((a, b) => a.label.localeCompare(b.label))
+    .slice(-14)
+    .map((d) => ({ ...d, label: d.label.slice(5) })) // MM-DD
+
   return (
     <section className="flex-1 space-y-6 p-4 lg:p-8">
       <PageHeader
@@ -58,6 +77,27 @@ export default async function ResumenPage() {
         <StatCard label="Gastos este mes" value={monthCount} />
         <StatCard label="Registros totales" value={expenses.length} />
       </div>
+
+      {expenses.length > 0 && (
+        <div className="grid gap-4 lg:grid-cols-3">
+          <Card className="lg:col-span-2">
+            <CardHeader>
+              <CardTitle>Gastos por día</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <LineChart data={byDay} valueFormat={money} />
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader>
+              <CardTitle>Por categoría</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <DonutChart data={byCategory} valueFormat={money} centerLabel="total" />
+            </CardContent>
+          </Card>
+        </div>
+      )}
 
       <Card>
         <CardHeader>
