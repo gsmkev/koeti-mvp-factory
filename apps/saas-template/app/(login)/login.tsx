@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useActionState } from 'react';
 import { useSearchParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { Button, Input, Label } from '@koeti/ui';
 import { Loader2 } from 'lucide-react';
 import { signIn, signUp } from './actions';
@@ -17,6 +18,7 @@ export function Login({
   mode?: 'signin' | 'signup';
   googleEnabled?: boolean;
 }) {
+  const t = useTranslations('auth');
   const searchParams = useSearchParams();
   const redirect = searchParams.get('redirect');
   const priceId = searchParams.get('priceId');
@@ -43,17 +45,15 @@ export function Login({
           </Link>
 
           <h1 className="mt-10 text-2xl font-semibold tracking-tight">
-            {mode === 'signin' ? 'Sign in to your account' : 'Create your account'}
+            {mode === 'signin' ? t('signInTitle') : t('signUpTitle')}
           </h1>
           <p className="mt-2 text-sm text-muted-foreground">
-            {mode === 'signin'
-              ? 'Welcome back. Enter your details to continue.'
-              : 'Start with your work email and a password.'}
+            {mode === 'signin' ? t('signInSubtitle') : t('signUpSubtitle')}
           </p>
 
           {oauthError && (
             <p role="alert" className="mt-6 text-sm text-destructive">
-              Google sign-in didn&apos;t complete. Please try again.
+              {t('oauthError')}
             </p>
           )}
 
@@ -62,12 +62,12 @@ export function Login({
               <Button asChild variant="outline" className="mt-8 w-full">
                 <a href="/api/auth/google">
                   <GoogleIcon className="mr-2 h-4 w-4" />
-                  Continue with Google
+                  {t('googleContinue')}
                 </a>
               </Button>
               <div className="my-6 flex items-center gap-3 text-xs text-muted-foreground">
                 <span className="h-px flex-1 bg-border" />
-                or
+                {t('or')}
                 <span className="h-px flex-1 bg-border" />
               </div>
             </>
@@ -79,7 +79,7 @@ export function Login({
             <input type="hidden" name="inviteId" value={inviteId || ''} />
 
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email">{t('email')}</Label>
               <Input
                 id="email"
                 name="email"
@@ -88,19 +88,19 @@ export function Login({
                 defaultValue={state.email}
                 required
                 maxLength={50}
-                placeholder="you@company.com"
+                placeholder={t('emailPlaceholder')}
               />
             </div>
 
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <Label htmlFor="password">Password</Label>
+                <Label htmlFor="password">{t('password')}</Label>
                 {mode === 'signin' && (
                   <Link
                     href="/forgot-password"
                     className="text-sm font-medium text-primary underline-offset-4 hover:underline"
                   >
-                    Forgot password?
+                    {t('forgotPassword')}
                   </Link>
                 )}
               </div>
@@ -115,7 +115,11 @@ export function Login({
                 required
                 minLength={8}
                 maxLength={100}
-                placeholder={mode === 'signin' ? 'Your password' : 'At least 8 characters'}
+                placeholder={
+                  mode === 'signin'
+                    ? t('passwordPlaceholderSignIn')
+                    : t('passwordPlaceholderSignUp')
+                }
               />
             </div>
 
@@ -129,25 +133,25 @@ export function Login({
               {pending ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  {mode === 'signin' ? 'Signing in…' : 'Creating account…'}
+                  {mode === 'signin' ? t('signingIn') : t('creatingAccount')}
                 </>
               ) : mode === 'signin' ? (
-                'Sign in'
+                t('signInCta')
               ) : (
-                'Create account'
+                t('signUpCta')
               )}
             </Button>
           </form>
 
           <p className="mt-8 text-sm text-muted-foreground">
-            {mode === 'signin' ? 'New here?' : 'Already have an account?'}{' '}
+            {mode === 'signin' ? t('newHere') : t('alreadyHave')}{' '}
             <Link
               href={`${mode === 'signin' ? '/sign-up' : '/sign-in'}${
                 redirect ? `?redirect=${redirect}` : ''
               }${priceId ? `&priceId=${priceId}` : ''}`}
               className="font-medium text-primary underline-offset-4 hover:underline"
             >
-              {mode === 'signin' ? 'Create an account' : 'Sign in'}
+              {mode === 'signin' ? t('createAccountLink') : t('signInLink')}
             </Link>
           </p>
         </div>
@@ -167,11 +171,10 @@ export function Login({
         <div className="relative" />
         <blockquote className="relative max-w-md">
           <p className="font-display text-2xl font-medium leading-snug text-sidebar-primary">
-            Ship the boring part once — auth, billing, and teams are already
-            wired in.
+            {t('brandQuote')}
           </p>
           <footer className="mt-4 text-sm text-sidebar-foreground/70">
-            {APP_NAME} · SaaS starter
+            {t('brandFooter', { app: APP_NAME })}
           </footer>
         </blockquote>
       </div>

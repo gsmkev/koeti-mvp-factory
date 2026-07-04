@@ -20,13 +20,23 @@ import { comparePasswords, hashPassword, setSession } from '@/lib/auth/session';
 import { rateLimit, signOneTimeToken, verifyOneTimeToken, isSuperadmin, roleAtLeast, type TeamRole } from '@koeti/auth';
 import { redirect } from 'next/navigation';
 import { cookies, headers } from 'next/headers';
+import { getLocale, getTranslations } from 'next-intl/server';
+import type { Locale } from '@koeti/i18n/config';
 import { createCheckoutSession } from '@/lib/payments/stripe';
 import { getUser, getUserWithTeam } from '@/lib/db/queries';
 import {
   validatedAction,
   validatedActionWithUser
 } from '@/lib/auth/middleware';
-import { sendEmail, WelcomeEmail, PasswordResetEmail, InvitationEmail } from '@koeti/email';
+import {
+  sendEmail,
+  WelcomeEmail,
+  welcomeSubject,
+  PasswordResetEmail,
+  passwordResetSubject,
+  InvitationEmail,
+  invitationSubject
+} from '@koeti/email';
 import { track } from '@koeti/analytics/server';
 import { APP_NAME } from '@/lib/site';
 
@@ -35,6 +45,12 @@ import { APP_NAME } from '@/lib/site';
 async function clientIp() {
   const h = await headers();
   return h.get('x-forwarded-for')?.split(',')[0]?.trim() || 'local';
+}
+
+// next-intl types getLocale() as string; our request config (i18n/request.ts)
+// only ever resolves to a supported Locale, so this narrowing is safe.
+async function currentLocale(): Promise<Locale> {
+  return (await getLocale()) as Locale;
 }
 
 // Browser-facing links in emails follow the request origin in dev (tunnels,
@@ -77,12 +93,13 @@ const signInSchema = z.object({
 
 export const signIn = validatedAction(signInSchema, async (data, formData) => {
   const { email, password } = data;
+  const t = await getTranslations('errors');
 
   if (
     !rateLimit(`signin:${await clientIp()}`, { limit: 10 }) ||
     !rateLimit(`signin:${email.toLowerCase()}`, { limit: 10 })
   ) {
-    return { error: 'Too many attempts. Please wait a minute and try again.', email, password };
+    return { error: t('tooManyAttempts'), email, password };
   }
 
   const userWithTeam = await db
@@ -98,7 +115,7 @@ export const signIn = validatedAction(signInSchema, async (data, formData) => {
 
   if (userWithTeam.length === 0) {
     return {
-      error: 'Invalid email or password. Please try again.',
+      error: t('invalidCredentials'),
       email,
       password
     };
@@ -113,7 +130,7 @@ export const signIn = validatedAction(signInSchema, async (data, formData) => {
 
   if (!isPasswordValid) {
     return {
-      error: 'Invalid email or password. Please try again.',
+      error: t('invalidCredentials'),
       email,
       password
     };
@@ -141,9 +158,10 @@ const signUpSchema = z.object({
 
 export const signUp = validatedAction(signUpSchema, async (data, formData) => {
   const { email, password, inviteId } = data;
+  const t = await getTranslations('errors');
 
   if (!rateLimit(`signup:${await clientIp()}`, { limit: 5 })) {
-    return { error: 'Too many attempts. Please wait a minute and try again.', email, password };
+    return { error: t('tooManyAttempts'), email, password };
   }
 
   const existingUser = await db
@@ -154,7 +172,7 @@ export const signUp = validatedAction(signUpSchema, async (data, formData) => {
 
   if (existingUser.length > 0) {
     return {
-      error: 'Failed to create user. Please try again.',
+      error: t('createUserFailed'),
       email,
       password
     };
@@ -172,7 +190,7 @@ export const signUp = validatedAction(signUpSchema, async (data, formData) => {
 
   if (!createdUser) {
     return {
-      error: 'Failed to create user. Please try again.',
+      error: t('createUserFailed'),
       email,
       password
     };
@@ -213,7 +231,7 @@ export const signUp = validatedAction(signUpSchema, async (data, formData) => {
         .where(eq(teams.id, teamId))
         .limit(1);
     } else {
-      return { error: 'Invalid or expired invitation.', email, password };
+      return { error: t('invalidInvitation'), email, password };
     }
   } else {
     // Create a new team if there's no invitation
@@ -225,7 +243,7 @@ export const signUp = validatedAction(signUpSchema, async (data, formData) => {
 
     if (!createdTeam) {
       return {
-        error: 'Failed to create team. Please try again.',
+        error: t('createTeamFailed'),
         email,
         password
       };
@@ -251,8 +269,12 @@ export const signUp = validatedAction(signUpSchema, async (data, formData) => {
 
   // Fire-and-forget: email/analytics must never block or fail sign-up.
   // Both are no-ops when their keys aren't configured.
-  sendEmail({ to: email, subject: 'Welcome!', react: WelcomeEmail({ name: email }) })
-    .catch((err) => console.error('welcome email failed:', err));
+  const locale = await currentLocale();
+  sendEmail({
+    to: email,
+    subject: welcomeSubject(locale),
+    react: WelcomeEmail({ name: email, locale })
+  }).catch((err) => console.error('welcome email failed:', err));
   track('user_signed_up', { userId: String(createdUser.id) });
 
   const redirectTo = formData.get('redirect') as string | null;
@@ -278,11 +300,12 @@ const forgotPasswordSchema = z.object({
 export const forgotPassword = validatedAction(
   forgotPasswordSchema,
   async (data) => {
+    const t = await getTranslations('errors');
     if (
       !rateLimit(`forgot:${await clientIp()}`, { limit: 5 }) ||
       !rateLimit(`forgot:${data.email.toLowerCase()}`, { limit: 5 })
     ) {
-      return { error: 'Too many attempts. Please wait a minute and try again.' };
+      return { error: t('tooManyAttempts') };
     }
 
     const [user] = await db
@@ -299,15 +322,16 @@ export const forgotPassword = validatedAction(
         fingerprint: user.passwordHash.slice(-16)
       });
       const resetLink = `${await requestOrigin()}/reset-password?token=${token}`;
+      const locale = await currentLocale();
       sendEmail({
         to: user.email,
-        subject: `Reset your ${APP_NAME} password`,
-        react: PasswordResetEmail({ resetLink })
+        subject: passwordResetSubject(APP_NAME, locale),
+        react: PasswordResetEmail({ resetLink, locale })
       }).catch((err) => console.error('password reset email failed:', err));
     }
 
     // Same response either way — don't leak which emails have accounts.
-    return { success: 'If that email has an account, a reset link is on its way.' };
+    return { success: t('forgotSent') };
   }
 );
 
@@ -320,11 +344,12 @@ const resetPasswordSchema = z.object({
 export const resetPassword = validatedAction(
   resetPasswordSchema,
   async (data) => {
+    const t = await getTranslations('errors');
     if (data.password !== data.confirmPassword) {
-      return { error: 'Passwords do not match.' };
+      return { error: t('passwordsDontMatch') };
     }
 
-    const invalid = { error: 'This reset link is invalid or has expired. Request a new one.' };
+    const invalid = { error: t('resetLinkInvalid') };
     const payload = await verifyOneTimeToken(data.token, 'password-reset');
     if (!payload) return invalid;
 
@@ -343,7 +368,7 @@ export const resetPassword = validatedAction(
     const userWithTeam = await getUserWithTeam(user.id);
     await logActivity(userWithTeam?.teamId, user.id, ActivityType.UPDATE_PASSWORD);
 
-    return { success: 'Password updated. You can sign in with it now.' };
+    return { success: t('passwordUpdatedSignIn') };
   }
 );
 
@@ -357,6 +382,7 @@ export const updatePassword = validatedActionWithUser(
   updatePasswordSchema,
   async (data, _, user) => {
     const { currentPassword, newPassword, confirmPassword } = data;
+    const t = await getTranslations('errors');
 
     const isPasswordValid = await comparePasswords(
       currentPassword,
@@ -368,7 +394,7 @@ export const updatePassword = validatedActionWithUser(
         currentPassword,
         newPassword,
         confirmPassword,
-        error: 'Current password is incorrect.'
+        error: t('currentPasswordIncorrect')
       };
     }
 
@@ -377,7 +403,7 @@ export const updatePassword = validatedActionWithUser(
         currentPassword,
         newPassword,
         confirmPassword,
-        error: 'New password must be different from the current password.'
+        error: t('newPasswordSame')
       };
     }
 
@@ -386,7 +412,7 @@ export const updatePassword = validatedActionWithUser(
         currentPassword,
         newPassword,
         confirmPassword,
-        error: 'New password and confirmation password do not match.'
+        error: t('newPasswordMismatch')
       };
     }
 
@@ -402,7 +428,7 @@ export const updatePassword = validatedActionWithUser(
     ]);
 
     return {
-      success: 'Password updated successfully.'
+      success: t('passwordUpdated')
     };
   }
 );
@@ -415,12 +441,13 @@ export const deleteAccount = validatedActionWithUser(
   deleteAccountSchema,
   async (data, _, user) => {
     const { password } = data;
+    const t = await getTranslations('errors');
 
     const isPasswordValid = await comparePasswords(password, user.passwordHash);
     if (!isPasswordValid) {
       return {
         password,
-        error: 'Incorrect password. Account deletion failed.'
+        error: t('incorrectPasswordDelete')
       };
     }
 
@@ -466,6 +493,7 @@ export const updateAccount = validatedActionWithUser(
   updateAccountSchema,
   async (data, _, user) => {
     const { name, email } = data;
+    const t = await getTranslations('errors');
     const userWithTeam = await getUserWithTeam(user.id);
 
     await Promise.all([
@@ -473,7 +501,7 @@ export const updateAccount = validatedActionWithUser(
       logActivity(userWithTeam?.teamId, user.id, ActivityType.UPDATE_ACCOUNT)
     ]);
 
-    return { name, success: 'Account updated successfully.' };
+    return { name, success: t('accountUpdated') };
   }
 );
 
@@ -496,14 +524,15 @@ export const removeTeamMember = validatedActionWithUser(
   removeTeamMemberSchema,
   async (data, _, user) => {
     const { memberId } = data;
+    const t = await getTranslations('errors');
     const userWithTeam = await getUserWithTeam(user.id);
 
     if (!userWithTeam?.teamId) {
-      return { error: 'User is not part of a team' };
+      return { error: t('notInTeam') };
     }
 
     if (!(await hasTeamRole(user, userWithTeam.teamId, 'admin'))) {
-      return { error: 'Only team admins can remove members' };
+      return { error: t('adminOnlyRemove') };
     }
 
     await db
@@ -521,7 +550,7 @@ export const removeTeamMember = validatedActionWithUser(
       ActivityType.REMOVE_TEAM_MEMBER
     );
 
-    return { success: 'Team member removed successfully' };
+    return { success: t('memberRemoved') };
   }
 );
 
@@ -534,14 +563,15 @@ export const inviteTeamMember = validatedActionWithUser(
   inviteTeamMemberSchema,
   async (data, _, user) => {
     const { email, role } = data;
+    const t = await getTranslations('errors');
     const userWithTeam = await getUserWithTeam(user.id);
 
     if (!userWithTeam?.teamId) {
-      return { error: 'User is not part of a team' };
+      return { error: t('notInTeam') };
     }
 
     if (!(await hasTeamRole(user, userWithTeam.teamId, 'admin'))) {
-      return { error: 'Only team admins can invite members' };
+      return { error: t('adminOnlyInvite') };
     }
 
     const existingMember = await db
@@ -554,7 +584,7 @@ export const inviteTeamMember = validatedActionWithUser(
       .limit(1);
 
     if (existingMember.length > 0) {
-      return { error: 'User is already a member of this team' };
+      return { error: t('alreadyMember') };
     }
 
     // Check if there's an existing invitation
@@ -571,7 +601,7 @@ export const inviteTeamMember = validatedActionWithUser(
       .limit(1);
 
     if (existingInvitation.length > 0) {
-      return { error: 'An invitation has already been sent to this email' };
+      return { error: t('invitationExists') };
     }
 
     // Create a new invitation
@@ -598,17 +628,19 @@ export const inviteTeamMember = validatedActionWithUser(
       .where(eq(teams.id, userWithTeam.teamId))
       .limit(1);
     const inviteLink = `${await requestOrigin()}/sign-up?inviteId=${invitation.id}`;
+    const locale = await currentLocale();
     // Fire-and-forget: a no-op without RESEND_API_KEY, must never block the action.
     sendEmail({
       to: email,
-      subject: `You've been invited to ${team?.name ?? APP_NAME}`,
+      subject: invitationSubject(team?.name ?? APP_NAME, locale),
       react: InvitationEmail({
         teamName: team?.name ?? APP_NAME,
         inviterEmail: user.email,
-        inviteLink
+        inviteLink,
+        locale
       })
     }).catch((err) => console.error('invitation email failed:', err));
 
-    return { success: 'Invitation sent successfully' };
+    return { success: t('invitationSent') };
   }
 );

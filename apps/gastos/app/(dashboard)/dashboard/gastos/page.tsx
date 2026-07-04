@@ -2,29 +2,11 @@ import Link from 'next/link'
 import type { SearchParams } from 'nuqs/server'
 import { Download } from 'lucide-react'
 import { Badge, Button, ResourcePanel, StatCard, cn, type ResourceField } from '@koeti/ui'
+import { getTranslations } from 'next-intl/server'
 import { requireRole } from '@/lib/auth/middleware'
 import { getExpenses, getMonthTotal } from '@/lib/db/queries'
 import { createExpense, deleteExpense, updateExpense } from './actions'
 import { CATEGORIES, loadGastosSearchParams } from './search-params'
-
-const CATEGORY_LABELS: Record<string, string> = {
-  viaticos: 'Viáticos',
-  materiales: 'Materiales',
-  software: 'Software',
-  otros: 'Otros',
-}
-
-const FIELDS = [
-  { name: 'amount', label: 'Monto', type: 'number', step: '0.01', placeholder: '0.00', required: true },
-  {
-    name: 'category',
-    label: 'Categoría',
-    type: 'select',
-    options: Object.entries(CATEGORY_LABELS).map(([value, label]) => ({ value, label })),
-  },
-  { name: 'description', label: 'Descripción', placeholder: 'Ej: licencias anuales', required: true },
-  { name: 'spentAt', label: 'Fecha', type: 'date', defaultValue: new Date().toISOString().slice(0, 10), required: true },
-] satisfies ResourceField[]
 
 export default async function GastosPage({
   searchParams,
@@ -36,59 +18,74 @@ export default async function GastosPage({
   const { team } = await requireRole('viewer')
   // URL = estado: ?categoria=software filtra y es deep-linkable desde otro MVP
   const { categoria } = await loadGastosSearchParams(searchParams)
-  const [rows, monthTotal] = await Promise.all([
+  const [rows, monthTotal, t, tcat] = await Promise.all([
     getExpenses(team.id, categoria ?? undefined),
     getMonthTotal(team.id),
+    getTranslations('gastos'),
+    getTranslations('categories'),
   ])
+  const catLabel = (c: string) => (CATEGORIES.includes(c as (typeof CATEGORIES)[number]) ? tcat(c) : c)
+
+  const fields = [
+    { name: 'amount', label: t('fieldAmount'), type: 'number', step: '0.01', placeholder: t('amountPlaceholder'), required: true },
+    {
+      name: 'category',
+      label: t('fieldCategory'),
+      type: 'select',
+      options: CATEGORIES.map((value) => ({ value, label: tcat(value) })),
+    },
+    { name: 'description', label: t('fieldDescription'), placeholder: t('descPlaceholder'), required: true },
+    { name: 'spentAt', label: t('fieldDate'), type: 'date', defaultValue: new Date().toISOString().slice(0, 10), required: true },
+  ] satisfies ResourceField[]
 
   return (
     <section className="flex-1 space-y-6 p-4 lg:p-8">
       <div className="grid gap-4 sm:max-w-xs">
         <StatCard
-          label="Total del mes"
+          label={t('monthTotal')}
           value={`$${monthTotal.toLocaleString('es', { minimumFractionDigits: 2 })}`}
         />
       </div>
-      <nav className="flex flex-wrap gap-2" aria-label="Filtrar por categoría">
+      <nav className="flex flex-wrap gap-2" aria-label={t('filterAria')}>
         <Link href="/dashboard/gastos">
           <Badge variant={categoria ? 'outline' : 'default'} className={cn('cursor-pointer')}>
-            Todas
+            {t('filterAll')}
           </Badge>
         </Link>
         {CATEGORIES.map((c) => (
           <Link key={c} href={`/dashboard/gastos?categoria=${c}`}>
             <Badge variant={categoria === c ? 'default' : 'outline'} className="cursor-pointer">
-              {CATEGORY_LABELS[c]}
+              {tcat(c)}
             </Badge>
           </Link>
         ))}
         <Button variant="outline" size="sm" className="ml-auto" asChild>
           <a href={`/api/gastos/export${categoria ? `?categoria=${categoria}` : ''}`} download>
             <Download />
-            Exportar CSV
+            {t('exportCsv')}
           </a>
         </Button>
       </nav>
       <ResourcePanel
         className="p-0 lg:p-0"
-        title="Gastos"
-        description="Registra y consulta los gastos de tu equipo."
-        fields={FIELDS}
+        title={t('panelTitle')}
+        description={t('panelDesc')}
+        fields={fields}
         onCreate={createExpense}
-        createLabel="Registrar"
+        createLabel={t('createLabel')}
         columns={[
-          { header: 'Fecha', cell: (e) => e.spentAt },
-          { header: 'Categoría', cell: (e) => <Badge variant="secondary">{CATEGORY_LABELS[e.category] ?? e.category}</Badge> },
-          { header: 'Descripción', cell: (e) => e.description },
-          { header: 'Monto', className: 'text-right', cell: (e) => `$${Number(e.amount).toLocaleString('es', { minimumFractionDigits: 2 })}` },
+          { header: t('colDate'), cell: (e) => e.spentAt },
+          { header: t('colCategory'), cell: (e) => <Badge variant="secondary">{catLabel(e.category)}</Badge> },
+          { header: t('colDescription'), cell: (e) => e.description },
+          { header: t('colAmount'), className: 'text-right', cell: (e) => `$${Number(e.amount).toLocaleString('es', { minimumFractionDigits: 2 })}` },
         ]}
         rows={rows}
         rowKey={(e) => e.id}
         onUpdate={updateExpense}
-        editLabel="Editar gasto"
+        editLabel={t('editLabel')}
         onDelete={deleteExpense}
-        emptyTitle="Sin gastos todavía"
-        emptyDescription="Registra el primer gasto de tu equipo con el formulario de arriba."
+        emptyTitle={t('emptyTitle')}
+        emptyDescription={t('emptyDesc')}
       />
     </section>
   )

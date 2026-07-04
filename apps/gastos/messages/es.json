@@ -1,0 +1,80 @@
+{
+  "nav": {
+    "footerTagline": "{app} — los gastos de tu equipo, en orden."
+  },
+  "categories": {
+    "viaticos": "Viáticos",
+    "materiales": "Materiales",
+    "software": "Software",
+    "otros": "Otros"
+  },
+  "marketing": {
+    "eyebrow": "Control de gastos",
+    "title": "Los gastos de tu equipo, bajo control.",
+    "subtitle": "Registra cada gasto, clasifícalo por categoría y consulta el total del mes sin abrir una hoja de cálculo.",
+    "getStarted": "Empezar gratis",
+    "viewPricing": "Ver precios",
+    "moduleRegistroTag": "registro",
+    "moduleRegistroTitle": "Cada gasto, en segundos",
+    "moduleRegistroDesc": "Monto, categoría, descripción y fecha. Un formulario directo, sin pasos de más.",
+    "moduleCategoriasTag": "categorías",
+    "moduleCategoriasTitle": "Clasificado desde el inicio",
+    "moduleCategoriasDesc": "Viáticos, materiales, software y otros. Cada registro queda ordenado para revisarlo después.",
+    "moduleEquipoTag": "equipo",
+    "moduleEquipoTitle": "Todo el equipo, una cuenta",
+    "moduleEquipoDesc": "Los gastos viven en el equipo, no en la laptop de alguien. Invita a tu gente con roles claros.",
+    "ledgerThisMonth": "Este mes",
+    "ledgerRows": [
+      { "cat": "viaticos", "desc": "Viaje CDMX — cliente", "amount": "$2,450.00" },
+      { "cat": "software", "desc": "Licencias anuales", "amount": "$1,180.00" },
+      { "cat": "materiales", "desc": "Impresiones y papelería", "amount": "$312.50" }
+    ],
+    "ctaTitle": "Deja la hoja de cálculo hoy.",
+    "ctaSubtitle": "Tu equipo registra, Gastos suma. Al cierre del mes ya sabes en qué se fue el dinero.",
+    "createAccount": "Crear cuenta",
+    "alreadySignIn": "¿Ya tienes cuenta? Inicia sesión"
+  },
+  "overview": {
+    "title": "Resumen",
+    "description": "El estado de los gastos de tu equipo, de un vistazo.",
+    "downloadPdf": "Descargar PDF",
+    "registerExpense": "Registrar gasto",
+    "statMonthTotal": "Total del mes",
+    "statMonthExpenses": "Gastos este mes",
+    "statTotalRecords": "Registros totales",
+    "hintVsPrevMonth": "vs. mes anterior",
+    "chartByDay": "Gastos por día",
+    "chartByCategory": "Por categoría",
+    "centerTotal": "total",
+    "recentTitle": "Últimos gastos",
+    "colDate": "Fecha",
+    "colCategory": "Categoría",
+    "colDescription": "Descripción",
+    "colAmount": "Monto",
+    "emptyTitle": "Sin gastos todavía",
+    "emptyDesc": "Registra el primer gasto de tu equipo para ver el resumen aquí."
+  },
+  "gastos": {
+    "navLabel": "Gastos",
+    "monthTotal": "Total del mes",
+    "filterAll": "Todas",
+    "filterAria": "Filtrar por categoría",
+    "exportCsv": "Exportar CSV",
+    "panelTitle": "Gastos",
+    "panelDesc": "Registra y consulta los gastos de tu equipo.",
+    "createLabel": "Registrar",
+    "fieldAmount": "Monto",
+    "amountPlaceholder": "0.00",
+    "fieldCategory": "Categoría",
+    "fieldDescription": "Descripción",
+    "descPlaceholder": "Ej: licencias anuales",
+    "fieldDate": "Fecha",
+    "editLabel": "Editar gasto",
+    "emptyTitle": "Sin gastos todavía",
+    "emptyDesc": "Registra el primer gasto de tu equipo con el formulario de arriba.",
+    "colDate": "Fecha",
+    "colCategory": "Categoría",
+    "colDescription": "Descripción",
+    "colAmount": "Monto"
+  }
+}

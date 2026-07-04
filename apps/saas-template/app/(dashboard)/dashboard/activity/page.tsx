@@ -18,8 +18,11 @@ import {
   CheckCircle,
   type LucideIcon,
 } from 'lucide-react';
+import { getTranslations } from 'next-intl/server';
 import { ActivityType } from '@/lib/db/schema';
 import { getActivityLogs } from '@/lib/db/queries';
+
+type T = Awaited<ReturnType<typeof getTranslations>>;
 
 const iconMap: Record<ActivityType, LucideIcon> = {
   [ActivityType.SIGN_UP]: UserPlus,
@@ -34,56 +37,47 @@ const iconMap: Record<ActivityType, LucideIcon> = {
   [ActivityType.ACCEPT_INVITATION]: CheckCircle,
 };
 
-function getRelativeTime(date: Date) {
+function getRelativeTime(t: T, date: Date) {
   const now = new Date();
   const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
 
-  if (diffInSeconds < 60) return 'just now';
+  if (diffInSeconds < 60) return t('justNow');
   if (diffInSeconds < 3600)
-    return `${Math.floor(diffInSeconds / 60)} minutes ago`;
+    return t('minutesAgo', { count: Math.floor(diffInSeconds / 60) });
   if (diffInSeconds < 86400)
-    return `${Math.floor(diffInSeconds / 3600)} hours ago`;
+    return t('hoursAgo', { count: Math.floor(diffInSeconds / 3600) });
   if (diffInSeconds < 604800)
-    return `${Math.floor(diffInSeconds / 86400)} days ago`;
+    return t('daysAgo', { count: Math.floor(diffInSeconds / 86400) });
   return date.toLocaleDateString();
 }
 
-function formatAction(action: ActivityType): string {
-  switch (action) {
-    case ActivityType.SIGN_UP:
-      return 'You signed up';
-    case ActivityType.SIGN_IN:
-      return 'You signed in';
-    case ActivityType.SIGN_OUT:
-      return 'You signed out';
-    case ActivityType.UPDATE_PASSWORD:
-      return 'You changed your password';
-    case ActivityType.DELETE_ACCOUNT:
-      return 'You deleted your account';
-    case ActivityType.UPDATE_ACCOUNT:
-      return 'You updated your account';
-    case ActivityType.CREATE_TEAM:
-      return 'You created a new team';
-    case ActivityType.REMOVE_TEAM_MEMBER:
-      return 'You removed a team member';
-    case ActivityType.INVITE_TEAM_MEMBER:
-      return 'You invited a team member';
-    case ActivityType.ACCEPT_INVITATION:
-      return 'You accepted an invitation';
-    default:
-      return 'Unknown action occurred';
-  }
+const actionKey: Record<ActivityType, string> = {
+  [ActivityType.SIGN_UP]: 'actionSignUp',
+  [ActivityType.SIGN_IN]: 'actionSignIn',
+  [ActivityType.SIGN_OUT]: 'actionSignOut',
+  [ActivityType.UPDATE_PASSWORD]: 'actionUpdatePassword',
+  [ActivityType.DELETE_ACCOUNT]: 'actionDeleteAccount',
+  [ActivityType.UPDATE_ACCOUNT]: 'actionUpdateAccount',
+  [ActivityType.CREATE_TEAM]: 'actionCreateTeam',
+  [ActivityType.REMOVE_TEAM_MEMBER]: 'actionRemoveTeamMember',
+  [ActivityType.INVITE_TEAM_MEMBER]: 'actionInviteTeamMember',
+  [ActivityType.ACCEPT_INVITATION]: 'actionAcceptInvitation',
+};
+
+function formatAction(t: T, action: ActivityType): string {
+  return t(actionKey[action] ?? 'actionUnknown');
 }
 
 export default async function ActivityPage() {
   const logs = await getActivityLogs();
+  const t = await getTranslations('activity');
 
   return (
     <section className="flex-1 space-y-6 p-4 lg:p-8">
-      <PageHeader title="Activity Log" />
+      <PageHeader title={t('title')} />
       <Card>
         <CardHeader>
-          <CardTitle>Recent Activity</CardTitle>
+          <CardTitle>{t('recentActivity')}</CardTitle>
         </CardHeader>
         <CardContent>
           {logs.length > 0 ? (
@@ -91,6 +85,7 @@ export default async function ActivityPage() {
               {logs.map((log) => {
                 const Icon = iconMap[log.action as ActivityType] || Settings;
                 const formattedAction = formatAction(
+                  t,
                   log.action as ActivityType
                 );
 
@@ -102,10 +97,10 @@ export default async function ActivityPage() {
                     <div className="flex-1">
                       <p className="text-sm font-medium text-foreground">
                         {formattedAction}
-                        {log.ipAddress && ` from IP ${log.ipAddress}`}
+                        {log.ipAddress && ` ${t('fromIp', { ip: log.ipAddress })}`}
                       </p>
                       <p className="text-xs text-muted-foreground">
-                        {getRelativeTime(new Date(log.timestamp))}
+                        {getRelativeTime(t, new Date(log.timestamp))}
                       </p>
                     </div>
                   </li>
@@ -115,8 +110,8 @@ export default async function ActivityPage() {
           ) : (
             <EmptyState
               icon={AlertCircle}
-              title="No activity yet"
-              description="When you perform actions like signing in or updating your account, they'll appear here."
+              title={t('emptyTitle')}
+              description={t('emptyDesc')}
               className="border-none"
             />
           )}

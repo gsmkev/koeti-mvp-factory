@@ -11,62 +11,61 @@ import {
   PrintButton,
   StatCard,
 } from '@koeti/ui'
+import { getTranslations } from 'next-intl/server'
 import { getTeamForUser } from '@/lib/db/queries'
 
 // Placeholder chart data — replace with real queries scoped by team.id.
 // Charts are zero-dependency SVG (render in server components, no client JS).
-const trend = [
-  { label: 'Mon', value: 12 },
-  { label: 'Tue', value: 18 },
-  { label: 'Wed', value: 15 },
-  { label: 'Thu', value: 27 },
-  { label: 'Fri', value: 32 },
-  { label: 'Sat', value: 24 },
-  { label: 'Sun', value: 38 },
-]
-const breakdown = [
-  { label: 'Direct', value: 42 },
-  { label: 'Search', value: 31 },
-  { label: 'Social', value: 18 },
-  { label: 'Email', value: 9 },
-]
+const trendValues = [12, 18, 15, 27, 32, 24, 38]
+const breakdownValues = [42, 31, 18, 9]
 
 export default async function OverviewPage() {
   const team = await getTeamForUser()
   if (!team) throw new Error('Team not found')
 
+  const t = await getTranslations('overview')
+  const tc = await getTranslations('common')
+  const days = t.raw('days') as string[]
+  const trend = trendValues.map((value, i) => ({ label: days[i], value }))
+  const breakdown = [
+    { label: t('sourceDirect'), value: breakdownValues[0] },
+    { label: t('sourceSearch'), value: breakdownValues[1] },
+    { label: t('sourceSocial'), value: breakdownValues[2] },
+    { label: t('sourceEmail'), value: breakdownValues[3] },
+  ]
+
   return (
     <section className="flex-1 space-y-6 p-4 lg:p-8">
       <PageHeader
-        title="Overview"
-        description="What's happening across your workspace."
+        title={t('title')}
+        description={t('description')}
         actions={<PrintButton />}
       />
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        <StatCard label="Team members" value={team.teamMembers.length} />
-        <StatCard label="Plan" value={team.planName ?? 'Free'} />
+        <StatCard label={t('statTeamMembers')} value={team.teamMembers.length} />
+        <StatCard label={t('statPlan')} value={team.planName ?? tc('free')} />
         <StatCard
-          label="Activity this week"
-          value={trend.reduce((s, d) => s + d.value, 0)}
+          label={t('statActivityWeek')}
+          value={trendValues.reduce((s, v) => s + v, 0)}
           delta={18}
-          hint="vs last week"
-          trend={trend.map((d) => d.value)}
+          hint={t('hintVsLastWeek')}
+          trend={trendValues}
         />
       </div>
       <div className="grid gap-4 lg:grid-cols-3">
         <Card className="lg:col-span-2">
           <CardContent className="pt-6">
-            <LineChart title="Activity this week" data={trend} />
+            <LineChart title={t('chartActivityWeek')} data={trend} />
           </CardContent>
         </Card>
         <Card>
           <CardContent className="pt-6">
-            <DonutChart title="By source" data={breakdown} centerLabel="visits" />
+            <DonutChart title={t('chartBySource')} data={breakdown} centerLabel={t('centerVisits')} />
           </CardContent>
         </Card>
         <Card className="lg:col-span-3">
           <CardContent className="pt-6">
-            <BarChart title="Daily activity" data={trend} />
+            <BarChart title={t('chartDailyActivity')} data={trend} />
           </CardContent>
         </Card>
       </div>

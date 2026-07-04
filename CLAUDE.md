@@ -56,6 +56,9 @@ import { BarChart, LineChart, DonutChart, Sparkline, type ChartDatum } from '@ko
 import { groupSum, countBy, topN } from '@koeti/ui' // rows → {label,value}[] for charts (topN folds extras into "Other")
 import { PrintButton } from '@koeti/ui' // one-click dashboard → PDF via native print (styled by @media print)
 import { createLoader, parseAsStringEnum } from 'nuqs/server' // typed URL state — see .claude/rules/url-state.md
+import { LocaleSwitcher, locales, defaultLocale, type Locale } from '@koeti/i18n' // en/es/pt via cookie — see .claude/rules/i18n.md
+import { createRequestConfig } from '@koeti/i18n/server' // for each app's i18n/request.ts
+import { getTranslations, getLocale } from 'next-intl/server' // server: t() in RSC/actions; useTranslations() in client components
 import { crudActions } from '@/lib/crud' // team-scoped CRUD actions factory (per app; optional minRole)
 import { requireRole, withTeam, teamRoleFor } from '@/lib/auth/middleware' // per-app RBAC: requireRole('viewer') in pages, withTeam(fn, 'admin') in actions
 import { getTeamFromApiKey } from '@/lib/auth/api-key' // Bearer koeti_… auth for app/api routes (per app)
@@ -75,6 +78,10 @@ Before implementing any UI (page, component, dashboard, landing), invoke the `ui
 For team-scoped CRUD features, follow `.claude/rules/crud.md` — schema → queries → actions → page → nav, using the `@koeti/ui` composites.
 
 Page state that survives a reload (filters, tabs, search) lives in the URL via nuqs — see `.claude/rules/url-state.md`. This is also how MVPs integrate with each other: deep links for features, `app/api/*` route handlers over HTTP for data.
+
+Every user-facing string goes through `t()` — the factory ships en/es/pt via a
+`NEXT_LOCALE` cookie (next-intl, no URL prefix). Shared chrome is translated once in
+`@koeti/i18n`; each app adds only its business messages. See `.claude/rules/i18n.md`.
 
 <!-- code-review-graph MCP tools -->
 ## MCP Tools: code-review-graph

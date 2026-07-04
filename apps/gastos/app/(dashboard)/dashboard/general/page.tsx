@@ -1,6 +1,7 @@
 'use client';
 
 import { useActionState } from 'react';
+import { useTranslations } from 'next-intl';
 import { Input } from '@koeti/ui';
 import { Card, CardContent, CardHeader, CardTitle } from '@koeti/ui';
 import { Label, PageHeader, SubmitButton } from '@koeti/ui';
@@ -28,29 +29,30 @@ function AccountForm({
   nameValue = '',
   emailValue = ''
 }: AccountFormProps) {
+  const t = useTranslations('account');
   return (
     <>
       <div>
         <Label htmlFor="name" className="mb-2">
-          Name
+          {t('name')}
         </Label>
         <Input
           id="name"
           name="name"
-          placeholder="Enter your name"
+          placeholder={t('namePlaceholder')}
           defaultValue={state.name || nameValue}
           required
         />
       </div>
       <div>
         <Label htmlFor="email" className="mb-2">
-          Email
+          {t('email')}
         </Label>
         <Input
           id="email"
           name="email"
           type="email"
-          placeholder="Enter your email"
+          placeholder={t('emailPlaceholder')}
           defaultValue={emailValue}
           required
         />
@@ -71,6 +73,7 @@ function AccountFormWithData({ state }: { state: ActionState }) {
 }
 
 export default function GeneralPage() {
+  const t = useTranslations('account');
   const [state, formAction] = useActionState<ActionState, FormData>(
     updateAccount,
     {}
@@ -78,11 +81,11 @@ export default function GeneralPage() {
 
   return (
     <section className="flex-1 space-y-6 p-4 lg:p-8">
-      <PageHeader title="General Settings" />
+      <PageHeader title={t('title')} />
 
       <Card>
         <CardHeader>
-          <CardTitle>Account Information</CardTitle>
+          <CardTitle>{t('cardTitle')}</CardTitle>
         </CardHeader>
         <CardContent>
           <form className="space-y-4" action={formAction}>
@@ -95,11 +98,7 @@ export default function GeneralPage() {
             {state.success && (
               <p className="text-success text-sm">{state.success}</p>
             )}
-            <SubmitButton
-              pendingText="Saving..."
-            >
-              Save Changes
-            </SubmitButton>
+            <SubmitButton pendingText={t('saving')}>{t('save')}</SubmitButton>
           </form>
         </CardContent>
       </Card>

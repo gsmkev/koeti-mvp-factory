@@ -17,14 +17,8 @@ import {
   StatCard,
   topN,
 } from '@koeti/ui'
+import { getTranslations } from 'next-intl/server'
 import { getExpenses, getMonthTotal, getTeamForUser } from '@/lib/db/queries'
-
-const CATEGORY_LABELS: Record<string, string> = {
-  viaticos: 'Viáticos',
-  materiales: 'Materiales',
-  software: 'Software',
-  otros: 'Otros',
-}
 
 const money = (n: number) =>
   `$${n.toLocaleString('es', { minimumFractionDigits: 2 })}`
@@ -32,10 +26,13 @@ const money = (n: number) =>
 export default async function ResumenPage() {
   const team = await getTeamForUser()
   if (!team) throw new Error('Team not found')
-  const [expenses, monthTotal] = await Promise.all([
+  const [expenses, monthTotal, t, tcat] = await Promise.all([
     getExpenses(team.id),
     getMonthTotal(team.id),
+    getTranslations('overview'),
+    getTranslations('categories'),
   ])
+  const catLabel = (c: string) => (['viaticos', 'materiales', 'software', 'otros'].includes(c) ? tcat(c) : c)
 
   const monthStart = new Date()
   monthStart.setDate(1)
@@ -57,11 +54,11 @@ export default async function ResumenPage() {
   const byCategory = topN(
     groupSum(
       expenses,
-      (e) => CATEGORY_LABELS[e.category] ?? e.category,
+      (e) => catLabel(e.category),
       (e) => Number(e.amount),
     ),
     5,
-    'Otros',
+    tcat('otros'),
   )
   const byDay = groupSum(expenses, (e) => e.spentAt.slice(0, 10), (e) => Number(e.amount))
     .sort((a, b) => a.label.localeCompare(b.label))
@@ -71,14 +68,14 @@ export default async function ResumenPage() {
   return (
     <section className="flex-1 space-y-6 p-4 lg:p-8">
       <PageHeader
-        title="Resumen"
-        description="El estado de los gastos de tu equipo, de un vistazo."
+        title={t('title')}
+        description={t('description')}
         actions={
           <>
-            <PrintButton>Descargar PDF</PrintButton>
+            <PrintButton>{t('downloadPdf')}</PrintButton>
             <Button asChild>
               <Link href="/dashboard/gastos">
-                Registrar gasto
+                {t('registerExpense')}
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
             </Button>
@@ -88,22 +85,22 @@ export default async function ResumenPage() {
 
       <div className="grid gap-4 sm:grid-cols-3">
         <StatCard
-          label="Total del mes"
+          label={t('statMonthTotal')}
           value={money(monthTotal)}
           delta={monthDelta}
           deltaGoodDirection="down"
-          hint="vs. mes anterior"
+          hint={t('hintVsPrevMonth')}
           trend={byDay.map((d) => d.value)}
         />
-        <StatCard label="Gastos este mes" value={monthCount} />
-        <StatCard label="Registros totales" value={expenses.length} />
+        <StatCard label={t('statMonthExpenses')} value={monthCount} />
+        <StatCard label={t('statTotalRecords')} value={expenses.length} />
       </div>
 
       {expenses.length > 0 && (
         <div className="grid gap-4 lg:grid-cols-3">
           <Card className="lg:col-span-2">
             <CardHeader>
-              <CardTitle>Gastos por día</CardTitle>
+              <CardTitle>{t('chartByDay')}</CardTitle>
             </CardHeader>
             <CardContent>
               <LineChart data={byDay} valueFormat={money} />
@@ -111,10 +108,10 @@ export default async function ResumenPage() {
           </Card>
           <Card>
             <CardHeader>
-              <CardTitle>Por categoría</CardTitle>
+              <CardTitle>{t('chartByCategory')}</CardTitle>
             </CardHeader>
             <CardContent>
-              <DonutChart data={byCategory} valueFormat={money} centerLabel="total" />
+              <DonutChart data={byCategory} valueFormat={money} centerLabel={t('centerTotal')} />
             </CardContent>
           </Card>
         </div>
@@ -122,25 +119,23 @@ export default async function ResumenPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Últimos gastos</CardTitle>
+          <CardTitle>{t('recentTitle')}</CardTitle>
         </CardHeader>
         <CardContent>
           <DataTable
             rows={recent}
             rowKey={(e) => e.id}
             columns={[
-              { header: 'Fecha', cell: (e) => e.spentAt },
+              { header: t('colDate'), cell: (e) => e.spentAt },
               {
-                header: 'Categoría',
+                header: t('colCategory'),
                 cell: (e) => (
-                  <Badge variant="secondary">
-                    {CATEGORY_LABELS[e.category] ?? e.category}
-                  </Badge>
+                  <Badge variant="secondary">{catLabel(e.category)}</Badge>
                 ),
               },
-              { header: 'Descripción', cell: (e) => e.description },
+              { header: t('colDescription'), cell: (e) => e.description },
               {
-                header: 'Monto',
+                header: t('colAmount'),
                 className: 'text-right',
                 cell: (e) => money(Number(e.amount)),
               },
@@ -148,8 +143,8 @@ export default async function ResumenPage() {
             empty={
               <EmptyState
                 icon={Receipt}
-                title="Sin gastos todavía"
-                description="Registra el primer gasto de tu equipo para ver el resumen aquí."
+                title={t('emptyTitle')}
+                description={t('emptyDesc')}
                 className="border-none"
               />
             }

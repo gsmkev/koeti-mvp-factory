@@ -1,6 +1,7 @@
 import { checkoutAction } from '@/lib/payments/actions';
 import { ArrowRight, Check } from 'lucide-react';
 import { getStripePrices, getStripeProducts } from '@/lib/payments/stripe';
+import { getTranslations } from 'next-intl/server';
 import {
   Badge,
   Card,
@@ -12,13 +13,16 @@ import {
   SubmitButton,
 } from '@koeti/ui';
 
+type T = Awaited<ReturnType<typeof getTranslations>>;
+
 // Prices are fresh for one hour max
 export const revalidate = 3600;
 
 export default async function PricingPage() {
-  const [prices, products] = await Promise.all([
+  const [prices, products, t] = await Promise.all([
     getStripePrices(),
     getStripeProducts(),
+    getTranslations('pricing'),
   ]);
 
   const basePlan = products.find((product) => product.name === 'Base');
@@ -31,41 +35,33 @@ export default async function PricingPage() {
     <main className="mx-auto max-w-6xl px-6 py-16 sm:px-8 sm:py-20">
       <div className="max-w-2xl">
         <p className="font-mono text-xs uppercase tracking-widest text-muted-foreground">
-          Scaffold // 02
+          {t('eyebrow')}
         </p>
         <h1 className="mt-4 text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl">
-          One foundation. Pick your plan.
+          {t('title')}
         </h1>
         <p className="mt-4 max-w-lg text-lg text-muted-foreground">
-          Every plan ships with the full scaffold — auth, billing, and team
-          accounts included. Plus adds priority support and early access as
-          your team grows.
+          {t('subtitle')}
         </p>
       </div>
 
       <div className="mt-12 grid gap-6 md:grid-cols-2">
         <PricingCard
+          t={t}
           name={basePlan?.name || 'Base'}
           price={basePrice?.unitAmount || 800}
           interval={basePrice?.interval || 'month'}
           trialDays={basePrice?.trialPeriodDays || 7}
-          features={[
-            'Unlimited usage',
-            'Unlimited workspace members',
-            'Email support',
-          ]}
+          features={t.raw('baseFeatures') as string[]}
           priceId={basePrice?.id}
         />
         <PricingCard
+          t={t}
           name={plusPlan?.name || 'Plus'}
           price={plusPrice?.unitAmount || 1200}
           interval={plusPrice?.interval || 'month'}
           trialDays={plusPrice?.trialPeriodDays || 7}
-          features={[
-            'Everything in Base, and:',
-            'Early access to new features',
-            '24/7 support + Slack access',
-          ]}
+          features={t.raw('plusFeatures') as string[]}
           priceId={plusPrice?.id}
           highlight
         />
@@ -75,6 +71,7 @@ export default async function PricingPage() {
 }
 
 function PricingCard({
+  t,
   name,
   price,
   interval,
@@ -83,6 +80,7 @@ function PricingCard({
   priceId,
   highlight = false,
 }: {
+  t: T;
   name: string;
   price: number;
   interval: string;
@@ -100,12 +98,12 @@ function PricingCard({
           </span>
           <CardTitle className="mt-1 text-2xl">{name}</CardTitle>
           <p className="mt-1 text-sm text-muted-foreground">
-            {trialDays}-day free trial
+            {t('freeTrial', { days: trialDays })}
           </p>
         </div>
         {highlight && (
           <CardAction>
-            <Badge>Recommended</Badge>
+            <Badge>{t('recommended')}</Badge>
           </CardAction>
         )}
       </CardHeader>
@@ -113,7 +111,7 @@ function PricingCard({
         <p className="text-4xl font-bold text-foreground">
           ${price / 100}
           <span className="ml-2 text-base font-normal text-muted-foreground">
-            per user / {interval}
+            {t('perUser', { interval })}
           </span>
         </p>
         <ul className="mt-8 space-y-4 border-t border-border pt-8">
@@ -131,9 +129,9 @@ function PricingCard({
           <SubmitButton
             variant="outline"
             className="w-full rounded-full"
-            pendingText="Loading..."
+            pendingText={t('loading')}
           >
-            Get Started
+            {t('getStarted')}
             <ArrowRight className="ml-2 h-4 w-4" />
           </SubmitButton>
         </form>

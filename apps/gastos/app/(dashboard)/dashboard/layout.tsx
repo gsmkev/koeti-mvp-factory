@@ -22,30 +22,38 @@ import {
   DropdownMenuTrigger,
   type AppShellNavGroup
 } from '@koeti/ui';
+import { LocaleSwitcher } from '@koeti/i18n';
+import { useTranslations } from 'next-intl';
 import { signOut } from '@/app/(login)/actions';
 import { User } from '@/lib/db/schema';
 import useSWR, { mutate } from 'swr';
 
 const APP_NAME = 'Gastos';
 
-const NAV: AppShellNavGroup[] = [
-  {
-    items: [
-      { href: '/dashboard', label: 'Resumen', icon: <LayoutDashboard /> },
-      { href: '/dashboard/gastos', label: 'Gastos', icon: <Receipt /> }
-    ]
-  },
-  {
-    label: 'Configuración',
-    items: [
-      { href: '/dashboard/team', label: 'Equipo', icon: <Users /> },
-      { href: '/dashboard/general', label: 'General', icon: <Settings /> },
-      { href: '/dashboard/security', label: 'Seguridad', icon: <Shield /> },
-      { href: '/dashboard/api-keys', label: 'API Keys', icon: <KeyRound /> },
-      { href: '/dashboard/activity', label: 'Actividad', icon: <Activity /> }
-    ]
-  }
-];
+// Baseline nav labels come from @koeti/i18n; the app-specific "Gastos" entry
+// uses this app's own namespace.
+function useNav(): AppShellNavGroup[] {
+  const t = useTranslations('nav');
+  const tg = useTranslations('gastos');
+  return [
+    {
+      items: [
+        { href: '/dashboard', label: t('overview'), icon: <LayoutDashboard /> },
+        { href: '/dashboard/gastos', label: tg('navLabel'), icon: <Receipt /> }
+      ]
+    },
+    {
+      label: t('settings'),
+      items: [
+        { href: '/dashboard/team', label: t('team'), icon: <Users /> },
+        { href: '/dashboard/general', label: t('general'), icon: <Settings /> },
+        { href: '/dashboard/security', label: t('security'), icon: <Shield /> },
+        { href: '/dashboard/api-keys', label: t('apiKeys'), icon: <KeyRound /> },
+        { href: '/dashboard/activity', label: t('activity'), icon: <Activity /> }
+      ]
+    }
+  ];
+}
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
@@ -66,6 +74,7 @@ function Brand() {
 }
 
 function SidebarUser() {
+  const t = useTranslations('nav');
   const { data: user } = useSWR<User>('/api/user', fetcher);
   const router = useRouter();
 
@@ -101,7 +110,7 @@ function SidebarUser() {
           <button type="submit" className="flex w-full">
             <DropdownMenuItem className="w-full flex-1 cursor-pointer">
               <LogOut className="mr-2 h-4 w-4" />
-              <span>Cerrar sesión</span>
+              <span>{t('signOut')}</span>
             </DropdownMenuItem>
           </button>
         </form>
@@ -116,14 +125,20 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
+  const nav = useNav();
 
   return (
     <AppShell
       brand={<Brand />}
-      nav={NAV}
+      nav={nav}
       pathname={pathname}
       linkComponent={Link}
-      footer={<SidebarUser />}
+      footer={
+        <div className="space-y-2">
+          <LocaleSwitcher className="w-full" />
+          <SidebarUser />
+        </div>
+      }
     >
       {children}
     </AppShell>
