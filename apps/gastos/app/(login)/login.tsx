@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useActionState } from 'react';
 import { useSearchParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { Button, Input, Label } from '@koeti/ui';
 import { Loader2 } from 'lucide-react';
 import { signIn, signUp } from './actions';
@@ -17,6 +18,7 @@ export function Login({
   mode?: 'signin' | 'signup';
   googleEnabled?: boolean;
 }) {
+  const t = useTranslations('auth');
   const searchParams = useSearchParams();
   const redirect = searchParams.get('redirect');
   const priceId = searchParams.get('priceId');
@@ -37,23 +39,21 @@ export function Login({
               className="flex size-8 items-center justify-center rounded-md bg-primary font-display text-base font-bold text-primary-foreground"
               aria-hidden
             >
-              G
+              {APP_NAME[0]}
             </span>
             <span className="font-display text-lg font-semibold">{APP_NAME}</span>
           </Link>
 
           <h1 className="mt-10 text-2xl font-semibold tracking-tight">
-            {mode === 'signin' ? 'Inicia sesión en tu cuenta' : 'Crea tu cuenta'}
+            {mode === 'signin' ? t('signInTitle') : t('signUpTitle')}
           </h1>
           <p className="mt-2 text-sm text-muted-foreground">
-            {mode === 'signin'
-              ? 'Qué gusto verte de nuevo. Ingresa tus datos para continuar.'
-              : 'Empieza con tu correo de trabajo y una contraseña.'}
+            {mode === 'signin' ? t('signInSubtitle') : t('signUpSubtitle')}
           </p>
 
           {oauthError && (
             <p role="alert" className="mt-6 text-sm text-destructive">
-              No se pudo completar el acceso con Google. Inténtalo de nuevo.
+              {t('oauthError')}
             </p>
           )}
 
@@ -62,11 +62,12 @@ export function Login({
               <Button asChild variant="outline" className="mt-8 w-full">
                 <a href="/api/auth/google">
                   <GoogleIcon className="mr-2 h-4 w-4" />
-                  Continuar con Google
+                  {t('googleContinue')}
                 </a>
               </Button>
               <div className="my-6 flex items-center gap-3 text-xs text-muted-foreground">
-                <span className="h-px flex-1 bg-border" />o
+                <span className="h-px flex-1 bg-border" />
+                {t('or')}
                 <span className="h-px flex-1 bg-border" />
               </div>
             </>
@@ -78,7 +79,7 @@ export function Login({
             <input type="hidden" name="inviteId" value={inviteId || ''} />
 
             <div className="space-y-2">
-              <Label htmlFor="email">Correo electrónico</Label>
+              <Label htmlFor="email">{t('email')}</Label>
               <Input
                 id="email"
                 name="email"
@@ -87,19 +88,19 @@ export function Login({
                 defaultValue={state.email}
                 required
                 maxLength={50}
-                placeholder="tu@empresa.com"
+                placeholder={t('emailPlaceholder')}
               />
             </div>
 
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <Label htmlFor="password">Contraseña</Label>
+                <Label htmlFor="password">{t('password')}</Label>
                 {mode === 'signin' && (
                   <Link
                     href="/forgot-password"
                     className="text-sm font-medium text-primary underline-offset-4 hover:underline"
                   >
-                    ¿Olvidaste tu contraseña?
+                    {t('forgotPassword')}
                   </Link>
                 )}
               </div>
@@ -115,7 +116,9 @@ export function Login({
                 minLength={8}
                 maxLength={100}
                 placeholder={
-                  mode === 'signin' ? 'Tu contraseña' : 'Mínimo 8 caracteres'
+                  mode === 'signin'
+                    ? t('passwordPlaceholderSignIn')
+                    : t('passwordPlaceholderSignUp')
                 }
               />
             </div>
@@ -130,25 +133,25 @@ export function Login({
               {pending ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  {mode === 'signin' ? 'Iniciando sesión…' : 'Creando cuenta…'}
+                  {mode === 'signin' ? t('signingIn') : t('creatingAccount')}
                 </>
               ) : mode === 'signin' ? (
-                'Iniciar sesión'
+                t('signInCta')
               ) : (
-                'Crear cuenta'
+                t('signUpCta')
               )}
             </Button>
           </form>
 
           <p className="mt-8 text-sm text-muted-foreground">
-            {mode === 'signin' ? '¿Primera vez aquí?' : '¿Ya tienes cuenta?'}{' '}
+            {mode === 'signin' ? t('newHere') : t('alreadyHave')}{' '}
             <Link
               href={`${mode === 'signin' ? '/sign-up' : '/sign-in'}${
                 redirect ? `?redirect=${redirect}` : ''
               }${priceId ? `&priceId=${priceId}` : ''}`}
               className="font-medium text-primary underline-offset-4 hover:underline"
             >
-              {mode === 'signin' ? 'Crea una cuenta' : 'Inicia sesión'}
+              {mode === 'signin' ? t('createAccountLink') : t('signInLink')}
             </Link>
           </p>
         </div>
@@ -168,10 +171,10 @@ export function Login({
         <div className="relative" />
         <blockquote className="relative max-w-md">
           <p className="font-display text-2xl font-medium leading-snug text-sidebar-primary">
-            Cada gasto registrado, cada mes cuadrado. Sin hojas de cálculo.
+            {t('brandQuote')}
           </p>
           <footer className="mt-4 text-sm text-sidebar-foreground/70">
-            {APP_NAME} · control de gastos para equipos
+            {t('brandFooter', { app: APP_NAME })}
           </footer>
         </blockquote>
       </div>

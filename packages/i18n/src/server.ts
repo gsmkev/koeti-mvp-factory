@@ -4,13 +4,26 @@ import { LOCALE_COOKIE, resolveLocale, type Locale } from './config'
 
 export * from './config'
 
-type Messages = Record<string, unknown>
+type Namespace = Record<string, unknown>
+type Messages = Record<string, Namespace>
 type MessagesModule = { default: Messages }
+
+// One-level-deep merge: app namespaces merge INTO the matching baseline
+// namespace (per-key), instead of a shallow spread that would replace a whole
+// baseline namespace (e.g. an app adding one `nav` key would otherwise wipe the
+// baseline nav). App keys win on collision.
+function mergeMessages(base: Messages, app: Messages): Messages {
+  const out: Messages = { ...base }
+  for (const [ns, values] of Object.entries(app)) {
+    out[ns] = { ...(base[ns] ?? {}), ...values }
+  }
+  return out
+}
 
 // Each app's i18n/request.ts calls this with a loader for its own business
 // messages. We resolve the locale (cookie → Accept-Language → default), then
-// merge the shared baseline under the app's messages so apps can add or
-// override keys. No middleware needed — locale lives in a cookie.
+// merge the shared baseline with the app's messages. No middleware needed —
+// locale lives in a cookie.
 export function createRequestConfig(
   loadAppMessages: (locale: Locale) => Promise<MessagesModule>
 ) {
@@ -26,6 +39,6 @@ export function createRequestConfig(
       loadAppMessages(locale),
     ])
 
-    return { locale, messages: { ...baseline.default, ...app.default } }
+    return { locale, messages: mergeMessages(baseline.default, app.default) }
   })
 }

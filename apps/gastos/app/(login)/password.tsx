@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useActionState } from 'react';
 import { useSearchParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { Button, Input, Label } from '@koeti/ui';
 import { Loader2 } from 'lucide-react';
 import { forgotPassword, resetPassword } from './actions';
@@ -58,19 +59,17 @@ function FormMessages({ state }: { state: ActionState }) {
 }
 
 export function ForgotPasswordForm() {
+  const t = useTranslations('auth');
   const [state, formAction, pending] = useActionState<ActionState, FormData>(
     forgotPassword,
     { error: '' }
   );
 
   return (
-    <AuthShell
-      title="Restablece tu contraseña"
-      description="Ingresa el correo de tu cuenta y te enviaremos un enlace para restablecerla."
-    >
+    <AuthShell title={t('forgotTitle')} description={t('forgotDesc')}>
       <form className="mt-8 space-y-5" action={formAction}>
         <div className="space-y-2">
-          <Label htmlFor="email">Correo electrónico</Label>
+          <Label htmlFor="email">{t('email')}</Label>
           <Input
             id="email"
             name="email"
@@ -78,7 +77,7 @@ export function ForgotPasswordForm() {
             autoComplete="email"
             required
             maxLength={255}
-            placeholder="tu@empresa.com"
+            placeholder={t('emailPlaceholder')}
           />
         </div>
 
@@ -88,21 +87,21 @@ export function ForgotPasswordForm() {
           {pending ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Enviando enlace…
+              {t('sendingLink')}
             </>
           ) : (
-            'Enviar enlace'
+            t('sendResetLink')
           )}
         </Button>
       </form>
 
       <p className="mt-8 text-sm text-muted-foreground">
-        ¿La recordaste?{' '}
+        {t('rememberedIt')}{' '}
         <Link
           href="/sign-in"
           className="font-medium text-primary underline-offset-4 hover:underline"
         >
-          Inicia sesión
+          {t('signInLink')}
         </Link>
       </p>
     </AuthShell>
@@ -110,6 +109,7 @@ export function ForgotPasswordForm() {
 }
 
 export function ResetPasswordForm() {
+  const t = useTranslations('auth');
   const searchParams = useSearchParams();
   const token = searchParams.get('token') ?? '';
   const [state, formAction, pending] = useActionState<ActionState, FormData>(
@@ -120,26 +120,23 @@ export function ResetPasswordForm() {
   if (!token) {
     return (
       <AuthShell
-        title="Enlace inválido"
-        description="A este enlace le falta el token de restablecimiento. Solicita uno nuevo."
+        title={t('resetInvalidTitle')}
+        description={t('resetInvalidDesc')}
       >
         <Button asChild className="mt-8 w-full">
-          <Link href="/forgot-password">Solicitar un enlace nuevo</Link>
+          <Link href="/forgot-password">{t('requestNewLink')}</Link>
         </Button>
       </AuthShell>
     );
   }
 
   return (
-    <AuthShell
-      title="Elige una contraseña nueva"
-      description="Debe tener al menos 8 caracteres."
-    >
+    <AuthShell title={t('resetTitle')} description={t('resetDesc')}>
       <form className="mt-8 space-y-5" action={formAction}>
         <input type="hidden" name="token" value={token} />
 
         <div className="space-y-2">
-          <Label htmlFor="password">Contraseña nueva</Label>
+          <Label htmlFor="password">{t('newPassword')}</Label>
           <Input
             id="password"
             name="password"
@@ -148,12 +145,12 @@ export function ResetPasswordForm() {
             required
             minLength={8}
             maxLength={100}
-            placeholder="Al menos 8 caracteres"
+            placeholder={t('newPasswordPlaceholder')}
           />
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="confirmPassword">Confirma la contraseña nueva</Label>
+          <Label htmlFor="confirmPassword">{t('confirmNewPassword')}</Label>
           <Input
             id="confirmPassword"
             name="confirmPassword"
@@ -162,7 +159,7 @@ export function ResetPasswordForm() {
             required
             minLength={8}
             maxLength={100}
-            placeholder="Repite la contraseña"
+            placeholder={t('repeatPasswordPlaceholder')}
           />
         </div>
 
@@ -170,17 +167,17 @@ export function ResetPasswordForm() {
 
         {state?.success ? (
           <Button asChild className="w-full">
-            <Link href="/sign-in">Ir a iniciar sesión</Link>
+            <Link href="/sign-in">{t('goToSignIn')}</Link>
           </Button>
         ) : (
           <Button type="submit" className="w-full" disabled={pending}>
             {pending ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Actualizando…
+                {t('updatingPassword')}
               </>
             ) : (
-              'Actualizar contraseña'
+              t('updatePassword')
             )}
           </Button>
         )}

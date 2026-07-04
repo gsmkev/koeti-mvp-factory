@@ -1,0 +1,80 @@
+{
+  "nav": {
+    "footerTagline": "{app} — os gastos do seu time, em ordem."
+  },
+  "categories": {
+    "viaticos": "Viagens",
+    "materiales": "Materiais",
+    "software": "Software",
+    "otros": "Outros"
+  },
+  "marketing": {
+    "eyebrow": "Controle de gastos",
+    "title": "Os gastos do seu time, sob controle.",
+    "subtitle": "Registre cada gasto, classifique por categoria e veja o total do mês sem abrir uma planilha.",
+    "getStarted": "Começar grátis",
+    "viewPricing": "Ver preços",
+    "moduleRegistroTag": "registro",
+    "moduleRegistroTitle": "Cada gasto, em segundos",
+    "moduleRegistroDesc": "Valor, categoria, descrição e data. Um formulário direto, sem passos a mais.",
+    "moduleCategoriasTag": "categorias",
+    "moduleCategoriasTitle": "Classificado desde o início",
+    "moduleCategoriasDesc": "Viagens, materiais, software e outros. Cada registro fica organizado para revisar depois.",
+    "moduleEquipoTag": "time",
+    "moduleEquipoTitle": "O time todo, uma conta",
+    "moduleEquipoDesc": "Os gastos ficam no time, não no notebook de alguém. Convide sua gente com funções claras.",
+    "ledgerThisMonth": "Este mês",
+    "ledgerRows": [
+      { "cat": "viaticos", "desc": "Viagem à matriz — cliente", "amount": "$2.450,00" },
+      { "cat": "software", "desc": "Licenças anuais", "amount": "$1.180,00" },
+      { "cat": "materiales", "desc": "Impressões e papelaria", "amount": "$312,50" }
+    ],
+    "ctaTitle": "Largue a planilha hoje.",
+    "ctaSubtitle": "Seu time registra, o Gastos soma. No fim do mês você já sabe para onde o dinheiro foi.",
+    "createAccount": "Criar conta",
+    "alreadySignIn": "Já tem uma conta? Entre"
+  },
+  "overview": {
+    "title": "Visão geral",
+    "description": "Os gastos do seu time, num relance.",
+    "downloadPdf": "Baixar PDF",
+    "registerExpense": "Registrar gasto",
+    "statMonthTotal": "Total do mês",
+    "statMonthExpenses": "Gastos este mês",
+    "statTotalRecords": "Registros totais",
+    "hintVsPrevMonth": "vs. mês anterior",
+    "chartByDay": "Gastos por dia",
+    "chartByCategory": "Por categoria",
+    "centerTotal": "total",
+    "recentTitle": "Últimos gastos",
+    "colDate": "Data",
+    "colCategory": "Categoria",
+    "colDescription": "Descrição",
+    "colAmount": "Valor",
+    "emptyTitle": "Ainda não há gastos",
+    "emptyDesc": "Registre o primeiro gasto do seu time para ver o resumo aqui."
+  },
+  "gastos": {
+    "navLabel": "Gastos",
+    "monthTotal": "Total do mês",
+    "filterAll": "Todas",
+    "filterAria": "Filtrar por categoria",
+    "exportCsv": "Exportar CSV",
+    "panelTitle": "Gastos",
+    "panelDesc": "Registre e consulte os gastos do seu time.",
+    "createLabel": "Registrar",
+    "fieldAmount": "Valor",
+    "amountPlaceholder": "0.00",
+    "fieldCategory": "Categoria",
+    "fieldDescription": "Descrição",
+    "descPlaceholder": "Ex: licenças anuais",
+    "fieldDate": "Data",
+    "editLabel": "Editar gasto",
+    "emptyTitle": "Ainda não há gastos",
+    "emptyDesc": "Registre o primeiro gasto do seu time com o formulário acima.",
+    "colDate": "Data",
+    "colCategory": "Categoria",
+    "colDescription": "Descrição",
+    "colAmount": "Valor"
+  }
+}

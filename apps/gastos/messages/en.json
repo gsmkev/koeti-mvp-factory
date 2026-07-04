@@ -1,0 +1,80 @@
+{
+  "nav": {
+    "footerTagline": "{app} — your team's spending, in order."
+  },
+  "categories": {
+    "viaticos": "Travel",
+    "materiales": "Supplies",
+    "software": "Software",
+    "otros": "Other"
+  },
+  "marketing": {
+    "eyebrow": "Expense tracking",
+    "title": "Your team's spending, under control.",
+    "subtitle": "Log every expense, tag it by category, and check the month's total without opening a spreadsheet.",
+    "getStarted": "Start free",
+    "viewPricing": "View pricing",
+    "moduleRegistroTag": "logging",
+    "moduleRegistroTitle": "Every expense, in seconds",
+    "moduleRegistroDesc": "Amount, category, description, and date. A straight form, no extra steps.",
+    "moduleCategoriasTag": "categories",
+    "moduleCategoriasTitle": "Sorted from the start",
+    "moduleCategoriasDesc": "Travel, supplies, software, and other. Every entry stays organized to review later.",
+    "moduleEquipoTag": "team",
+    "moduleEquipoTitle": "One account for the whole team",
+    "moduleEquipoDesc": "Expenses live in the team, not on someone's laptop. Invite your people with clear roles.",
+    "ledgerThisMonth": "This month",
+    "ledgerRows": [
+      { "cat": "viaticos", "desc": "Trip to HQ — client", "amount": "$2,450.00" },
+      { "cat": "software", "desc": "Annual licenses", "amount": "$1,180.00" },
+      { "cat": "materiales", "desc": "Printing & stationery", "amount": "$312.50" }
+    ],
+    "ctaTitle": "Drop the spreadsheet today.",
+    "ctaSubtitle": "Your team logs, Gastos adds it up. By month's end you already know where the money went.",
+    "createAccount": "Create account",
+    "alreadySignIn": "Already have an account? Sign in"
+  },
+  "overview": {
+    "title": "Overview",
+    "description": "Your team's spending, at a glance.",
+    "downloadPdf": "Download PDF",
+    "registerExpense": "Log expense",
+    "statMonthTotal": "Month total",
+    "statMonthExpenses": "Expenses this month",
+    "statTotalRecords": "Total records",
+    "hintVsPrevMonth": "vs. last month",
+    "chartByDay": "Spending by day",
+    "chartByCategory": "By category",
+    "centerTotal": "total",
+    "recentTitle": "Latest expenses",
+    "colDate": "Date",
+    "colCategory": "Category",
+    "colDescription": "Description",
+    "colAmount": "Amount",
+    "emptyTitle": "No expenses yet",
+    "emptyDesc": "Log your team's first expense to see the overview here."
+  },
+  "gastos": {
+    "navLabel": "Expenses",
+    "monthTotal": "Month total",
+    "filterAll": "All",
+    "filterAria": "Filter by category",
+    "exportCsv": "Export CSV",
+    "panelTitle": "Expenses",
+    "panelDesc": "Log and review your team's expenses.",
+    "createLabel": "Log",
+    "fieldAmount": "Amount",
+    "amountPlaceholder": "0.00",
+    "fieldCategory": "Category",
+    "fieldDescription": "Description",
+    "descPlaceholder": "e.g. annual licenses",
+    "fieldDate": "Date",
+    "editLabel": "Edit expense",
+    "emptyTitle": "No expenses yet",
+    "emptyDesc": "Log your team's first expense with the form above.",
+    "colDate": "Date",
+    "colCategory": "Category",
+    "colDescription": "Description",
+    "colAmount": "Amount"
+  }
+}

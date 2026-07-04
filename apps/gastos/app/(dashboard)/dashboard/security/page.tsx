@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@koeti/ui';
 import { Label, PageHeader, SubmitButton } from '@koeti/ui';
 import { Lock, Trash2 } from 'lucide-react';
 import { useActionState } from 'react';
+import { useTranslations } from 'next-intl';
 import { updatePassword, deleteAccount } from '@/app/(login)/actions';
 
 type PasswordState = {
@@ -22,6 +23,7 @@ type DeleteState = {
 };
 
 export default function SecurityPage() {
+  const t = useTranslations('security');
   const [passwordState, passwordAction] = useActionState<
     PasswordState,
     FormData
@@ -34,16 +36,16 @@ export default function SecurityPage() {
 
   return (
     <section className="flex-1 space-y-6 p-4 lg:p-8">
-      <PageHeader title="Security Settings" />
+      <PageHeader title={t('title')} />
       <Card>
         <CardHeader>
-          <CardTitle>Password</CardTitle>
+          <CardTitle>{t('passwordCard')}</CardTitle>
         </CardHeader>
         <CardContent>
           <form className="space-y-4" action={passwordAction}>
             <div>
               <Label htmlFor="current-password" className="mb-2">
-                Current Password
+                {t('currentPassword')}
               </Label>
               <Input
                 id="current-password"
@@ -58,7 +60,7 @@ export default function SecurityPage() {
             </div>
             <div>
               <Label htmlFor="new-password" className="mb-2">
-                New Password
+                {t('newPassword')}
               </Label>
               <Input
                 id="new-password"
@@ -73,7 +75,7 @@ export default function SecurityPage() {
             </div>
             <div>
               <Label htmlFor="confirm-password" className="mb-2">
-                Confirm New Password
+                {t('confirmNewPassword')}
               </Label>
               <Input
                 id="confirm-password"
@@ -91,11 +93,9 @@ export default function SecurityPage() {
             {passwordState.success && (
               <p className="text-success text-sm">{passwordState.success}</p>
             )}
-            <SubmitButton
-              pendingText="Updating..."
-            >
+            <SubmitButton pendingText={t('updating')}>
               <Lock className="mr-2 h-4 w-4" />
-              Update Password
+              {t('updatePassword')}
             </SubmitButton>
           </form>
         </CardContent>
@@ -103,16 +103,16 @@ export default function SecurityPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Delete Account</CardTitle>
+          <CardTitle>{t('deleteCard')}</CardTitle>
         </CardHeader>
         <CardContent>
           <p className="text-sm text-muted-foreground mb-4">
-            Account deletion is non-reversable. Please proceed with caution.
+            {t('deleteWarning')}
           </p>
           <form action={deleteAction} className="space-y-4">
             <div>
               <Label htmlFor="delete-password" className="mb-2">
-                Confirm Password
+                {t('confirmPassword')}
               </Label>
               <Input
                 id="delete-password"
@@ -130,10 +130,10 @@ export default function SecurityPage() {
             <SubmitButton
               variant="destructive"
               className="bg-destructive hover:bg-destructive/90"
-              pendingText="Deleting..."
+              pendingText={t('deleting')}
             >
               <Trash2 className="mr-2 h-4 w-4" />
-              Delete Account
+              {t('deleteAccount')}
             </SubmitButton>
           </form>
         </CardContent>
