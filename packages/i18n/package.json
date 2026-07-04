@@ -1,25 +1,26 @@
 {
-  "name": "@koeti/email",
+  "name": "@koeti/i18n",
   "version": "0.1.0",
   "private": true,
   "main": "./src/index.ts",
   "types": "./src/index.ts",
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./server": "./src/server.ts",
+    "./config": "./src/config.ts"
   },
   "dependencies": {
-    "@koeti/i18n": "workspace:*",
-    "@react-email/components": "^0.0.34",
-    "react-email": "^4.0.16",
-    "resend": "^4.5.2"
+    "next-intl": "^4.13.1"
   },
   "peerDependencies": {
-    "react": ">=19.0.0"
+    "next": ">=15",
+    "react": ">=19"
   },
   "devDependencies": {
     "@koeti/config": "workspace:*",
-    "@types/node": "^20.0.0",
     "@types/react": "^19.0.0",
+    "next": "15.6.0-canary.59",
+    "react": "^19.1.0",
     "typescript": "^5.8.3",
     "vitest": "^3.2.4"
   },

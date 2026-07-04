@@ -1,0 +1,50 @@
+{
+  "marketing": {
+    "eyebrow": "Scaffold // 01",
+    "titleLine1": "Ship the boring part",
+    "titleLine2": "once.",
+    "subtitle": "Authentication, billing, and team accounts — wired in before you write your first feature.",
+    "getStarted": "Get started",
+    "viewPricing": "View pricing",
+    "yourApp": "your app",
+    "moduleAuthTitle": "Sign-in that just works",
+    "moduleAuthDesc": "Email and password, sessions, and sign-out are ready on day one. Swap the copy, not the plumbing.",
+    "moduleBillingTitle": "Subscriptions, handled",
+    "moduleBillingDesc": "Checkout, plan changes, and webhooks connect straight to Stripe — no billing code to write.",
+    "moduleTeamsTitle": "Built for teams",
+    "moduleTeamsDesc": "Every account starts inside a team, with roles and invites ready before your first user signs up.",
+    "ctaTitle": "Your product starts on page one.",
+    "ctaSubtitle": "Everything above ships with every app in the factory. What you build on top of it is yours.",
+    "createAccount": "Create your account",
+    "alreadySignIn": "Already using it? Sign in"
+  },
+  "pricing": {
+    "eyebrow": "Scaffold // 02",
+    "title": "One foundation. Pick your plan.",
+    "subtitle": "Every plan ships with the full scaffold — auth, billing, and team accounts included. Plus adds priority support and early access as your team grows.",
+    "freeTrial": "{days}-day free trial",
+    "perUser": "per user / {interval}",
+    "recommended": "Recommended",
+    "getStarted": "Get Started",
+    "loading": "Loading…",
+    "baseFeatures": ["Unlimited usage", "Unlimited workspace members", "Email support"],
+    "plusFeatures": ["Everything in Base, and:", "Early access to new features", "24/7 support + Slack access"]
+  },
+  "overview": {
+    "title": "Overview",
+    "description": "What's happening across your workspace.",
+    "statTeamMembers": "Team members",
+    "statPlan": "Plan",
+    "statActivityWeek": "Activity this week",
+    "hintVsLastWeek": "vs last week",
+    "chartActivityWeek": "Activity this week",
+    "chartBySource": "By source",
+    "chartDailyActivity": "Daily activity",
+    "centerVisits": "visits",
+    "days": ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+    "sourceDirect": "Direct",
+    "sourceSearch": "Search",
+    "sourceSocial": "Social",
+    "sourceEmail": "Email"
+  }
+}

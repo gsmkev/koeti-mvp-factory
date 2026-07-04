@@ -3,6 +3,8 @@
 import Link from 'next/link';
 import { Suspense } from 'react';
 import { Button, ThemeToggle } from '@koeti/ui';
+import { LocaleSwitcher } from '@koeti/i18n';
+import { useTranslations } from 'next-intl';
 import { LayoutDashboard, LogOut } from 'lucide-react';
 import {
   Avatar,
@@ -34,6 +36,7 @@ export function BrandMark({ className = '' }: { className?: string }) {
 }
 
 function UserMenu() {
+  const t = useTranslations('nav');
   const { data: user } = useSWR<User>('/api/user', fetcher);
   const router = useRouter();
 
@@ -50,16 +53,16 @@ function UserMenu() {
           href="/pricing"
           className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
         >
-          Pricing
+          {t('pricing')}
         </Link>
         <Link
           href="/sign-in"
           className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
         >
-          Sign in
+          {t('signIn')}
         </Link>
         <Button asChild size="sm">
-          <Link href="/sign-up">Get started</Link>
+          <Link href="/sign-up">{t('getStarted')}</Link>
         </Button>
       </>
     );
@@ -82,14 +85,14 @@ function UserMenu() {
         <DropdownMenuItem className="cursor-pointer">
           <Link href="/dashboard" className="flex w-full items-center">
             <LayoutDashboard className="mr-2 h-4 w-4" />
-            <span>Dashboard</span>
+            <span>{t('dashboard')}</span>
           </Link>
         </DropdownMenuItem>
         <form action={handleSignOut} className="w-full">
           <button type="submit" className="flex w-full">
             <DropdownMenuItem className="w-full flex-1 cursor-pointer">
               <LogOut className="mr-2 h-4 w-4" />
-              <span>Sign out</span>
+              <span>{t('signOut')}</span>
             </DropdownMenuItem>
           </button>
         </form>
@@ -103,6 +106,7 @@ export default function MarketingLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const t = useTranslations('nav');
   return (
     <section className="flex min-h-screen flex-col">
       <header className="sticky top-0 z-40 border-b border-border bg-background/85 backdrop-blur">
@@ -114,6 +118,7 @@ export default function MarketingLayout({
             </span>
           </Link>
           <div className="flex items-center gap-3 sm:gap-5">
+            <LocaleSwitcher />
             <ThemeToggle />
             <Suspense fallback={<div className="h-9" />}>
               <UserMenu />
@@ -125,13 +130,13 @@ export default function MarketingLayout({
       <footer className="border-t border-border">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-6 sm:px-8">
           <p className="text-sm text-muted-foreground">
-            {APP_NAME} — built on the factory scaffold.
+            {t('footerTagline', { app: APP_NAME })}
           </p>
           <Link
             href="/pricing"
             className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
           >
-            Pricing
+            {t('pricing')}
           </Link>
         </div>
       </footer>
