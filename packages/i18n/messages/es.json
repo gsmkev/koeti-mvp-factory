@@ -109,7 +109,10 @@
     "noPending": "No hay invitaciones pendientes.",
     "revoke": "Revocar",
     "revoking": "Revocando…",
-    "invitedAs": "Invitado como {role}"
+    "invitedAs": "Invitado como {role}",
+    "exportTitle": "Exportar datos del equipo",
+    "exportDesc": "Descargá todo lo almacenado de este equipo en JSON — cada registro, listo para portabilidad o pedidos GDPR.",
+    "exportButton": "Descargar JSON"
   },
   "activity": {
     "title": "Registro de actividad",
@@ -131,7 +134,10 @@
     "actionRemoveTeamMember": "Quitaste a un miembro del equipo",
     "actionInviteTeamMember": "Invitaste a un miembro al equipo",
     "actionAcceptInvitation": "Aceptaste una invitación",
-    "actionUnknown": "Ocurrió una acción desconocida"
+    "actionUnknown": "Ocurrió una acción desconocida",
+    "actionEntityCreated": "Creó un registro en {entity}",
+    "actionEntityUpdated": "Actualizó un registro en {entity}",
+    "actionEntityDeleted": "Eliminó un registro en {entity}"
   },
   "apiKeys": {
     "title": "Claves API",

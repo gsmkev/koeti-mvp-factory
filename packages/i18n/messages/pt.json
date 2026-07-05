@@ -109,7 +109,10 @@
     "noPending": "Nenhum convite pendente.",
     "revoke": "Revogar",
     "revoking": "Revogando…",
-    "invitedAs": "Convidado como {role}"
+    "invitedAs": "Convidado como {role}",
+    "exportTitle": "Exportar dados da equipe",
+    "exportDesc": "Baixe tudo o que está armazenado desta equipe em JSON — cada registro, pronto para portabilidade ou pedidos GDPR.",
+    "exportButton": "Baixar JSON"
   },
   "activity": {
     "title": "Registro de atividade",
@@ -131,7 +134,10 @@
     "actionRemoveTeamMember": "Você removeu um membro do time",
     "actionInviteTeamMember": "Você convidou um membro para o time",
     "actionAcceptInvitation": "Você aceitou um convite",
-    "actionUnknown": "Ocorreu uma ação desconhecida"
+    "actionUnknown": "Ocorreu uma ação desconhecida",
+    "actionEntityCreated": "Criou um registro em {entity}",
+    "actionEntityUpdated": "Atualizou um registro em {entity}",
+    "actionEntityDeleted": "Excluiu um registro em {entity}"
   },
   "apiKeys": {
     "title": "Chaves de API",

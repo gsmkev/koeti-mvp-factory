@@ -115,6 +115,39 @@ try {
   await page.waitForURL('**/dashboard', { timeout: 30_000 });
   console.log(`  ✅ signed up e2e-${stamp}@test.com → /dashboard`);
 
+  step('Platform endpoints (uploads + notifications)');
+  // page.request shares the session cookie with the browser context
+  const upload = await page.request.post(`${base}/api/files`, {
+    multipart: {
+      file: { name: 'e2e.txt', mimeType: 'text/plain', buffer: Buffer.from(`e2e ${stamp}`) },
+    },
+  });
+  if (upload.status() !== 201) throw new Error(`/api/files upload: HTTP ${upload.status()}`);
+  const stored = await upload.json();
+  const fileUrl = stored.url.startsWith('http') ? stored.url : `${base}${stored.url}`;
+  const served = await page.request.get(fileUrl);
+  if (served.status() !== 200 || (await served.text()) !== `e2e ${stamp}`) {
+    throw new Error(`serving uploaded file: HTTP ${served.status()}`);
+  }
+  console.log(`  ✅ /api/files upload → 201, served back from ${stored.url}`);
+
+  const notif = await page.request.get(`${base}/api/notifications`);
+  const notifBody = notif.status() === 200 ? await notif.json() : {};
+  if (!Array.isArray(notifBody.items) || typeof notifBody.unread !== 'number') {
+    throw new Error(`/api/notifications: HTTP ${notif.status()}`);
+  }
+  const bell = page.locator('button:has(.lucide-bell)').first();
+  if (!(await bell.isVisible())) throw new Error('notifications bell not visible in AppShell');
+  console.log(`  ✅ /api/notifications → 200 (${notifBody.unread} unread), bell visible`);
+
+  // GDPR export — sign-up made this user the team owner, so it must succeed
+  const exportRes = await page.request.get(`${base}/api/team/export`);
+  const exportBody = exportRes.status() === 200 ? await exportRes.json() : {};
+  if (!Array.isArray(exportBody.team)) {
+    throw new Error(`/api/team/export: HTTP ${exportRes.status()}`);
+  }
+  console.log(`  ✅ /api/team/export → 200 (${Object.keys(exportBody).length} tables in the dump)`);
+
   const dashRoutes = discoverRoutes(join(appDir, 'app'))
     .filter((r) => r.startsWith('/dashboard'))
     .sort();

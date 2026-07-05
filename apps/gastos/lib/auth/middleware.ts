@@ -45,7 +45,11 @@ export async function requireRole(min: TeamRole) {
   return { user, team, role: role as TeamRole };
 }
 
-type ActionWithTeamFunction<T> = (formData: FormData, team: TeamDataWithMembers) => Promise<T>;
+type ActionWithTeamFunction<T> = (
+  formData: FormData,
+  team: TeamDataWithMembers,
+  user: User,
+) => Promise<T>;
 
 // Overloads: without minRole the wrapper never injects an error result, so
 // plain `<form action={...}>` usages keep their Promise<void> signature.
@@ -63,6 +67,6 @@ export function withTeam<T>(action: ActionWithTeamFunction<T>, minRole?: TeamRol
     if (minRole && !roleAtLeast(teamRoleFor(user, team), minRole)) {
       return { error: `Requires the ${minRole} role or higher` };
     }
-    return action(formData, team);
+    return action(formData, team, user);
   };
 }

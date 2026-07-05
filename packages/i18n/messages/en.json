@@ -109,7 +109,10 @@
     "noPending": "No pending invitations.",
     "revoke": "Revoke",
     "revoking": "Revoking…",
-    "invitedAs": "Invited as {role}"
+    "invitedAs": "Invited as {role}",
+    "exportTitle": "Export team data",
+    "exportDesc": "Download everything stored for this team as JSON — every record, ready for portability or GDPR requests.",
+    "exportButton": "Download JSON"
   },
   "activity": {
     "title": "Activity Log",
@@ -131,7 +134,10 @@
     "actionRemoveTeamMember": "You removed a team member",
     "actionInviteTeamMember": "You invited a team member",
     "actionAcceptInvitation": "You accepted an invitation",
-    "actionUnknown": "Unknown action occurred"
+    "actionUnknown": "Unknown action occurred",
+    "actionEntityCreated": "Created a record in {entity}",
+    "actionEntityUpdated": "Updated a record in {entity}",
+    "actionEntityDeleted": "Deleted a record in {entity}"
   },
   "apiKeys": {
     "title": "API Keys",

@@ -14,6 +14,7 @@ import { Input } from '@koeti/ui';
 import { RadioGroup, RadioGroupItem } from '@koeti/ui';
 import { Label, PageHeader, SubmitButton } from '@koeti/ui';
 import { PlusCircle } from 'lucide-react';
+import { ExportDataCard } from '@/components/export-data-card';
 
 type ActionState = {
   error?: string;
@@ -272,6 +273,7 @@ export default function SettingsPage() {
       <Suspense fallback={<InviteTeamMemberSkeleton />}>
         <InviteTeamMember />
       </Suspense>
+      <ExportDataCard />
     </section>
   );
 }

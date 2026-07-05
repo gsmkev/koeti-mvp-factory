@@ -55,8 +55,20 @@ const actionKey: Record<ActivityType, string> = {
   [ActivityType.ACCEPT_INVITATION]: 'actionAcceptInvitation',
 };
 
-function formatAction(t: T, action: ActivityType): string {
-  return t(actionKey[action] ?? 'actionUnknown');
+function formatAction(t: T, action: string): string {
+  // Business audit entries written by crudActions: ENTITY_<verb>:<table>
+  const m = action.match(/^ENTITY_(CREATED|UPDATED|DELETED):(.+)$/);
+  if (m) {
+    const key = (
+      {
+        CREATED: 'actionEntityCreated',
+        UPDATED: 'actionEntityUpdated',
+        DELETED: 'actionEntityDeleted',
+      } as const
+    )[m[1] as 'CREATED' | 'UPDATED' | 'DELETED'];
+    return t(key, { entity: m[2] });
+  }
+  return t(actionKey[action as ActivityType] ?? 'actionUnknown');
 }
 
 export default async function ActivityPage() {
@@ -75,7 +87,7 @@ export default async function ActivityPage() {
             <ul className="space-y-4">
               {logs.map((log) => {
                 const Icon = iconMap[log.action as ActivityType] || Settings;
-                const formattedAction = formatAction(t, log.action as ActivityType);
+                const formattedAction = formatAction(t, log.action);
 
                 return (
                   <li key={log.id} className="flex items-center space-x-4">
