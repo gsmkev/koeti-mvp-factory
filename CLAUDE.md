@@ -87,6 +87,9 @@ import { getTeamFromApiKey } from '@/lib/auth/api-key'; // Bearer koeti_… auth
 import { toCsv, csvResponse } from '@/lib/csv'; // CSV export helper (per app)
 import { sendEmail, WelcomeEmail, PasswordResetEmail, InvitationEmail } from '@koeti/email';
 import { track, identify } from '@koeti/analytics/server';
+import { aiChat, aiJson, AI_MODELS, AiError, detectAnomalies } from '@koeti/ai'; // Mistral tiers fast/balanced/quality + z-score anomalies
+import { consumeAiQuota } from '@/lib/ai/quota'; // per app: AI rate limit (SaaS/plan/tenant) — call before every aiChat
+import { generateInsights } from '@/lib/ai/insights'; // per app: what the daily /api/cron/insights sweep computes
 ```
 
 ## Knowledge graph
