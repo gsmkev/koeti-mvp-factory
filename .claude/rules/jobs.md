@@ -41,6 +41,6 @@ never wedges the queue.
   (same auth as the insights cron). Curl it locally to drain the queue in dev.
 - Stuck/poisoned jobs are visible in SQL: `select * from jobs where status = 'failed'`.
   Re-run one by setting `status = 'pending', attempts = 0`.
-- A job claimed by a sweep that crashed mid-run stays `running` forever — if
-  that bites, reset with `update jobs set status='pending' where status='running' and created_at < now() - interval '1 hour'`.
-  Not automated on purpose; it's a once-a-quarter event at MVP scale.
+- A job claimed by a sweep that crashed mid-run is reclaimed automatically
+  after an hour (counts as a failed attempt, so a crash-looping job still
+  dead-letters instead of spinning forever).

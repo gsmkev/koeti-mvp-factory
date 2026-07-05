@@ -3,7 +3,7 @@
 // dummy POSTGRES_URL and skips.
 import { describe, expect, it } from 'vitest';
 import { eq, sql } from 'drizzle-orm';
-import { enqueueJob, runJobs, jobs, backoffDelayMs } from '@koeti/db';
+import { claimJobs, enqueueJob, runJobs, jobs, backoffDelayMs } from '@koeti/db';
 
 let db: (typeof import('./drizzle'))['db'] | null = null;
 try {
@@ -30,6 +30,24 @@ describe.skipIf(!db)('jobs queue', () => {
     expect(seen).toContainEqual({ n: 42 });
     const [row] = await db!.select().from(jobs).where(eq(jobs.id, id));
     expect(row.status).toBe('done');
+  });
+
+  it('reclaims a job whose worker died mid-run', async () => {
+    const seen: unknown[] = [];
+    const type = `test-stale-${crypto.randomUUID()}`;
+    const id = await enqueueJob(db, type, { n: 1 });
+    const [claimed] = await claimJobs(db, 50).then((c) => c.filter((j) => j.id === id));
+    expect(claimed.status).toBe('running');
+    // simulate a worker that claimed it 2h ago and never finished
+    await db!
+      .update(jobs)
+      .set({ runAt: new Date(Date.now() - 2 * 3600_000) })
+      .where(eq(jobs.id, id));
+    await runJobs(db, { [type]: async (payload) => void seen.push(payload) }, 50);
+    const [row] = await db!.select().from(jobs).where(eq(jobs.id, id));
+    expect(row.status).toBe('done'); // reclaimed and processed in the same sweep
+    expect(row.attempts).toBe(1); // the lost run counted as an attempt
+    expect(seen).toContainEqual({ n: 1 });
   });
 
   it('retries with backoff, then dead-letters after maxAttempts', async () => {

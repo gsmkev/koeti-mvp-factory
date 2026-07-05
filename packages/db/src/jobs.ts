@@ -34,13 +34,17 @@ export async function enqueueJob(
 
 /** Atomically claim up to `batch` due jobs (pending → running). */
 export async function claimJobs(db: Db, batch = 10): Promise<Job[]> {
-  return db
-    .update(jobs)
-    .set({ status: 'running' })
-    .where(
-      sql`${jobs.id} in (select id from jobs where status = 'pending' and run_at <= now() order by run_at asc limit ${batch} for update skip locked)`,
-    )
-    .returning();
+  return (
+    db
+      .update(jobs)
+      // runAt doubles as the claim timestamp while running — runJobs uses it to
+      // reclaim jobs whose worker died mid-run.
+      .set({ status: 'running', runAt: new Date() })
+      .where(
+        sql`${jobs.id} in (select id from jobs where status = 'pending' and run_at <= now() order by run_at asc limit ${batch} for update skip locked)`,
+      )
+      .returning()
+  );
 }
 
 export function backoffDelayMs(attempts: number): number {
@@ -57,6 +61,18 @@ export async function runJobs(
   handlers: Record<string, JobHandler>,
   batch = 10,
 ): Promise<{ processed: number; failed: number }> {
+  // A worker that died mid-run leaves its jobs 'running' forever. Reclaim
+  // anything claimed over an hour ago, counting it as a failed attempt
+  // (dead-letters when maxAttempts is exhausted), then sweep as usual.
+  await db
+    .update(jobs)
+    .set({
+      status: sql`case when ${jobs.attempts} + 1 >= ${jobs.maxAttempts} then 'failed' else 'pending' end`,
+      attempts: sql`${jobs.attempts} + 1`,
+      lastError: 'reset: claimed over an hour ago (worker died mid-run)',
+    })
+    .where(and(eq(jobs.status, 'running'), lt(jobs.runAt, sql`now() - interval '1 hour'`)));
+
   const claimed = await claimJobs(db, batch);
   let processed = 0;
   let failed = 0;
