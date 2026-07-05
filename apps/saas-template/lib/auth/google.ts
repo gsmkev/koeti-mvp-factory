@@ -39,11 +39,12 @@ export async function upsertGoogleUser(profile: { email: string; name?: string }
   }
 
   const passwordHash = await hashPassword(randomBytes(32).toString('hex'));
+  // Global role stays the schema default ('member'); tenant role is 'owner' via
+  // teamMembers below. Only 'superadmin' is meaningful on users.role.
   const newUser: NewUser = {
     email: profile.email,
     name: profile.name ?? null,
     passwordHash,
-    role: 'owner',
   };
   const [user] = await db.insert(users).values(newUser).returning();
 

@@ -103,7 +103,12 @@
     "roleOwner": "Owner",
     "inviteMember": "Invite Member",
     "inviting": "Inviting…",
-    "adminOnlyInvite": "You must be a team admin to invite new members."
+    "adminOnlyInvite": "You must be a team admin to invite new members.",
+    "pendingCard": "Pending Invitations",
+    "noPending": "No pending invitations.",
+    "revoke": "Revoke",
+    "revoking": "Revoking…",
+    "invitedAs": "Invited as {role}"
   },
   "activity": {
     "title": "Activity Log",
@@ -188,7 +193,10 @@
     "adminOnlyInvite": "Only team admins can invite members",
     "alreadyMember": "User is already a member of this team",
     "invitationExists": "An invitation has already been sent to this email",
-    "invitationSent": "Invitation sent successfully"
+    "invitationSent": "Invitation sent successfully",
+    "invitationRevoked": "Invitation revoked.",
+    "verificationSent": "Verification email sent.",
+    "emailAlreadyVerified": "Your email is already verified."
   },
   "notFound": {
     "code": "404",
@@ -205,5 +213,11 @@
   },
   "common": {
     "free": "Free"
+  },
+  "verifyBanner": {
+    "message": "Verify your email address to secure your account.",
+    "resend": "Resend link",
+    "resending": "Sending…",
+    "sent": "Verification email sent — check your inbox."
   }
 }

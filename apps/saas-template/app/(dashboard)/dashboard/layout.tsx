@@ -17,6 +17,7 @@ import {
 import { LocaleSwitcher } from '@koeti/i18n';
 import { useTranslations } from 'next-intl';
 import { signOut } from '@/app/(login)/actions';
+import { VerifyEmailBanner } from '@/components/verify-email-banner';
 import { User } from '@/lib/db/schema';
 import { APP_NAME } from '@/lib/site';
 import useSWR, { mutate } from 'swr';
@@ -116,6 +117,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </div>
       }
     >
+      <VerifyEmailBanner />
       {children}
     </AppShell>
   );

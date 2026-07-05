@@ -28,7 +28,18 @@ export async function comparePasswords(plain: string, hashed: string) {
 type SessionData = {
   user: { id: number };
   expires: string;
+  // Fingerprint of the current password hash (last 16 chars). Ties the session
+  // to the credential: changing/resetting the password revokes every existing
+  // session (getUser rejects a stale fp), closing the stolen-token window
+  // without a session table. Optional so pre-fingerprint sessions and the
+  // verify-app test minter keep working until they expire.
+  fp?: string;
 };
+
+// The credential fingerprint stored in a session/one-time token.
+export function credentialFingerprint(passwordHash: string) {
+  return passwordHash.slice(-16);
+}
 
 export async function signToken(payload: SessionData) {
   return await new SignJWT(payload)
@@ -76,11 +87,12 @@ export async function getSession() {
   return await verifyToken(session);
 }
 
-export async function setSession(user: { id: number }) {
+export async function setSession(user: { id: number; passwordHash: string }) {
   const expiresInOneDay = new Date(Date.now() + 24 * 60 * 60 * 1000);
   const session: SessionData = {
     user: { id: user.id },
     expires: expiresInOneDay.toISOString(),
+    fp: credentialFingerprint(user.passwordHash),
   };
   const encryptedSession = await signToken(session);
   (await cookies()).set('session', encryptedSession, {

@@ -1,9 +1,9 @@
 // saas-template lib — queries.
 import { desc, and, eq, isNull, sql } from 'drizzle-orm';
 import { db } from './drizzle';
-import { verifyToken } from '@koeti/auth';
+import { verifyToken, credentialFingerprint } from '@koeti/auth';
 import { cookies } from 'next/headers';
-import { activityLogs, apiKeys, teamMembers, teams, users } from '@koeti/db';
+import { activityLogs, apiKeys, invitations, teamMembers, teams, users } from '@koeti/db';
 
 export async function getUser() {
   const sessionCookie = (await cookies()).get('session');
@@ -16,7 +16,15 @@ export async function getUser() {
     .from(users)
     .where(and(eq(users.id, sessionData.user.id), isNull(users.deletedAt)))
     .limit(1);
-  return user[0] ?? null;
+  const found = user[0] ?? null;
+  if (!found) return null;
+  // Revoke sessions minted before a password change/reset. Only enforced when
+  // the token carries a fingerprint — legacy/test sessions without one keep
+  // working until they expire.
+  if (sessionData.fp && sessionData.fp !== credentialFingerprint(found.passwordHash)) {
+    return null;
+  }
+  return found;
 }
 
 export async function getTeamByStripeCustomerId(customerId: string) {
@@ -94,6 +102,19 @@ export async function getApiKeys(teamId: number) {
     .from(apiKeys)
     .where(eq(apiKeys.teamId, teamId))
     .orderBy(desc(apiKeys.createdAt));
+}
+
+export async function getPendingInvitations(teamId: number) {
+  return db
+    .select({
+      id: invitations.id,
+      email: invitations.email,
+      role: invitations.role,
+      invitedAt: invitations.invitedAt,
+    })
+    .from(invitations)
+    .where(and(eq(invitations.teamId, teamId), eq(invitations.status, 'pending')))
+    .orderBy(desc(invitations.invitedAt));
 }
 
 export async function getTeamForUser() {

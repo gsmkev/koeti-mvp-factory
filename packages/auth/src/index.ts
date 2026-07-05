@@ -8,6 +8,7 @@ export {
   setSession,
   signOneTimeToken,
   verifyOneTimeToken,
+  credentialFingerprint,
 } from './session';
 export { rateLimit } from './rate-limit';
 export { generateApiKey, hashApiKey, apiKeyPrefix } from './api-key';

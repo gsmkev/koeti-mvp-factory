@@ -41,6 +41,8 @@ import {
   passwordResetSubject,
   InvitationEmail,
   invitationSubject,
+  EmailVerificationEmail,
+  emailVerificationSubject,
 } from '@koeti/email';
 import { track } from '@koeti/analytics/server';
 import { APP_NAME } from '@/lib/site';
@@ -71,6 +73,22 @@ async function requestOrigin() {
   if (!host) return process.env.BASE_URL ?? 'http://localhost:3000';
   const proto = h.get('x-forwarded-proto') ?? 'http';
   return `${proto}://${host}`;
+}
+
+// Soft email verification: mint a purpose-scoped token tied to the current
+// email (so a later email change invalidates the link) and send the link.
+// Fire-and-forget — a no-op without RESEND_API_KEY, must never block sign-up.
+async function sendVerificationEmail(userId: number, email: string, locale: Locale) {
+  const token = await signOneTimeToken(
+    { purpose: 'email-verification', userId, fingerprint: email.toLowerCase() },
+    '24 hours',
+  );
+  const verifyLink = `${await requestOrigin()}/verify-email?token=${token}`;
+  return sendEmail({
+    to: email,
+    subject: emailVerificationSubject(APP_NAME, locale),
+    react: EmailVerificationEmail({ verifyLink, locale }),
+  });
 }
 
 async function logActivity(
@@ -178,10 +196,12 @@ export const signUp = validatedAction(signUpSchema, async (data, formData) => {
 
   const passwordHash = await hashPassword(password);
 
+  // Global role stays the schema default ('member'). Tenant role lives on
+  // teamMembers.role (set below to 'owner' or the invitation's role); the
+  // global users.role only ever distinguishes 'superadmin'.
   const newUser: NewUser = {
     email,
     passwordHash,
-    role: 'owner', // Default role, will be overridden if there's an invitation
   };
 
   const [createdUser] = await db.insert(users).values(newUser).returning();
@@ -269,6 +289,9 @@ export const signUp = validatedAction(signUpSchema, async (data, formData) => {
     subject: welcomeSubject(locale),
     react: WelcomeEmail({ name: email, locale }),
   }).catch((err) => console.error('welcome email failed:', err));
+  sendVerificationEmail(createdUser.id, email, locale).catch((err) =>
+    console.error('verification email failed:', err),
+  );
   track('user_signed_up', { userId: String(createdUser.id) });
 
   const redirectTo = formData.get('redirect') as string | null;
@@ -400,6 +423,11 @@ export const updatePassword = validatedActionWithUser(
       db.update(users).set({ passwordHash: newPasswordHash }).where(eq(users.id, user.id)),
       logActivity(userWithTeam?.teamId, user.id, ActivityType.UPDATE_PASSWORD),
     ]);
+
+    // Re-issue this session against the new credential — otherwise the
+    // fingerprint check would log the user out of the tab they just used to
+    // change their password. Other devices' sessions still die (intended).
+    await setSession({ id: user.id, passwordHash: newPasswordHash });
 
     return {
       success: t('passwordUpdated'),
@@ -584,3 +612,53 @@ export const inviteTeamMember = validatedActionWithUser(
     return { success: t('invitationSent') };
   },
 );
+
+const revokeInvitationSchema = z.object({
+  invitationId: z.coerce.number(),
+});
+
+export const revokeInvitation = validatedActionWithUser(
+  revokeInvitationSchema,
+  async (data, _, user) => {
+    const t = await getTranslations('errors');
+    const userWithTeam = await getUserWithTeam(user.id);
+
+    if (!userWithTeam?.teamId) {
+      return { error: t('notInTeam') };
+    }
+
+    if (!(await hasTeamRole(user, userWithTeam.teamId, 'admin'))) {
+      return { error: t('adminOnlyInvite') };
+    }
+
+    // Scope the delete by team + pending status — never trust the id alone.
+    await db
+      .delete(invitations)
+      .where(
+        and(
+          eq(invitations.id, data.invitationId),
+          eq(invitations.teamId, userWithTeam.teamId),
+          eq(invitations.status, 'pending'),
+        ),
+      );
+
+    return { success: t('invitationRevoked') };
+  },
+);
+
+// Re-send the verification link from the dashboard banner. Rate-limited so the
+// button can't be used to spam an address.
+export const resendVerification = validatedActionWithUser(z.object({}), async (_data, _, user) => {
+  const t = await getTranslations('errors');
+  if (user.emailVerified) {
+    return { success: t('emailAlreadyVerified') };
+  }
+  if (!rateLimit(`verify:${user.id}`, { limit: 5 })) {
+    return { error: t('tooManyAttempts') };
+  }
+  const locale = await currentLocale();
+  sendVerificationEmail(user.id, user.email, locale).catch((err) =>
+    console.error('verification email failed:', err),
+  );
+  return { success: t('verificationSent') };
+});

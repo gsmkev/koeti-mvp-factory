@@ -6,6 +6,7 @@ vi.mock('next/headers', () => ({ cookies: vi.fn() }));
 
 import {
   comparePasswords,
+  credentialFingerprint,
   hashPassword,
   signOneTimeToken,
   signToken,
@@ -22,16 +23,32 @@ describe('password hashing', () => {
   });
 });
 
+describe('credential fingerprint', () => {
+  it('changes when the password hash changes, so it revokes sessions', async () => {
+    const oldHash = await hashPassword('hunter2');
+    const newHash = await hashPassword('hunter3');
+    const sessionFp = credentialFingerprint(oldHash);
+    // Same credential still matches; a rotated hash no longer does.
+    expect(sessionFp).toBe(credentialFingerprint(oldHash));
+    expect(sessionFp).not.toBe(credentialFingerprint(newHash));
+  });
+});
+
 describe('session tokens', () => {
   beforeEach(() => {
     vi.unstubAllEnvs();
   });
 
-  it('signs and verifies a session round-trip', async () => {
+  it('signs and verifies a session round-trip, preserving the fingerprint', async () => {
     vi.stubEnv('AUTH_SECRET', 'test-secret-0123456789abcdef');
-    const token = await signToken({ user: { id: 42 }, expires: new Date().toISOString() });
+    const token = await signToken({
+      user: { id: 42 },
+      expires: new Date().toISOString(),
+      fp: 'deadbeefdeadbeef',
+    });
     const payload = await verifyToken(token);
     expect(payload.user.id).toBe(42);
+    expect(payload.fp).toBe('deadbeefdeadbeef');
   });
 
   it('rejects a tampered token', async () => {

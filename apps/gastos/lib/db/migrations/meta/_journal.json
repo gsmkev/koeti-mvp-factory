@@ -15,6 +15,20 @@
       "when": 1783072984418,
       "tag": "0001_slimy_trauma",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1783220692863,
+      "tag": "0002_chilly_skullbuster",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1783254415329,
+      "tag": "0003_nervous_venom",
+      "breakpoints": true
     }
   ]
 }
