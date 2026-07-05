@@ -216,7 +216,9 @@
     "goHome": "Go home"
   },
   "common": {
-    "free": "Free"
+    "free": "Free",
+    "prevPage": "Previous page",
+    "nextPage": "Next page"
   },
   "verifyBanner": {
     "message": "Verify your email address to secure your account.",
@@ -232,5 +234,12 @@
     "dismiss": "Dismiss",
     "kindAnomaly": "Anomaly",
     "kindSuggestion": "Suggestion"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "empty": "No notifications yet",
+    "aria": "Notifications",
+    "ariaUnread": "Notifications ({count} unread)",
+    "insightsNew": "{count, plural, one {# new insight for your team} other {# new insights for your team}}"
   }
 }

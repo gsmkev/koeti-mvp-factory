@@ -9,6 +9,7 @@ import {
   date,
   primaryKey,
   uniqueIndex,
+  index,
 } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
 
@@ -42,60 +43,130 @@ export const teams = pgTable('teams', {
   aiDailyLimit: integer('ai_daily_limit'),
 });
 
-export const teamMembers = pgTable('team_members', {
-  id: serial('id').primaryKey(),
-  userId: integer('user_id')
-    .notNull()
-    .references(() => users.id),
-  teamId: integer('team_id')
-    .notNull()
-    .references(() => teams.id),
-  role: varchar('role', { length: 50 }).notNull(),
-  joinedAt: timestamp('joined_at').notNull().defaultNow(),
-});
+export const teamMembers = pgTable(
+  'team_members',
+  {
+    id: serial('id').primaryKey(),
+    userId: integer('user_id')
+      .notNull()
+      .references(() => users.id),
+    teamId: integer('team_id')
+      .notNull()
+      .references(() => teams.id),
+    role: varchar('role', { length: 50 }).notNull(),
+    joinedAt: timestamp('joined_at').notNull().defaultNow(),
+  },
+  (t) => [index('team_members_user_idx').on(t.userId), index('team_members_team_idx').on(t.teamId)],
+);
 
-export const activityLogs = pgTable('activity_logs', {
-  id: serial('id').primaryKey(),
-  teamId: integer('team_id')
-    .notNull()
-    .references(() => teams.id),
-  userId: integer('user_id').references(() => users.id),
-  action: text('action').notNull(),
-  timestamp: timestamp('timestamp').notNull().defaultNow(),
-  ipAddress: varchar('ip_address', { length: 45 }),
-});
+export const activityLogs = pgTable(
+  'activity_logs',
+  {
+    id: serial('id').primaryKey(),
+    teamId: integer('team_id')
+      .notNull()
+      .references(() => teams.id),
+    userId: integer('user_id').references(() => users.id),
+    action: text('action').notNull(),
+    timestamp: timestamp('timestamp').notNull().defaultNow(),
+    ipAddress: varchar('ip_address', { length: 45 }),
+  },
+  (t) => [
+    index('activity_logs_team_idx').on(t.teamId, t.timestamp),
+    index('activity_logs_user_idx').on(t.userId, t.timestamp),
+  ],
+);
 
-export const invitations = pgTable('invitations', {
-  id: serial('id').primaryKey(),
-  teamId: integer('team_id')
-    .notNull()
-    .references(() => teams.id),
-  email: varchar('email', { length: 255 }).notNull(),
-  role: varchar('role', { length: 50 }).notNull(),
-  invitedBy: integer('invited_by')
-    .notNull()
-    .references(() => users.id),
-  invitedAt: timestamp('invited_at').notNull().defaultNow(),
-  status: varchar('status', { length: 20 }).notNull().default('pending'),
-});
+export const invitations = pgTable(
+  'invitations',
+  {
+    id: serial('id').primaryKey(),
+    teamId: integer('team_id')
+      .notNull()
+      .references(() => teams.id),
+    email: varchar('email', { length: 255 }).notNull(),
+    role: varchar('role', { length: 50 }).notNull(),
+    invitedBy: integer('invited_by')
+      .notNull()
+      .references(() => users.id),
+    invitedAt: timestamp('invited_at').notNull().defaultNow(),
+    status: varchar('status', { length: 20 }).notNull().default('pending'),
+  },
+  (t) => [index('invitations_team_idx').on(t.teamId), index('invitations_email_idx').on(t.email)],
+);
 
 // Per-team API keys for MVP-to-MVP / external integrations.
 // Only a SHA-256 hash of the key is stored; the plaintext is shown once at creation.
-export const apiKeys = pgTable('api_keys', {
-  id: serial('id').primaryKey(),
-  teamId: integer('team_id')
-    .notNull()
-    .references(() => teams.id),
-  name: varchar('name', { length: 100 }).notNull(),
-  keyHash: text('key_hash').notNull().unique(),
-  keyPrefix: varchar('key_prefix', { length: 16 }).notNull(),
-  createdBy: integer('created_by')
-    .notNull()
-    .references(() => users.id),
-  createdAt: timestamp('created_at').notNull().defaultNow(),
-  lastUsedAt: timestamp('last_used_at'),
-  revokedAt: timestamp('revoked_at'),
+export const apiKeys = pgTable(
+  'api_keys',
+  {
+    id: serial('id').primaryKey(),
+    teamId: integer('team_id')
+      .notNull()
+      .references(() => teams.id),
+    name: varchar('name', { length: 100 }).notNull(),
+    keyHash: text('key_hash').notNull().unique(),
+    keyPrefix: varchar('key_prefix', { length: 16 }).notNull(),
+    createdBy: integer('created_by')
+      .notNull()
+      .references(() => users.id),
+    createdAt: timestamp('created_at').notNull().defaultNow(),
+    lastUsedAt: timestamp('last_used_at'),
+    revokedAt: timestamp('revoked_at'),
+  },
+  (t) => [index('api_keys_team_idx').on(t.teamId)],
+);
+
+// Durable half of the auth rate limit (see consumeRateLimit in ./rate-limit.ts):
+// one fixed window per key, atomically upserted, so brute-force guards hold
+// across instances. The in-memory rateLimit stays as the cheap burst guard.
+export const rateLimits = pgTable('rate_limits', {
+  key: varchar('key', { length: 255 }).primaryKey(),
+  count: integer('count').notNull().default(0),
+  resetAt: timestamp('reset_at').notNull(),
 });
+
+// Per-user in-app notifications. Content is an i18n key + JSON params (same
+// pattern as insights) so the bell renders in the viewer's locale. Team-wide
+// events insert one row per member — teams are small.
+export const notifications = pgTable(
+  'notifications',
+  {
+    id: serial('id').primaryKey(),
+    teamId: integer('team_id')
+      .notNull()
+      .references(() => teams.id),
+    userId: integer('user_id')
+      .notNull()
+      .references(() => users.id),
+    messageKey: varchar('message_key', { length: 100 }).notNull(),
+    params: text('params').notNull().default('{}'),
+    href: varchar('href', { length: 255 }),
+    createdAt: timestamp('created_at').notNull().defaultNow(),
+    readAt: timestamp('read_at'),
+  },
+  (t) => [index('notifications_user_idx').on(t.userId, t.createdAt)],
+);
+
+// Durable background jobs (see enqueueJob/runJobs in ./jobs.ts): Postgres-backed
+// queue with atomic claim (FOR UPDATE SKIP LOCKED), retries with exponential
+// backoff, and a dead-letter status ('failed') after maxAttempts.
+export const jobs = pgTable(
+  'jobs',
+  {
+    id: serial('id').primaryKey(),
+    teamId: integer('team_id').references(() => teams.id),
+    type: varchar('type', { length: 100 }).notNull(),
+    payload: text('payload').notNull().default('{}'),
+    status: varchar('status', { length: 10 }).notNull().default('pending'), // pending|running|done|failed
+    attempts: integer('attempts').notNull().default(0),
+    maxAttempts: integer('max_attempts').notNull().default(3),
+    runAt: timestamp('run_at').notNull().defaultNow(),
+    lastError: text('last_error'),
+    createdAt: timestamp('created_at').notNull().defaultNow(),
+  },
+  (t) => [index('jobs_pending_idx').on(t.status, t.runAt)],
+);
 
 // Stripe delivers webhooks at-least-once. We record every processed event id
 // and skip duplicates, so a redelivery can never double-apply a handler (the
@@ -216,6 +287,10 @@ export type ApiKey = typeof apiKeys.$inferSelect;
 export type NewApiKey = typeof apiKeys.$inferInsert;
 export type StripeEvent = typeof stripeEvents.$inferSelect;
 export type NewStripeEvent = typeof stripeEvents.$inferInsert;
+export type Notification = typeof notifications.$inferSelect;
+export type NewNotification = typeof notifications.$inferInsert;
+export type Job = typeof jobs.$inferSelect;
+export type NewJob = typeof jobs.$inferInsert;
 export type AiUsage = typeof aiUsage.$inferSelect;
 export type Insight = typeof insights.$inferSelect;
 export type NewInsight = typeof insights.$inferInsert;

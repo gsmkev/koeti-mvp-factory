@@ -83,4 +83,5 @@ export { AppShell, type AppShellNavGroup, type AppShellNavItem } from './compone
 export { BarChart, LineChart, DonutChart, Sparkline, type ChartDatum } from './components/chart';
 export { groupSum, countBy, topN } from './components/chart-data';
 export { PrintButton } from './components/print-button';
+export { Pagination } from './components/pagination';
 export { ThemeToggle, ThemeScript } from './components/theme-toggle';

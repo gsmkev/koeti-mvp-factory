@@ -29,3 +29,6 @@ graphify-out/
 
 # Local agent worktrees
 .claude/worktrees/
+
+# local file-upload driver (@koeti/storage)
+.uploads/

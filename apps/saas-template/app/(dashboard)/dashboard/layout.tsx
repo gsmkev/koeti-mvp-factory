@@ -26,6 +26,7 @@ import {
 import { LocaleSwitcher } from '@koeti/i18n';
 import { useTranslations } from 'next-intl';
 import { signOut } from '@/app/(login)/actions';
+import { NotificationsBell } from '@/components/notifications-bell';
 import { VerifyEmailBanner } from '@/components/verify-email-banner';
 import { User } from '@/lib/db/schema';
 import { APP_NAME } from '@/lib/site';
@@ -120,6 +121,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     <AppShell
       brand={<Brand />}
       nav={nav}
+      actions={<NotificationsBell />}
       pathname={pathname}
       linkComponent={Link}
       footer={

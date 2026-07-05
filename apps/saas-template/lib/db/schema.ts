@@ -13,6 +13,8 @@ export type {
   NewActivityLog,
   Invitation,
   NewInvitation,
+  Notification,
+  Job,
   TeamDataWithMembers,
 } from '@koeti/db';
 export { ActivityType } from '@koeti/db';

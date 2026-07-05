@@ -159,6 +159,13 @@ erDiagram
 Las tablas de negocio de cada MVP (ej. `gastos`) añaden su propio schema con
 columna `team_id` → así `crudActions` las scope-a automáticamente por equipo.
 
+Tablas de infraestructura (en `@koeti/db`, fuera del ERD para no saturarlo):
+`stripe_events` (idempotencia de webhooks), `ai_usage` (cuota diaria de IA),
+`insights` (hallazgos del cron), `notifications` (campana in-app, por usuario),
+`jobs` (cola durable con reintentos — `.claude/rules/jobs.md`) y `rate_limits`
+(ventana fija durable para los guards de auth). Los FKs calientes llevan índice
+desde la migración 0005.
+
 ---
 
 ## 4. Flujo de auth + sesión (sign-in / OAuth / request scope-ado)
@@ -448,7 +455,7 @@ flowchart LR
   f_dep --> r_dep
   f_ui --> r_ui
 
-  manual["charts.md · url-state.md<br/>(sin path — referidas desde CLAUDE.md<br/>al hacer gráficos / estado en URL)"]
+  manual["charts.md · url-state.md · uploads.md · jobs.md<br/>(sin path — referidas desde CLAUDE.md<br/>al hacer gráficos / URL / archivos / colas)"]
 ```
 
 ## 13. Workflow autónomo — el loop `/factory` (7 fases, cero preguntas)

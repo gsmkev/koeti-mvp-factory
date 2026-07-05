@@ -59,6 +59,9 @@ import { roleAtLeast, isSuperadmin, type TeamRole } from '@koeti/auth'; // RBAC:
 import { generateApiKey, hashApiKey, apiKeyPrefix } from '@koeti/auth'; // team API keys for MVP-to-MVP auth
 import { baseSchema } from '@koeti/db';
 import type { User, Team, TeamMember, ApiKey } from '@koeti/db';
+import { consumeRateLimit } from '@koeti/db'; // durable cross-instance rate limit (auth guards use it via limitOk in (login)/actions)
+import { enqueueJob } from '@koeti/db'; // Postgres job queue: retries+backoff, swept by /api/cron/jobs — see .claude/rules/jobs.md
+import { putFile, deleteFile } from '@koeti/storage'; // file uploads: Vercel Blob prod / .uploads dev — see .claude/rules/uploads.md
 import {
   createCheckoutSession,
   handleSubscriptionChange,
@@ -77,6 +80,8 @@ import {
 import { BarChart, LineChart, DonutChart, Sparkline, type ChartDatum } from '@koeti/ui'; // zero-dep SVG charts (RSC-safe) — see .claude/rules/charts.md
 import { groupSum, countBy, topN } from '@koeti/ui'; // rows → {label,value}[] for charts (topN folds extras into "Other")
 import { PrintButton } from '@koeti/ui'; // one-click dashboard → PDF via native print (styled by @media print)
+import { Pagination } from '@koeti/ui'; // URL-driven pager for unbounded lists — pattern in .claude/rules/crud.md §2
+import { notifyTeam, notifyUser } from '@/lib/notifications'; // per app: in-app notifications (bell in AppShell); i18n key + params like insights
 import { createLoader, parseAsStringEnum } from 'nuqs/server'; // typed URL state — see .claude/rules/url-state.md
 import { LocaleSwitcher, locales, defaultLocale, type Locale } from '@koeti/i18n'; // en/es/pt via cookie — see .claude/rules/i18n.md
 import { createRequestConfig } from '@koeti/i18n/server'; // for each app's i18n/request.ts
