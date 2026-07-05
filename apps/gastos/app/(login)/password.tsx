@@ -1,4 +1,5 @@
 'use client';
+// ForgotPasswordForm — component for the login segment.
 
 import Link from 'next/link';
 import { useActionState } from 'react';
@@ -13,7 +14,7 @@ import { APP_NAME } from '@/lib/site';
 function AuthShell({
   title,
   description,
-  children
+  children,
 }: {
   title: string;
   description: string;
@@ -60,10 +61,9 @@ function FormMessages({ state }: { state: ActionState }) {
 
 export function ForgotPasswordForm() {
   const t = useTranslations('auth');
-  const [state, formAction, pending] = useActionState<ActionState, FormData>(
-    forgotPassword,
-    { error: '' }
-  );
+  const [state, formAction, pending] = useActionState<ActionState, FormData>(forgotPassword, {
+    error: '',
+  });
 
   return (
     <AuthShell title={t('forgotTitle')} description={t('forgotDesc')}>
@@ -112,17 +112,13 @@ export function ResetPasswordForm() {
   const t = useTranslations('auth');
   const searchParams = useSearchParams();
   const token = searchParams.get('token') ?? '';
-  const [state, formAction, pending] = useActionState<ActionState, FormData>(
-    resetPassword,
-    { error: '' }
-  );
+  const [state, formAction, pending] = useActionState<ActionState, FormData>(resetPassword, {
+    error: '',
+  });
 
   if (!token) {
     return (
-      <AuthShell
-        title={t('resetInvalidTitle')}
-        description={t('resetInvalidDesc')}
-      >
+      <AuthShell title={t('resetInvalidTitle')} description={t('resetInvalidDesc')}>
         <Button asChild className="mt-8 w-full">
           <Link href="/forgot-password">{t('requestNewLink')}</Link>
         </Button>

@@ -1,3 +1,4 @@
+// Next.js config: next-intl plugin, PPR, dev origins.
 import type { NextConfig } from 'next';
 import createNextIntlPlugin from 'next-intl/plugin';
 
@@ -9,8 +10,8 @@ const nextConfig: NextConfig = {
   allowedDevOrigins: (process.env.DEV_ORIGINS ?? 'koeti-lab').split(','),
   experimental: {
     ppr: true,
-    clientSegmentCache: true
-  }
+    clientSegmentCache: true,
+  },
 };
 
 export default withNextIntl(nextConfig);

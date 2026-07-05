@@ -1,7 +1,8 @@
-import Stripe from 'stripe'
-import { redirect } from 'next/navigation'
-import { headers } from 'next/headers'
-import type { Team } from '@koeti/db'
+// @koeti/billing — stripe.
+import Stripe from 'stripe';
+import { redirect } from 'next/navigation';
+import { headers } from 'next/headers';
+import type { Team } from '@koeti/db';
 
 // Redirect URLs must point at the origin the *browser* is using (forwarded
 // port, public IP, prod domain) — a static BASE_URL breaks checkout the
@@ -10,45 +11,45 @@ async function requestOrigin() {
   // In production the canonical domain is configured — never trust
   // client-suppliable Host headers to decide where Stripe redirects.
   if (process.env.NODE_ENV === 'production') {
-    if (!process.env.BASE_URL) throw new Error('BASE_URL must be set in production')
-    return process.env.BASE_URL
+    if (!process.env.BASE_URL) throw new Error('BASE_URL must be set in production');
+    return process.env.BASE_URL;
   }
-  const h = await headers()
-  const host = h.get('x-forwarded-host') ?? h.get('host')
-  if (!host) return process.env.BASE_URL
-  const proto = h.get('x-forwarded-proto') ?? 'http'
-  return `${proto}://${host}`
+  const h = await headers();
+  const host = h.get('x-forwarded-host') ?? h.get('host');
+  if (!host) return process.env.BASE_URL;
+  const proto = h.get('x-forwarded-proto') ?? 'http';
+  return `${proto}://${host}`;
 }
 
 // Lazy: constructing eagerly at module load crashes the build for any app
 // importing this package in an environment without STRIPE_SECRET_KEY set,
 // even on routes that never touch Stripe.
-let _stripe: Stripe | undefined
+let _stripe: Stripe | undefined;
 export const stripe = new Proxy({} as Stripe, {
   get(_target, prop, receiver) {
     if (!_stripe) {
       _stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
         apiVersion: '2025-08-27.basil',
-      })
+      });
     }
-    return Reflect.get(_stripe, prop, receiver)
+    return Reflect.get(_stripe, prop, receiver);
   },
-})
+});
 
 export async function createCheckoutSession({
   team,
   priceId,
   getUser,
 }: {
-  team: Team | null
-  priceId: string
-  getUser: () => Promise<{ id: number } | null>
+  team: Team | null;
+  priceId: string;
+  getUser: () => Promise<{ id: number } | null>;
 }) {
-  const user = await getUser()
+  const user = await getUser();
   if (!team || !user) {
-    redirect(`/sign-up?redirect=checkout&priceId=${priceId}`)
+    redirect(`/sign-up?redirect=checkout&priceId=${priceId}`);
   }
-  const origin = await requestOrigin()
+  const origin = await requestOrigin();
   const session = await stripe.checkout.sessions.create({
     payment_method_types: ['card'],
     line_items: [{ price: priceId, quantity: 1 }],
@@ -59,23 +60,23 @@ export async function createCheckoutSession({
     client_reference_id: String(user.id),
     allow_promotion_codes: true,
     subscription_data: { trial_period_days: 14 },
-  })
-  redirect(session.url!)
+  });
+  redirect(session.url!);
 }
 
 export async function createCustomerPortalSession(team: Team) {
   if (!team.stripeCustomerId || !team.stripeProductId) {
-    redirect('/pricing')
+    redirect('/pricing');
   }
-  let configuration: Stripe.BillingPortal.Configuration
-  const configurations = await stripe.billingPortal.configurations.list()
+  let configuration: Stripe.BillingPortal.Configuration;
+  const configurations = await stripe.billingPortal.configurations.list();
   if (configurations.data.length > 0) {
-    configuration = configurations.data[0]
+    configuration = configurations.data[0];
   } else {
-    const product = await stripe.products.retrieve(team.stripeProductId)
-    if (!product.active) throw new Error("Team's product is not active in Stripe")
-    const prices = await stripe.prices.list({ product: product.id, active: true })
-    if (prices.data.length === 0) throw new Error('No active prices found')
+    const product = await stripe.products.retrieve(team.stripeProductId);
+    if (!product.active) throw new Error("Team's product is not active in Stripe");
+    const prices = await stripe.prices.list({ product: product.id, active: true });
+    if (prices.data.length === 0) throw new Error('No active prices found');
     configuration = await stripe.billingPortal.configurations.create({
       business_profile: { headline: 'Manage your subscription' },
       features: {
@@ -95,73 +96,77 @@ export async function createCustomerPortalSession(team: Team) {
         },
         payment_method_update: { enabled: true },
       },
-    })
+    });
   }
   return stripe.billingPortal.sessions.create({
     customer: team.stripeCustomerId,
     return_url: `${await requestOrigin()}/dashboard`,
     configuration: configuration.id,
-  })
+  });
 }
 
 type BillingDeps = {
-  getTeamByStripeCustomerId: (customerId: string) => Promise<Team | null>
+  getTeamByStripeCustomerId: (customerId: string) => Promise<Team | null>;
   updateTeamSubscription: (
     teamId: number,
     data: {
-      stripeSubscriptionId: string | null
-      stripeProductId: string | null
-      planName: string | null
-      subscriptionStatus: string
-    }
-  ) => Promise<void>
-}
+      stripeSubscriptionId: string | null;
+      stripeProductId: string | null;
+      planName: string | null;
+      subscriptionStatus: string;
+    },
+  ) => Promise<void>;
+};
 
 export async function handleSubscriptionChange(
   subscription: Stripe.Subscription,
-  deps: BillingDeps
+  deps: BillingDeps,
 ) {
-  const customerId = subscription.customer as string
-  const team = await deps.getTeamByStripeCustomerId(customerId)
+  const customerId = subscription.customer as string;
+  const team = await deps.getTeamByStripeCustomerId(customerId);
   if (!team) {
-    console.error('Team not found for Stripe customer:', customerId)
-    return
+    console.error('Team not found for Stripe customer:', customerId);
+    return;
   }
-  const status = subscription.status
+  const status = subscription.status;
   if (status === 'active' || status === 'trialing') {
     // Webhook payloads carry product as an unexpanded string id; expanded
     // objects only appear when the caller asked for them. Handle both.
-    const product = subscription.items.data[0]?.plan?.product
-    let stripeProductId: string | null = null
-    let planName: string | null = null
+    const product = subscription.items.data[0]?.plan?.product;
+    let stripeProductId: string | null = null;
+    let planName: string | null = null;
     if (typeof product === 'string') {
-      stripeProductId = product
-      planName = (await stripe.products.retrieve(product)).name
+      stripeProductId = product;
+      planName = (await stripe.products.retrieve(product)).name;
     } else if (product && !product.deleted) {
-      stripeProductId = product.id
-      planName = product.name
+      stripeProductId = product.id;
+      planName = product.name;
     }
     await deps.updateTeamSubscription(team.id, {
       stripeSubscriptionId: subscription.id,
       stripeProductId,
       planName,
       subscriptionStatus: status,
-    })
+    });
   } else if (status === 'canceled' || status === 'unpaid') {
     await deps.updateTeamSubscription(team.id, {
       stripeSubscriptionId: null,
       stripeProductId: null,
       planName: null,
       subscriptionStatus: status,
-    })
+    });
   }
 }
 
 export async function getStripePrices() {
   // ponytail: no key (CI, fresh scaffold) → empty catalog instead of a failed build;
   // with a real key, real API errors still fail loudly
-  if (!process.env.STRIPE_SECRET_KEY) return []
-  const prices = await stripe.prices.list({ expand: ['data.product'], active: true, type: 'recurring' })
+  if (!process.env.STRIPE_SECRET_KEY) return [];
+  const prices = await stripe.prices.list({
+    expand: ['data.product'],
+    active: true,
+    type: 'recurring',
+  });
   return prices.data.map((price) => ({
     id: price.id,
     productId: typeof price.product === 'string' ? price.product : price.product.id,
@@ -169,17 +174,17 @@ export async function getStripePrices() {
     currency: price.currency,
     interval: price.recurring?.interval,
     trialPeriodDays: price.recurring?.trial_period_days,
-  }))
+  }));
 }
 
 export async function getStripeProducts() {
-  if (!process.env.STRIPE_SECRET_KEY) return []
-  const products = await stripe.products.list({ active: true, expand: ['data.default_price'] })
+  if (!process.env.STRIPE_SECRET_KEY) return [];
+  const products = await stripe.products.list({ active: true, expand: ['data.default_price'] });
   return products.data.map((product) => ({
     id: product.id,
     name: product.name,
     description: product.description,
     defaultPriceId:
       typeof product.default_price === 'string' ? product.default_price : product.default_price?.id,
-  }))
+  }));
 }

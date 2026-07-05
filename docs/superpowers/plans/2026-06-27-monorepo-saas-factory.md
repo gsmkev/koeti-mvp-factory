@@ -89,6 +89,7 @@ scripts/create-mvp.mjs
 ## Task 1: Root monorepo scaffold
 
 **Files:**
+
 - Create: `package.json`
 - Create: `pnpm-workspace.yaml`
 - Create: `turbo.json`
@@ -198,6 +199,7 @@ git commit -m "feat: root monorepo scaffold (Turborepo + pnpm workspaces)"
 ## Task 2: @koeti/config package
 
 **Files:**
+
 - Create: `packages/config/package.json`
 - Create: `packages/config/tsconfig/base.json`
 - Create: `packages/config/tsconfig/nextjs.json`
@@ -275,7 +277,7 @@ module.exports = [
       'no-console': ['warn', { allow: ['error'] }],
     },
   },
-]
+];
 ```
 
 - [ ] **Step 5: Create `packages/config/tailwind/preset.js`**
@@ -293,7 +295,7 @@ module.exports = {
       },
     },
   },
-}
+};
 ```
 
 - [ ] **Step 6: Commit**
@@ -308,6 +310,7 @@ git commit -m "feat: add @koeti/config (tsconfig, eslint, tailwind preset)"
 ## Task 3: @koeti/db package
 
 **Files:**
+
 - Create: `packages/db/package.json`
 - Create: `packages/db/tsconfig.json`
 - Create: `packages/db/src/schema.ts`
@@ -355,11 +358,11 @@ Copy the full content of `apps/saas-template/lib/db/schema.ts` verbatim. No chan
 - [ ] **Step 4: Create `packages/db/src/index.ts`**
 
 ```ts
-export * from './schema'
+export * from './schema';
 
 // Grouped export for spreading into app drizzle instances
-import * as schema from './schema'
-export const baseSchema = schema
+import * as schema from './schema';
+export const baseSchema = schema;
 ```
 
 - [ ] **Step 5: Commit**
@@ -374,6 +377,7 @@ git commit -m "feat: add @koeti/db (base schema + baseSchema export)"
 ## Task 4: @koeti/auth package
 
 **Files:**
+
 - Create: `packages/auth/package.json`
 - Create: `packages/auth/tsconfig.json`
 - Create: `packages/auth/src/session.ts`
@@ -427,58 +431,58 @@ git commit -m "feat: add @koeti/db (base schema + baseSchema export)"
 Copy `apps/saas-template/lib/auth/session.ts` verbatim, removing the `import { NewUser } from '@/lib/db/schema'` and replacing it with:
 
 ```ts
-import { compare, hash } from 'bcryptjs'
-import { SignJWT, jwtVerify } from 'jose'
-import { cookies } from 'next/headers'
+import { compare, hash } from 'bcryptjs';
+import { SignJWT, jwtVerify } from 'jose';
+import { cookies } from 'next/headers';
 
-const key = new TextEncoder().encode(process.env.AUTH_SECRET)
-const SALT_ROUNDS = 10
+const key = new TextEncoder().encode(process.env.AUTH_SECRET);
+const SALT_ROUNDS = 10;
 
 export async function hashPassword(password: string) {
-  return hash(password, SALT_ROUNDS)
+  return hash(password, SALT_ROUNDS);
 }
 
 export async function comparePasswords(plain: string, hashed: string) {
-  return compare(plain, hashed)
+  return compare(plain, hashed);
 }
 
 type SessionData = {
-  user: { id: number }
-  expires: string
-}
+  user: { id: number };
+  expires: string;
+};
 
 export async function signToken(payload: SessionData) {
   return await new SignJWT(payload)
     .setProtectedHeader({ alg: 'HS256' })
     .setIssuedAt()
     .setExpirationTime('1 day from now')
-    .sign(key)
+    .sign(key);
 }
 
 export async function verifyToken(input: string) {
-  const { payload } = await jwtVerify(input, key, { algorithms: ['HS256'] })
-  return payload as SessionData
+  const { payload } = await jwtVerify(input, key, { algorithms: ['HS256'] });
+  return payload as SessionData;
 }
 
 export async function getSession() {
-  const session = (await cookies()).get('session')?.value
-  if (!session) return null
-  return await verifyToken(session)
+  const session = (await cookies()).get('session')?.value;
+  if (!session) return null;
+  return await verifyToken(session);
 }
 
 export async function setSession(user: { id: number }) {
-  const expiresInOneDay = new Date(Date.now() + 24 * 60 * 60 * 1000)
+  const expiresInOneDay = new Date(Date.now() + 24 * 60 * 60 * 1000);
   const session: SessionData = {
     user: { id: user.id },
     expires: expiresInOneDay.toISOString(),
-  }
-  const encryptedSession = await signToken(session)
-  ;(await cookies()).set('session', encryptedSession, {
+  };
+  const encryptedSession = await signToken(session);
+  (await cookies()).set('session', encryptedSession, {
     expires: expiresInOneDay,
     httpOnly: true,
     secure: true,
     sameSite: 'lax',
-  })
+  });
 }
 ```
 
@@ -487,58 +491,58 @@ export async function setSession(user: { id: number }) {
 This exports `validatedAction` (no DB) and `ActionState`. `validatedActionWithUser` and `withTeam` stay per-app because they need `getUser`/`getTeamForUser` from the app's DB instance.
 
 ```ts
-import { z } from 'zod'
+import { z } from 'zod';
 
 export type ActionState = {
-  error?: string
-  success?: string
-  [key: string]: any
-}
+  error?: string;
+  success?: string;
+  [key: string]: any;
+};
 
 type ValidatedActionFunction<S extends z.ZodType<any, any>, T> = (
   data: z.infer<S>,
-  formData: FormData
-) => Promise<T>
+  formData: FormData,
+) => Promise<T>;
 
 export function validatedAction<S extends z.ZodType<any, any>, T>(
   schema: S,
-  action: ValidatedActionFunction<S, T>
+  action: ValidatedActionFunction<S, T>,
 ) {
   return async (prevState: ActionState, formData: FormData) => {
-    const result = schema.safeParse(Object.fromEntries(formData))
+    const result = schema.safeParse(Object.fromEntries(formData));
     if (!result.success) {
-      return { error: result.error.errors[0].message }
+      return { error: result.error.errors[0].message };
     }
-    return action(result.data, formData)
-  }
+    return action(result.data, formData);
+  };
 }
 ```
 
 - [ ] **Step 5: Create `packages/auth/src/create-middleware.ts`**
 
 ```ts
-import { NextResponse } from 'next/server'
-import type { NextRequest } from 'next/server'
-import { signToken, verifyToken } from './session'
+import { NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
+import { signToken, verifyToken } from './session';
 
 export function createAuthMiddleware(config: { protectedRoutes: string[] }) {
-  const protectedPrefixes = config.protectedRoutes
+  const protectedPrefixes = config.protectedRoutes;
 
   async function middleware(request: NextRequest) {
-    const { pathname } = request.nextUrl
-    const sessionCookie = request.cookies.get('session')
-    const isProtected = protectedPrefixes.some((p) => pathname.startsWith(p))
+    const { pathname } = request.nextUrl;
+    const sessionCookie = request.cookies.get('session');
+    const isProtected = protectedPrefixes.some((p) => pathname.startsWith(p));
 
     if (isProtected && !sessionCookie) {
-      return NextResponse.redirect(new URL('/sign-in', request.url))
+      return NextResponse.redirect(new URL('/sign-in', request.url));
     }
 
-    let res = NextResponse.next()
+    let res = NextResponse.next();
 
     if (sessionCookie && request.method === 'GET') {
       try {
-        const parsed = await verifyToken(sessionCookie.value)
-        const expiresInOneDay = new Date(Date.now() + 24 * 60 * 60 * 1000)
+        const parsed = await verifyToken(sessionCookie.value);
+        const expiresInOneDay = new Date(Date.now() + 24 * 60 * 60 * 1000);
         res.cookies.set({
           name: 'session',
           value: await signToken({ ...parsed, expires: expiresInOneDay.toISOString() }),
@@ -546,34 +550,41 @@ export function createAuthMiddleware(config: { protectedRoutes: string[] }) {
           secure: true,
           sameSite: 'lax',
           expires: expiresInOneDay,
-        })
+        });
       } catch {
-        res.cookies.delete('session')
+        res.cookies.delete('session');
         if (isProtected) {
-          return NextResponse.redirect(new URL('/sign-in', request.url))
+          return NextResponse.redirect(new URL('/sign-in', request.url));
         }
       }
     }
 
-    return res
+    return res;
   }
 
   const config_ = {
     matcher: ['/((?!api|_next/static|_next/image|favicon.ico).*)'],
     runtime: 'nodejs' as const,
-  }
+  };
 
-  return { middleware, config: config_ }
+  return { middleware, config: config_ };
 }
 ```
 
 - [ ] **Step 6: Create `packages/auth/src/index.ts`**
 
 ```ts
-export { hashPassword, comparePasswords, signToken, verifyToken, getSession, setSession } from './session'
-export { validatedAction } from './middleware'
-export type { ActionState } from './middleware'
-export { createAuthMiddleware } from './create-middleware'
+export {
+  hashPassword,
+  comparePasswords,
+  signToken,
+  verifyToken,
+  getSession,
+  setSession,
+} from './session';
+export { validatedAction } from './middleware';
+export type { ActionState } from './middleware';
+export { createAuthMiddleware } from './create-middleware';
 ```
 
 - [ ] **Step 7: Commit**
@@ -588,6 +599,7 @@ git commit -m "feat: add @koeti/auth (session, validatedAction, createAuthMiddle
 ## Task 5: @koeti/billing package
 
 **Files:**
+
 - Create: `packages/billing/package.json`
 - Create: `packages/billing/tsconfig.json`
 - Create: `packages/billing/src/stripe.ts`
@@ -634,26 +646,26 @@ git commit -m "feat: add @koeti/auth (session, validatedAction, createAuthMiddle
 Adapted from `apps/saas-template/lib/payments/stripe.ts`. Key change: `handleSubscriptionChange` accepts DB functions via dependency injection instead of importing from the app.
 
 ```ts
-import Stripe from 'stripe'
-import { redirect } from 'next/navigation'
-import type { Team } from '@koeti/db'
+import Stripe from 'stripe';
+import { redirect } from 'next/navigation';
+import type { Team } from '@koeti/db';
 
 export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: '2025-04-30.basil',
-})
+});
 
 export async function createCheckoutSession({
   team,
   priceId,
   getUser,
 }: {
-  team: Team | null
-  priceId: string
-  getUser: () => Promise<{ id: number } | null>
+  team: Team | null;
+  priceId: string;
+  getUser: () => Promise<{ id: number } | null>;
 }) {
-  const user = await getUser()
+  const user = await getUser();
   if (!team || !user) {
-    redirect(`/sign-up?redirect=checkout&priceId=${priceId}`)
+    redirect(`/sign-up?redirect=checkout&priceId=${priceId}`);
   }
   const session = await stripe.checkout.sessions.create({
     payment_method_types: ['card'],
@@ -665,23 +677,23 @@ export async function createCheckoutSession({
     client_reference_id: String(user.id),
     allow_promotion_codes: true,
     subscription_data: { trial_period_days: 14 },
-  })
-  redirect(session.url!)
+  });
+  redirect(session.url!);
 }
 
 export async function createCustomerPortalSession(team: Team) {
   if (!team.stripeCustomerId || !team.stripeProductId) {
-    redirect('/pricing')
+    redirect('/pricing');
   }
-  let configuration: Stripe.BillingPortal.Configuration
-  const configurations = await stripe.billingPortal.configurations.list()
+  let configuration: Stripe.BillingPortal.Configuration;
+  const configurations = await stripe.billingPortal.configurations.list();
   if (configurations.data.length > 0) {
-    configuration = configurations.data[0]
+    configuration = configurations.data[0];
   } else {
-    const product = await stripe.products.retrieve(team.stripeProductId)
-    if (!product.active) throw new Error("Team's product is not active in Stripe")
-    const prices = await stripe.prices.list({ product: product.id, active: true })
-    if (prices.data.length === 0) throw new Error('No active prices found')
+    const product = await stripe.products.retrieve(team.stripeProductId);
+    if (!product.active) throw new Error("Team's product is not active in Stripe");
+    const prices = await stripe.prices.list({ product: product.id, active: true });
+    if (prices.data.length === 0) throw new Error('No active prices found');
     configuration = await stripe.billingPortal.configurations.create({
       business_profile: { headline: 'Manage your subscription' },
       features: {
@@ -701,59 +713,63 @@ export async function createCustomerPortalSession(team: Team) {
         },
         payment_method_update: { enabled: true },
       },
-    })
+    });
   }
   return stripe.billingPortal.sessions.create({
     customer: team.stripeCustomerId,
     return_url: `${process.env.BASE_URL}/dashboard`,
     configuration: configuration.id,
-  })
+  });
 }
 
 type BillingDeps = {
-  getTeamByStripeCustomerId: (customerId: string) => Promise<Team | null>
+  getTeamByStripeCustomerId: (customerId: string) => Promise<Team | null>;
   updateTeamSubscription: (
     teamId: number,
     data: {
-      stripeSubscriptionId: string | null
-      stripeProductId: string | null
-      planName: string | null
-      subscriptionStatus: string
-    }
-  ) => Promise<void>
-}
+      stripeSubscriptionId: string | null;
+      stripeProductId: string | null;
+      planName: string | null;
+      subscriptionStatus: string;
+    },
+  ) => Promise<void>;
+};
 
 export async function handleSubscriptionChange(
   subscription: Stripe.Subscription,
-  deps: BillingDeps
+  deps: BillingDeps,
 ) {
-  const customerId = subscription.customer as string
-  const team = await deps.getTeamByStripeCustomerId(customerId)
+  const customerId = subscription.customer as string;
+  const team = await deps.getTeamByStripeCustomerId(customerId);
   if (!team) {
-    console.error('Team not found for Stripe customer:', customerId)
-    return
+    console.error('Team not found for Stripe customer:', customerId);
+    return;
   }
-  const status = subscription.status
+  const status = subscription.status;
   if (status === 'active' || status === 'trialing') {
-    const plan = subscription.items.data[0]?.plan
+    const plan = subscription.items.data[0]?.plan;
     await deps.updateTeamSubscription(team.id, {
       stripeSubscriptionId: subscription.id,
       stripeProductId: plan?.product as string,
       planName: (plan?.product as Stripe.Product).name,
       subscriptionStatus: status,
-    })
+    });
   } else if (status === 'canceled' || status === 'unpaid') {
     await deps.updateTeamSubscription(team.id, {
       stripeSubscriptionId: null,
       stripeProductId: null,
       planName: null,
       subscriptionStatus: status,
-    })
+    });
   }
 }
 
 export async function getStripePrices() {
-  const prices = await stripe.prices.list({ expand: ['data.product'], active: true, type: 'recurring' })
+  const prices = await stripe.prices.list({
+    expand: ['data.product'],
+    active: true,
+    type: 'recurring',
+  });
   return prices.data.map((price) => ({
     id: price.id,
     productId: typeof price.product === 'string' ? price.product : price.product.id,
@@ -761,18 +777,18 @@ export async function getStripePrices() {
     currency: price.currency,
     interval: price.recurring?.interval,
     trialPeriodDays: price.recurring?.trial_period_days,
-  }))
+  }));
 }
 
 export async function getStripeProducts() {
-  const products = await stripe.products.list({ active: true, expand: ['data.default_price'] })
+  const products = await stripe.products.list({ active: true, expand: ['data.default_price'] });
   return products.data.map((product) => ({
     id: product.id,
     name: product.name,
     description: product.description,
     defaultPriceId:
       typeof product.default_price === 'string' ? product.default_price : product.default_price?.id,
-  }))
+  }));
 }
 ```
 
@@ -786,7 +802,7 @@ export {
   handleSubscriptionChange,
   getStripePrices,
   getStripeProducts,
-} from './stripe'
+} from './stripe';
 ```
 
 - [ ] **Step 5: Commit**
@@ -801,6 +817,7 @@ git commit -m "feat: add @koeti/billing (Stripe checkout, portal, webhook handle
 ## Task 6: @koeti/ui package
 
 **Files:**
+
 - Create: `packages/ui/package.json`
 - Create: `packages/ui/tsconfig.json`
 - Create: `packages/ui/src/utils.ts`
@@ -856,11 +873,11 @@ git commit -m "feat: add @koeti/billing (Stripe checkout, portal, webhook handle
 - [ ] **Step 3: Create `packages/ui/src/utils.ts`**
 
 ```ts
-import { clsx, type ClassValue } from 'clsx'
-import { twMerge } from 'tailwind-merge'
+import { clsx, type ClassValue } from 'clsx';
+import { twMerge } from 'tailwind-merge';
 
 export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs))
+  return twMerge(clsx(inputs));
 }
 ```
 
@@ -881,10 +898,17 @@ sed -i "s|from '@/lib/utils'|from '../utils'|g" packages/ui/src/components/*.tsx
 - [ ] **Step 5: Create `packages/ui/src/index.ts`**
 
 ```ts
-export { cn } from './utils'
-export { Avatar, AvatarFallback, AvatarImage } from './components/avatar'
-export { Button, buttonVariants } from './components/button'
-export { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from './components/card'
+export { cn } from './utils';
+export { Avatar, AvatarFallback, AvatarImage } from './components/avatar';
+export { Button, buttonVariants } from './components/button';
+export {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from './components/card';
 export {
   DropdownMenu,
   DropdownMenuContent,
@@ -892,10 +916,10 @@ export {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from './components/dropdown-menu'
-export { Input } from './components/input'
-export { Label } from './components/label'
-export { RadioGroup, RadioGroupItem } from './components/radio-group'
+} from './components/dropdown-menu';
+export { Input } from './components/input';
+export { Label } from './components/label';
+export { RadioGroup, RadioGroupItem } from './components/radio-group';
 ```
 
 - [ ] **Step 6: Commit**
@@ -910,6 +934,7 @@ git commit -m "feat: add @koeti/ui (shadcn components + cn utility)"
 ## Task 7: @koeti/email package
 
 **Files:**
+
 - Create: `packages/email/package.json`
 - Create: `packages/email/tsconfig.json`
 - Create: `packages/email/src/client.ts`
@@ -962,10 +987,10 @@ git commit -m "feat: add @koeti/ui (shadcn components + cn utility)"
 - [ ] **Step 3: Create `packages/email/src/client.ts`**
 
 ```ts
-import { Resend } from 'resend'
-import type { ReactElement } from 'react'
+import { Resend } from 'resend';
+import type { ReactElement } from 'react';
 
-const resend = new Resend(process.env.RESEND_API_KEY)
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 export async function sendEmail({
   to,
@@ -973,28 +998,28 @@ export async function sendEmail({
   template,
   from = 'noreply@koeti.io',
 }: {
-  to: string
-  subject: string
-  template: ReactElement
-  from?: string
+  to: string;
+  subject: string;
+  template: ReactElement;
+  from?: string;
 }) {
   const { error } = await resend.emails.send({
     from,
     to,
     subject,
     react: template,
-  })
-  if (error) throw new Error(`Failed to send email: ${error.message}`)
+  });
+  if (error) throw new Error(`Failed to send email: ${error.message}`);
 }
 ```
 
 - [ ] **Step 4: Create `packages/email/src/templates/welcome.tsx`**
 
 ```tsx
-import { Body, Container, Head, Heading, Html, Preview, Text } from '@react-email/components'
+import { Body, Container, Head, Heading, Html, Preview, Text } from '@react-email/components';
 
 interface WelcomeEmailProps {
-  name: string | null
+  name: string | null;
 }
 
 export function WelcomeEmail({ name }: WelcomeEmailProps) {
@@ -1009,17 +1034,17 @@ export function WelcomeEmail({ name }: WelcomeEmailProps) {
         </Container>
       </Body>
     </Html>
-  )
+  );
 }
 ```
 
 - [ ] **Step 5: Create `packages/email/src/templates/password-reset.tsx`**
 
 ```tsx
-import { Body, Container, Head, Heading, Html, Link, Preview, Text } from '@react-email/components'
+import { Body, Container, Head, Heading, Html, Link, Preview, Text } from '@react-email/components';
 
 interface PasswordResetEmailProps {
-  resetUrl: string
+  resetUrl: string;
 }
 
 export function PasswordResetEmail({ resetUrl }: PasswordResetEmailProps) {
@@ -1035,16 +1060,16 @@ export function PasswordResetEmail({ resetUrl }: PasswordResetEmailProps) {
         </Container>
       </Body>
     </Html>
-  )
+  );
 }
 ```
 
 - [ ] **Step 6: Create `packages/email/src/index.ts`**
 
 ```ts
-export { sendEmail } from './client'
-export { WelcomeEmail } from './templates/welcome'
-export { PasswordResetEmail } from './templates/password-reset'
+export { sendEmail } from './client';
+export { WelcomeEmail } from './templates/welcome';
+export { PasswordResetEmail } from './templates/password-reset';
 ```
 
 - [ ] **Step 7: Commit**
@@ -1059,6 +1084,7 @@ git commit -m "feat: add @koeti/email (Resend client + WelcomeEmail + PasswordRe
 ## Task 8: @koeti/analytics package
 
 **Files:**
+
 - Create: `packages/analytics/package.json`
 - Create: `packages/analytics/tsconfig.json`
 - Create: `packages/analytics/src/server.ts`
@@ -1106,50 +1132,50 @@ git commit -m "feat: add @koeti/email (Resend client + WelcomeEmail + PasswordRe
 - [ ] **Step 3: Create `packages/analytics/src/server.ts`**
 
 ```ts
-import { PostHog } from 'posthog-node'
+import { PostHog } from 'posthog-node';
 
 const client = new PostHog(process.env.NEXT_PUBLIC_POSTHOG_KEY!, {
   host: process.env.POSTHOG_HOST ?? 'https://app.posthog.com',
   flushAt: 1,
   flushInterval: 0,
-})
+});
 
 export function track(event: string, props?: Record<string, unknown> & { userId?: string }) {
-  const { userId, ...rest } = props ?? {}
-  client.capture({ distinctId: userId ?? 'anonymous', event, properties: rest })
+  const { userId, ...rest } = props ?? {};
+  client.capture({ distinctId: userId ?? 'anonymous', event, properties: rest });
 }
 
 export function identify(userId: string, traits?: Record<string, unknown>) {
-  client.identify({ distinctId: userId, properties: traits })
+  client.identify({ distinctId: userId, properties: traits });
 }
 ```
 
 - [ ] **Step 4: Create `packages/analytics/src/client.ts`**
 
 ```ts
-'use client'
+'use client';
 
-import posthog from 'posthog-js'
+import posthog from 'posthog-js';
 
-let initialized = false
+let initialized = false;
 
 function init() {
-  if (initialized || typeof window === 'undefined') return
+  if (initialized || typeof window === 'undefined') return;
   posthog.init(process.env.NEXT_PUBLIC_POSTHOG_KEY!, {
     api_host: process.env.NEXT_PUBLIC_POSTHOG_HOST ?? 'https://app.posthog.com',
     capture_pageview: false,
-  })
-  initialized = true
+  });
+  initialized = true;
 }
 
 export function track(event: string, props?: Record<string, unknown>) {
-  init()
-  posthog.capture(event, props)
+  init();
+  posthog.capture(event, props);
 }
 
 export function identify(userId: string, traits?: Record<string, unknown>) {
-  init()
-  posthog.identify(userId, traits)
+  init();
+  posthog.identify(userId, traits);
 }
 ```
 
@@ -1157,7 +1183,7 @@ export function identify(userId: string, traits?: Record<string, unknown>) {
 
 ```ts
 // Server-side by default
-export { track, identify } from './server'
+export { track, identify } from './server';
 ```
 
 - [ ] **Step 6: Commit**
@@ -1172,6 +1198,7 @@ git commit -m "feat: add @koeti/analytics (PostHog wrapper, server + client)"
 ## Task 9: Wire saas-template to @koeti/* packages
 
 **Files:**
+
 - Modify: `apps/saas-template/package.json`
 - Modify: `apps/saas-template/tsconfig.json`
 - Modify: `apps/saas-template/lib/db/drizzle.ts`
@@ -1247,20 +1274,20 @@ Replace with:
 - [ ] **Step 3: Update `apps/saas-template/lib/db/drizzle.ts`**
 
 ```ts
-import { drizzle } from 'drizzle-orm/postgres-js'
-import postgres from 'postgres'
-import { baseSchema } from '@koeti/db'
-import * as appSchema from './schema'
-import dotenv from 'dotenv'
+import { drizzle } from 'drizzle-orm/postgres-js';
+import postgres from 'postgres';
+import { baseSchema } from '@koeti/db';
+import * as appSchema from './schema';
+import dotenv from 'dotenv';
 
-dotenv.config()
+dotenv.config();
 
 if (!process.env.POSTGRES_URL) {
-  throw new Error('POSTGRES_URL environment variable is not set')
+  throw new Error('POSTGRES_URL environment variable is not set');
 }
 
-export const client = postgres(process.env.POSTGRES_URL)
-export const db = drizzle(client, { schema: { ...baseSchema, ...appSchema } })
+export const client = postgres(process.env.POSTGRES_URL);
+export const db = drizzle(client, { schema: { ...baseSchema, ...appSchema } });
 ```
 
 - [ ] **Step 4: Update `apps/saas-template/lib/db/schema.ts`**
@@ -1284,8 +1311,8 @@ export type {
   Invitation,
   NewInvitation,
   TeamDataWithMembers,
-} from '@koeti/db'
-export { ActivityType } from '@koeti/db'
+} from '@koeti/db';
+export { ActivityType } from '@koeti/db';
 ```
 
 - [ ] **Step 5: Update `apps/saas-template/lib/db/queries.ts`**
@@ -1293,41 +1320,48 @@ export { ActivityType } from '@koeti/db'
 Replace `@/lib/auth/session` import with `@koeti/auth`, and fix schema imports:
 
 ```ts
-import { desc, and, eq, isNull } from 'drizzle-orm'
-import { db } from './drizzle'
-import { verifyToken } from '@koeti/auth'
-import { cookies } from 'next/headers'
-import { activityLogs, teamMembers, teams, users } from '@koeti/db'
+import { desc, and, eq, isNull } from 'drizzle-orm';
+import { db } from './drizzle';
+import { verifyToken } from '@koeti/auth';
+import { cookies } from 'next/headers';
+import { activityLogs, teamMembers, teams, users } from '@koeti/db';
 
 export async function getUser() {
-  const sessionCookie = (await cookies()).get('session')
-  if (!sessionCookie?.value) return null
-  const sessionData = await verifyToken(sessionCookie.value)
-  if (!sessionData?.user || typeof sessionData.user.id !== 'number') return null
-  if (new Date(sessionData.expires) < new Date()) return null
+  const sessionCookie = (await cookies()).get('session');
+  if (!sessionCookie?.value) return null;
+  const sessionData = await verifyToken(sessionCookie.value);
+  if (!sessionData?.user || typeof sessionData.user.id !== 'number') return null;
+  if (new Date(sessionData.expires) < new Date()) return null;
   const user = await db
     .select()
     .from(users)
     .where(and(eq(users.id, sessionData.user.id), isNull(users.deletedAt)))
-    .limit(1)
-  return user[0] ?? null
+    .limit(1);
+  return user[0] ?? null;
 }
 
 export async function getTeamByStripeCustomerId(customerId: string) {
-  const result = await db.select().from(teams).where(eq(teams.stripeCustomerId, customerId)).limit(1)
-  return result[0] ?? null
+  const result = await db
+    .select()
+    .from(teams)
+    .where(eq(teams.stripeCustomerId, customerId))
+    .limit(1);
+  return result[0] ?? null;
 }
 
 export async function updateTeamSubscription(
   teamId: number,
   data: {
-    stripeSubscriptionId: string | null
-    stripeProductId: string | null
-    planName: string | null
-    subscriptionStatus: string
-  }
+    stripeSubscriptionId: string | null;
+    stripeProductId: string | null;
+    planName: string | null;
+    subscriptionStatus: string;
+  },
 ) {
-  await db.update(teams).set({ ...data, updatedAt: new Date() }).where(eq(teams.id, teamId))
+  await db
+    .update(teams)
+    .set({ ...data, updatedAt: new Date() })
+    .where(eq(teams.id, teamId));
 }
 
 export async function getUserWithTeam(userId: number) {
@@ -1336,13 +1370,13 @@ export async function getUserWithTeam(userId: number) {
     .from(users)
     .leftJoin(teamMembers, eq(users.id, teamMembers.userId))
     .where(eq(users.id, userId))
-    .limit(1)
-  return result[0]
+    .limit(1);
+  return result[0];
 }
 
 export async function getActivityLogs() {
-  const user = await getUser()
-  if (!user) throw new Error('User not authenticated')
+  const user = await getUser();
+  if (!user) throw new Error('User not authenticated');
   return await db
     .select({
       id: activityLogs.id,
@@ -1355,12 +1389,12 @@ export async function getActivityLogs() {
     .leftJoin(users, eq(activityLogs.userId, users.id))
     .where(eq(activityLogs.userId, user.id))
     .orderBy(desc(activityLogs.timestamp))
-    .limit(10)
+    .limit(10);
 }
 
 export async function getTeamForUser() {
-  const user = await getUser()
-  if (!user) return null
+  const user = await getUser();
+  if (!user) return null;
   const result = await db.query.teamMembers.findFirst({
     where: eq(teamMembers.userId, user.id),
     with: {
@@ -1372,8 +1406,8 @@ export async function getTeamForUser() {
         },
       },
     },
-  })
-  return result?.team ?? null
+  });
+  return result?.team ?? null;
 }
 ```
 
@@ -1381,7 +1415,14 @@ export async function getTeamForUser() {
 
 ```ts
 // Re-export from @koeti/auth — no local auth implementation
-export { hashPassword, comparePasswords, signToken, verifyToken, getSession, setSession } from '@koeti/auth'
+export {
+  hashPassword,
+  comparePasswords,
+  signToken,
+  verifyToken,
+  getSession,
+  setSession,
+} from '@koeti/auth';
 ```
 
 - [ ] **Step 7: Update `apps/saas-template/lib/auth/middleware.ts`**
@@ -1389,44 +1430,44 @@ export { hashPassword, comparePasswords, signToken, verifyToken, getSession, set
 Fix imports to use `@koeti/db` types and local queries:
 
 ```ts
-import { z } from 'zod'
-import type { TeamDataWithMembers, User } from '@koeti/db'
-import { getTeamForUser, getUser } from '@/lib/db/queries'
-import { redirect } from 'next/navigation'
-import { validatedAction } from '@koeti/auth'
+import { z } from 'zod';
+import type { TeamDataWithMembers, User } from '@koeti/db';
+import { getTeamForUser, getUser } from '@/lib/db/queries';
+import { redirect } from 'next/navigation';
+import { validatedAction } from '@koeti/auth';
 
-export type { ActionState } from '@koeti/auth'
-export { validatedAction }
+export type { ActionState } from '@koeti/auth';
+export { validatedAction };
 
 type ValidatedActionWithUserFunction<S extends z.ZodType<any, any>, T> = (
   data: z.infer<S>,
   formData: FormData,
-  user: User
-) => Promise<T>
+  user: User,
+) => Promise<T>;
 
 export function validatedActionWithUser<S extends z.ZodType<any, any>, T>(
   schema: S,
-  action: ValidatedActionWithUserFunction<S, T>
+  action: ValidatedActionWithUserFunction<S, T>,
 ) {
   return async (prevState: any, formData: FormData) => {
-    const user = await getUser()
-    if (!user) throw new Error('User is not authenticated')
-    const result = schema.safeParse(Object.fromEntries(formData))
-    if (!result.success) return { error: result.error.errors[0].message }
-    return action(result.data, formData, user)
-  }
+    const user = await getUser();
+    if (!user) throw new Error('User is not authenticated');
+    const result = schema.safeParse(Object.fromEntries(formData));
+    if (!result.success) return { error: result.error.errors[0].message };
+    return action(result.data, formData, user);
+  };
 }
 
-type ActionWithTeamFunction<T> = (formData: FormData, team: TeamDataWithMembers) => Promise<T>
+type ActionWithTeamFunction<T> = (formData: FormData, team: TeamDataWithMembers) => Promise<T>;
 
 export function withTeam<T>(action: ActionWithTeamFunction<T>) {
   return async (formData: FormData): Promise<T> => {
-    const user = await getUser()
-    if (!user) redirect('/sign-in')
-    const team = await getTeamForUser()
-    if (!team) throw new Error('Team not found')
-    return action(formData, team)
-  }
+    const user = await getUser();
+    if (!user) redirect('/sign-in');
+    const team = await getTeamForUser();
+    if (!team) throw new Error('Team not found');
+    return action(formData, team);
+  };
 }
 ```
 
@@ -1440,30 +1481,30 @@ export {
   handleSubscriptionChange,
   getStripePrices,
   getStripeProducts,
-} from '@koeti/billing'
+} from '@koeti/billing';
 ```
 
 - [ ] **Step 9: Update `apps/saas-template/middleware.ts`**
 
 ```ts
-import { createAuthMiddleware } from '@koeti/auth'
+import { createAuthMiddleware } from '@koeti/auth';
 
 export const { middleware, config } = createAuthMiddleware({
   protectedRoutes: ['/dashboard'],
-})
+});
 ```
 
 - [ ] **Step 10: Update `apps/saas-template/drizzle.config.ts`**
 
 ```ts
-import { defineConfig } from 'drizzle-kit'
+import { defineConfig } from 'drizzle-kit';
 
 export default defineConfig({
   schema: ['../../packages/db/src/schema.ts', './lib/db/schema.ts'],
   out: './lib/db/migrations',
   dialect: 'postgresql',
   dbCredentials: { url: process.env.POSTGRES_URL! },
-})
+});
 ```
 
 - [ ] **Step 11: Remove local components/ui (now in @koeti/ui)**
@@ -1489,22 +1530,22 @@ Also replace `from "@/lib/utils"` → `from "@koeti/ui"` (the `cn` function move
 Update `apps/saas-template/app/api/stripe/webhook/route.ts`:
 
 ```ts
-import { stripe, handleSubscriptionChange } from '@koeti/billing'
-import { getTeamByStripeCustomerId, updateTeamSubscription } from '@/lib/db/queries'
-import { NextRequest, NextResponse } from 'next/server'
-import Stripe from 'stripe'
+import { stripe, handleSubscriptionChange } from '@koeti/billing';
+import { getTeamByStripeCustomerId, updateTeamSubscription } from '@/lib/db/queries';
+import { NextRequest, NextResponse } from 'next/server';
+import Stripe from 'stripe';
 
-const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!
+const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!;
 
 export async function POST(request: NextRequest) {
-  const payload = await request.text()
-  const signature = request.headers.get('stripe-signature') as string
-  let event: Stripe.Event
+  const payload = await request.text();
+  const signature = request.headers.get('stripe-signature') as string;
+  let event: Stripe.Event;
   try {
-    event = stripe.webhooks.constructEvent(payload, signature, webhookSecret)
+    event = stripe.webhooks.constructEvent(payload, signature, webhookSecret);
   } catch (err) {
-    console.error('Webhook signature verification failed.', err)
-    return NextResponse.json({ error: 'Webhook signature verification failed.' }, { status: 400 })
+    console.error('Webhook signature verification failed.', err);
+    return NextResponse.json({ error: 'Webhook signature verification failed.' }, { status: 400 });
   }
   switch (event.type) {
     case 'customer.subscription.updated':
@@ -1512,12 +1553,12 @@ export async function POST(request: NextRequest) {
       await handleSubscriptionChange(event.data.object as Stripe.Subscription, {
         getTeamByStripeCustomerId,
         updateTeamSubscription,
-      })
-      break
+      });
+      break;
     default:
-      console.log(`Unhandled event type ${event.type}`)
+      console.log(`Unhandled event type ${event.type}`);
   }
-  return NextResponse.json({ received: true })
+  return NextResponse.json({ received: true });
 }
 ```
 
@@ -1542,66 +1583,71 @@ git commit -m "feat: wire saas-template to @koeti/* packages"
 ## Task 10: create-mvp.mjs generator
 
 **Files:**
+
 - Create: `scripts/create-mvp.mjs`
 
 - [ ] **Step 1: Create `scripts/create-mvp.mjs`**
 
 ```js
 #!/usr/bin/env node
-import { cpSync, mkdirSync, readFileSync, writeFileSync, existsSync } from 'fs'
-import { join, dirname } from 'path'
-import { fileURLToPath } from 'url'
-import { execSync } from 'child_process'
+import { cpSync, mkdirSync, readFileSync, writeFileSync, existsSync } from 'fs';
+import { join, dirname } from 'path';
+import { fileURLToPath } from 'url';
+import { execSync } from 'child_process';
 
-const __dirname = dirname(fileURLToPath(import.meta.url))
-const root = join(__dirname, '..')
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const root = join(__dirname, '..');
 
-const name = process.argv[2]
+const name = process.argv[2];
 if (!name) {
-  console.error('Usage: pnpm create-mvp <saas-name>')
-  process.exit(1)
+  console.error('Usage: pnpm create-mvp <saas-name>');
+  process.exit(1);
 }
 if (!/^[a-z][a-z0-9-]*$/.test(name)) {
-  console.error('Name must be lowercase alphanumeric with dashes (e.g. my-saas)')
-  process.exit(1)
+  console.error('Name must be lowercase alphanumeric with dashes (e.g. my-saas)');
+  process.exit(1);
 }
 
-const src = join(root, 'apps', 'saas-template')
-const dest = join(root, 'apps', name)
+const src = join(root, 'apps', 'saas-template');
+const dest = join(root, 'apps', name);
 
 if (existsSync(dest)) {
-  console.error(`apps/${name} already exists`)
-  process.exit(1)
+  console.error(`apps/${name} already exists`);
+  process.exit(1);
 }
 
-console.log(`\n🏗  Scaffolding @koeti/${name}...\n`)
+console.log(`\n🏗  Scaffolding @koeti/${name}...\n`);
 
 // Copy template
 cpSync(src, dest, {
   recursive: true,
-  filter: (src) => !src.includes('node_modules') && !src.includes('.next') && !src.includes('lib/db/migrations'),
-})
+  filter: (src) =>
+    !src.includes('node_modules') && !src.includes('.next') && !src.includes('lib/db/migrations'),
+});
 
 // Update package.json
-const pkgPath = join(dest, 'package.json')
-const pkg = JSON.parse(readFileSync(pkgPath, 'utf-8'))
-pkg.name = `@koeti/${name}`
-writeFileSync(pkgPath, JSON.stringify(pkg, null, 2) + '\n')
+const pkgPath = join(dest, 'package.json');
+const pkg = JSON.parse(readFileSync(pkgPath, 'utf-8'));
+pkg.name = `@koeti/${name}`;
+writeFileSync(pkgPath, JSON.stringify(pkg, null, 2) + '\n');
 
 // Replace saas-template references in key files
-const filesToPatch = [
-  'README.md',
-]
+const filesToPatch = ['README.md'];
 for (const file of filesToPatch) {
-  const filePath = join(dest, file)
-  if (!existsSync(filePath)) continue
-  const content = readFileSync(filePath, 'utf-8')
-  writeFileSync(filePath, content.replaceAll('saas-template', name).replaceAll('Saas Template', name))
+  const filePath = join(dest, file);
+  if (!existsSync(filePath)) continue;
+  const content = readFileSync(filePath, 'utf-8');
+  writeFileSync(
+    filePath,
+    content.replaceAll('saas-template', name).replaceAll('Saas Template', name),
+  );
 }
 
 // Create empty app schema
-const schemaPath = join(dest, 'lib', 'db', 'schema.ts')
-writeFileSync(schemaPath, `// App-specific tables for @koeti/${name}
+const schemaPath = join(dest, 'lib', 'db', 'schema.ts');
+writeFileSync(
+  schemaPath,
+  `// App-specific tables for @koeti/${name}
 // Base tables (users, teams, teamMembers, activityLogs, invitations) are in @koeti/db.
 // Re-export base types for convenience
 export type {
@@ -1609,13 +1655,16 @@ export type {
   ActivityLog, NewActivityLog, Invitation, NewInvitation, TeamDataWithMembers,
 } from '@koeti/db'
 export { ActivityType } from '@koeti/db'
-`)
+`,
+);
 
 // Create empty migrations dir
-mkdirSync(join(dest, 'lib', 'db', 'migrations'), { recursive: true })
+mkdirSync(join(dest, 'lib', 'db', 'migrations'), { recursive: true });
 
 // Create .env.local.example
-writeFileSync(join(dest, '.env.local.example'), `# Database
+writeFileSync(
+  join(dest, '.env.local.example'),
+  `# Database
 POSTGRES_URL=
 
 # Auth
@@ -1633,16 +1682,17 @@ RESEND_API_KEY=
 NEXT_PUBLIC_POSTHOG_KEY=
 POSTHOG_HOST=https://app.posthog.com
 NEXT_PUBLIC_POSTHOG_HOST=https://app.posthog.com
-`)
+`,
+);
 
-console.log(`✅ Created apps/${name}/\n`)
-console.log(`Next steps:`)
-console.log(`  1. cd apps/${name} && cp .env.local.example .env.local`)
-console.log(`  2. Fill in .env.local with your credentials`)
-console.log(`  3. Define your DB schema in lib/db/schema.ts`)
-console.log(`  4. pnpm --filter @koeti/${name} db:migrate`)
-console.log(`  5. pnpm --filter @koeti/${name} dev`)
-console.log(`\nRead AGENTS.md for patterns and conventions.\n`)
+console.log(`✅ Created apps/${name}/\n`);
+console.log(`Next steps:`);
+console.log(`  1. cd apps/${name} && cp .env.local.example .env.local`);
+console.log(`  2. Fill in .env.local with your credentials`);
+console.log(`  3. Define your DB schema in lib/db/schema.ts`);
+console.log(`  4. pnpm --filter @koeti/${name} db:migrate`);
+console.log(`  5. pnpm --filter @koeti/${name} dev`);
+console.log(`\nRead AGENTS.md for patterns and conventions.\n`);
 ```
 
 - [ ] **Step 2: Make executable and test**
@@ -1706,12 +1756,19 @@ Update the `@koeti/auth` section in `AGENTS.md` to clarify which wrappers are in
 
 ```ts
 // Direct from @koeti/auth (no DB needed):
-import { getSession, setSession, hashPassword, comparePasswords, signToken, verifyToken } from '@koeti/auth'
-import { validatedAction, createAuthMiddleware } from '@koeti/auth'
-import type { ActionState } from '@koeti/auth'
+import {
+  getSession,
+  setSession,
+  hashPassword,
+  comparePasswords,
+  signToken,
+  verifyToken,
+} from '@koeti/auth';
+import { validatedAction, createAuthMiddleware } from '@koeti/auth';
+import type { ActionState } from '@koeti/auth';
 
 // DB-aware wrappers — import from the app's own lib, not @koeti/auth:
-import { validatedActionWithUser, withTeam } from '@/lib/auth/middleware'
+import { validatedActionWithUser, withTeam } from '@/lib/auth/middleware';
 ```
 
 - [ ] **Step 5: Final commit**

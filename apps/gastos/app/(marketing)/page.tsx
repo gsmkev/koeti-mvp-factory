@@ -1,3 +1,4 @@
+// Page — route /.
 import Link from 'next/link';
 import { Button, Card, CardContent, CardHeader, CardTitle } from '@koeti/ui';
 import { getTranslations } from 'next-intl/server';
@@ -37,9 +38,7 @@ function LedgerPreview({
               <span className="rounded-md bg-accent px-2 py-0.5 text-xs font-medium text-accent-foreground">
                 {catLabel(row.cat)}
               </span>
-              <span className="min-w-0 flex-1 truncate text-sm text-foreground">
-                {row.desc}
-              </span>
+              <span className="min-w-0 flex-1 truncate text-sm text-foreground">{row.desc}</span>
               <span className="text-sm font-medium tabular-nums">{row.amount}</span>
             </li>
           ))}
@@ -75,9 +74,7 @@ export default async function HomePage() {
             <h1 className="mt-4 text-5xl font-extrabold tracking-tight text-foreground sm:text-6xl">
               {t('title')}
             </h1>
-            <p className="mt-6 max-w-md text-lg text-muted-foreground">
-              {t('subtitle')}
-            </p>
+            <p className="mt-6 max-w-md text-lg text-muted-foreground">{t('subtitle')}</p>
             <div className="mt-8 flex flex-wrap gap-3">
               <Button size="lg" asChild>
                 <Link href="/sign-up">{t('getStarted')}</Link>
@@ -102,17 +99,11 @@ export default async function HomePage() {
             {MODULES.map((mod) => (
               <Card key={mod.key}>
                 <CardHeader>
-                  <span className="font-mono text-xs text-muted-foreground">
-                    [{t(mod.tagKey)}]
-                  </span>
-                  <CardTitle className="text-lg">
-                    {t(`module${mod.key}Title`)}
-                  </CardTitle>
+                  <span className="font-mono text-xs text-muted-foreground">[{t(mod.tagKey)}]</span>
+                  <CardTitle className="text-lg">{t(`module${mod.key}Title`)}</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-sm text-muted-foreground">
-                    {t(`module${mod.key}Desc`)}
-                  </p>
+                  <p className="text-sm text-muted-foreground">{t(`module${mod.key}Desc`)}</p>
                 </CardContent>
               </Card>
             ))}
@@ -125,9 +116,7 @@ export default async function HomePage() {
           <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
             {t('ctaTitle')}
           </h2>
-          <p className="mx-auto mt-3 max-w-xl text-lg text-muted-foreground">
-            {t('ctaSubtitle')}
-          </p>
+          <p className="mx-auto mt-3 max-w-xl text-lg text-muted-foreground">{t('ctaSubtitle')}</p>
           <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
             <Button size="lg" asChild>
               <Link href="/sign-up">{t('createAccount')}</Link>

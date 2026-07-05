@@ -1,4 +1,5 @@
-import type { ChartDatum } from "./chart"
+// chart data — exported via @koeti/ui.
+import type { ChartDatum } from './chart';
 
 /*
  * Turn raw DB rows into chart data ({ label, value }[]) in one line.
@@ -15,17 +16,17 @@ export function groupSum<T>(
   label: (row: T) => string,
   value: (row: T) => number,
 ): ChartDatum[] {
-  const acc = new Map<string, number>()
+  const acc = new Map<string, number>();
   for (const row of rows) {
-    const k = label(row)
-    acc.set(k, (acc.get(k) ?? 0) + value(row))
+    const k = label(row);
+    acc.set(k, (acc.get(k) ?? 0) + value(row));
   }
-  return [...acc].map(([label, value]) => ({ label, value }))
+  return [...acc].map(([label, value]) => ({ label, value }));
 }
 
 /** Count rows per `label`. */
 export function countBy<T>(rows: readonly T[], label: (row: T) => string): ChartDatum[] {
-  return groupSum(rows, label, () => 1)
+  return groupSum(rows, label, () => 1);
 }
 
 /**
@@ -33,14 +34,10 @@ export function countBy<T>(rows: readonly T[], label: (row: T) => string): Chart
  * Categorical palettes only have ~5 safe hues — never render a 9th series,
  * fold it. Returns at most `n + 1` data points, sorted largest-first.
  */
-export function topN(
-  data: ChartDatum[],
-  n: number,
-  otherLabel = "Other",
-): ChartDatum[] {
-  if (data.length <= n) return [...data].sort((a, b) => b.value - a.value)
-  const sorted = [...data].sort((a, b) => b.value - a.value)
-  const rest = sorted.slice(n).reduce((s, d) => s + d.value, 0)
-  const top = sorted.slice(0, n)
-  return rest > 0 ? [...top, { label: otherLabel, value: rest }] : top
+export function topN(data: ChartDatum[], n: number, otherLabel = 'Other'): ChartDatum[] {
+  if (data.length <= n) return [...data].sort((a, b) => b.value - a.value);
+  const sorted = [...data].sort((a, b) => b.value - a.value);
+  const rest = sorted.slice(n).reduce((s, d) => s + d.value, 0);
+  const top = sorted.slice(0, n);
+  return rest > 0 ? [...top, { label: otherLabel, value: rest }] : top;
 }

@@ -1,16 +1,9 @@
 'use client';
+// Layout for /dashboard.
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import {
-  Activity,
-  KeyRound,
-  LayoutDashboard,
-  LogOut,
-  Settings,
-  Shield,
-  Users
-} from 'lucide-react';
+import { Activity, KeyRound, LayoutDashboard, LogOut, Settings, Shield, Users } from 'lucide-react';
 import {
   AppShell,
   Avatar,
@@ -19,7 +12,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-  type AppShellNavGroup
+  type AppShellNavGroup,
 } from '@koeti/ui';
 import { LocaleSwitcher } from '@koeti/i18n';
 import { useTranslations } from 'next-intl';
@@ -33,9 +26,7 @@ function useNav(): AppShellNavGroup[] {
   const t = useTranslations('nav');
   return [
     {
-      items: [
-        { href: '/dashboard', label: t('overview'), icon: <LayoutDashboard /> }
-      ]
+      items: [{ href: '/dashboard', label: t('overview'), icon: <LayoutDashboard /> }],
     },
     {
       label: t('settings'),
@@ -44,9 +35,9 @@ function useNav(): AppShellNavGroup[] {
         { href: '/dashboard/general', label: t('general'), icon: <Settings /> },
         { href: '/dashboard/security', label: t('security'), icon: <Shield /> },
         { href: '/dashboard/api-keys', label: t('apiKeys'), icon: <KeyRound /> },
-        { href: '/dashboard/activity', label: t('activity'), icon: <Activity /> }
-      ]
-    }
+        { href: '/dashboard/activity', label: t('activity'), icon: <Activity /> },
+      ],
+    },
   ];
 }
 
@@ -61,9 +52,7 @@ function Brand() {
       >
         {APP_NAME[0]}
       </span>
-      <span className="font-display text-base font-semibold text-sidebar-primary">
-        {APP_NAME}
-      </span>
+      <span className="font-display text-base font-semibold text-sidebar-primary">{APP_NAME}</span>
     </Link>
   );
 }
@@ -85,18 +74,14 @@ function SidebarUser() {
     <DropdownMenu>
       <DropdownMenuTrigger className="flex w-full cursor-pointer items-center gap-2.5 rounded-md px-2 py-1.5 text-left transition-colors hover:bg-sidebar-accent">
         <Avatar className="size-8">
-          <AvatarFallback>
-            {(user.name || user.email).slice(0, 1).toUpperCase()}
-          </AvatarFallback>
+          <AvatarFallback>{(user.name || user.email).slice(0, 1).toUpperCase()}</AvatarFallback>
         </Avatar>
         <span className="min-w-0 flex-1">
           <span className="block truncate text-sm font-medium text-sidebar-primary">
             {user.name || user.email}
           </span>
           {user.name && (
-            <span className="block truncate text-xs text-sidebar-foreground/60">
-              {user.email}
-            </span>
+            <span className="block truncate text-xs text-sidebar-foreground/60">{user.email}</span>
           )}
         </span>
       </DropdownMenuTrigger>
@@ -114,11 +99,7 @@ function SidebarUser() {
   );
 }
 
-export default function DashboardLayout({
-  children
-}: {
-  children: React.ReactNode;
-}) {
+export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const nav = useNav();
 

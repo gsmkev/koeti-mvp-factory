@@ -1,4 +1,5 @@
 'use server';
+// saas-template lib — actions.
 
 import { redirect } from 'next/navigation';
 import { createCheckoutSession, createCustomerPortalSession } from './stripe';

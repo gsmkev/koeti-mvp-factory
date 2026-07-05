@@ -1,6 +1,7 @@
-import * as React from "react"
+// chart — exported via @koeti/ui.
+import * as React from 'react';
 
-import { cn } from "../utils"
+import { cn } from '../utils';
 
 /*
  * Zero-dependency, server-renderable SVG charts for factory dashboards.
@@ -14,18 +15,18 @@ import { cn } from "../utils"
  * series on one axis? Add a `series` prop then; don't reach for a dual axis.
  */
 
-export type ChartDatum = { label: string; value: number }
+export type ChartDatum = { label: string; value: number };
 
 const SERIES = [
-  "var(--chart-1)",
-  "var(--chart-2)",
-  "var(--chart-3)",
-  "var(--chart-4)",
-  "var(--chart-5)",
-]
-const color = (i: number) => SERIES[i % SERIES.length]
+  'var(--chart-1)',
+  'var(--chart-2)',
+  'var(--chart-3)',
+  'var(--chart-4)',
+  'var(--chart-5)',
+];
+const color = (i: number) => SERIES[i % SERIES.length];
 
-const defaultFormat = (v: number) => v.toLocaleString()
+const defaultFormat = (v: number) => v.toLocaleString();
 
 function Figure({
   title,
@@ -33,35 +34,23 @@ function Figure({
   className,
   children,
 }: {
-  title?: string
-  caption?: string
-  className?: string
-  children: React.ReactNode
+  title?: string;
+  caption?: string;
+  className?: string;
+  children: React.ReactNode;
 }) {
   return (
-    <figure className={cn("w-full", className)}>
+    <figure className={cn('w-full', className)}>
       {title && (
-        <figcaption className="mb-3 text-sm font-medium text-foreground">
-          {title}
-        </figcaption>
+        <figcaption className="mb-3 text-sm font-medium text-foreground">{title}</figcaption>
       )}
       {children}
-      {caption && (
-        <figcaption className="mt-2 text-xs text-muted-foreground">
-          {caption}
-        </figcaption>
-      )}
+      {caption && <figcaption className="mt-2 text-xs text-muted-foreground">{caption}</figcaption>}
     </figure>
-  )
+  );
 }
 
-function Legend({
-  data,
-  format,
-}: {
-  data: ChartDatum[]
-  format: (v: number) => string
-}) {
+function Legend({ data, format }: { data: ChartDatum[]; format: (v: number) => string }) {
   return (
     <ul className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-xs">
       {data.map((d, i) => (
@@ -72,23 +61,21 @@ function Legend({
             aria-hidden
           />
           <span className="text-muted-foreground">{d.label}</span>
-          <span className="font-medium tabular-nums text-foreground">
-            {format(d.value)}
-          </span>
+          <span className="font-medium tabular-nums text-foreground">{format(d.value)}</span>
         </li>
       ))}
     </ul>
-  )
+  );
 }
 
 type ChartProps = {
-  data: ChartDatum[]
-  title?: string
-  caption?: string
-  height?: number
-  valueFormat?: (v: number) => string
-  className?: string
-}
+  data: ChartDatum[];
+  title?: string;
+  caption?: string;
+  height?: number;
+  valueFormat?: (v: number) => string;
+  className?: string;
+};
 
 /** Vertical bars for comparing magnitudes across categories (single series). */
 function BarChart({
@@ -99,15 +86,15 @@ function BarChart({
   valueFormat = defaultFormat,
   className,
 }: ChartProps) {
-  const W = 640
-  const H = height
-  const padX = 8
-  const padTop = 24
-  const padBottom = 28
-  const max = Math.max(0, ...data.map((d) => d.value))
-  const plotH = H - padTop - padBottom
-  const slot = (W - padX * 2) / Math.max(1, data.length)
-  const barW = Math.min(slot * 0.62, 72)
+  const W = 640;
+  const H = height;
+  const padX = 8;
+  const padTop = 24;
+  const padBottom = 28;
+  const max = Math.max(0, ...data.map((d) => d.value));
+  const plotH = H - padTop - padBottom;
+  const slot = (W - padX * 2) / Math.max(1, data.length);
+  const barW = Math.min(slot * 0.62, 72);
 
   return (
     <Figure title={title} caption={caption} className={className}>
@@ -116,7 +103,7 @@ function BarChart({
         width="100%"
         height="auto"
         role="img"
-        aria-label={title ?? "bar chart"}
+        aria-label={title ?? 'bar chart'}
         className="overflow-visible"
       >
         <line
@@ -128,9 +115,9 @@ function BarChart({
           strokeWidth={1}
         />
         {data.map((d, i) => {
-          const h = max > 0 ? (d.value / max) * plotH : 0
-          const x = padX + slot * i + (slot - barW) / 2
-          const y = H - padBottom - h
+          const h = max > 0 ? (d.value / max) * plotH : 0;
+          const x = padX + slot * i + (slot - barW) / 2;
+          const y = H - padBottom - h;
           return (
             <g key={d.label}>
               <rect
@@ -160,24 +147,29 @@ function BarChart({
                 {d.label}
               </text>
             </g>
-          )
+          );
         })}
       </svg>
     </Figure>
-  )
+  );
 }
 
-function linePoints(data: ChartDatum[], W: number, H: number, pad: { x: number; top: number; bottom: number }) {
-  const max = Math.max(0, ...data.map((d) => d.value))
-  const min = Math.min(0, ...data.map((d) => d.value))
-  const range = max - min || 1
-  const plotH = H - pad.top - pad.bottom
-  const step = data.length > 1 ? (W - pad.x * 2) / (data.length - 1) : 0
+function linePoints(
+  data: ChartDatum[],
+  W: number,
+  H: number,
+  pad: { x: number; top: number; bottom: number },
+) {
+  const max = Math.max(0, ...data.map((d) => d.value));
+  const min = Math.min(0, ...data.map((d) => d.value));
+  const range = max - min || 1;
+  const plotH = H - pad.top - pad.bottom;
+  const step = data.length > 1 ? (W - pad.x * 2) / (data.length - 1) : 0;
   return data.map((d, i) => ({
     ...d,
     x: pad.x + step * i,
     y: pad.top + plotH - ((d.value - min) / range) * plotH,
-  }))
+  }));
 }
 
 /** Trend of a single metric over ordered categories (time). */
@@ -190,16 +182,16 @@ function LineChart({
   area = true,
   className,
 }: ChartProps & { area?: boolean }) {
-  const W = 640
-  const H = height
-  const pad = { x: 12, top: 20, bottom: 28 }
-  const pts = linePoints(data, W, H, pad)
-  const path = pts.map((p, i) => `${i === 0 ? "M" : "L"}${p.x},${p.y}`).join(" ")
-  const baseline = H - pad.bottom
+  const W = 640;
+  const H = height;
+  const pad = { x: 12, top: 20, bottom: 28 };
+  const pts = linePoints(data, W, H, pad);
+  const path = pts.map((p, i) => `${i === 0 ? 'M' : 'L'}${p.x},${p.y}`).join(' ');
+  const baseline = H - pad.bottom;
   const areaPath =
     pts.length > 0
       ? `${path} L${pts[pts.length - 1].x},${baseline} L${pts[0].x},${baseline} Z`
-      : ""
+      : '';
 
   return (
     <Figure title={title} caption={caption} className={className}>
@@ -208,7 +200,7 @@ function LineChart({
         width="100%"
         height="auto"
         role="img"
-        aria-label={title ?? "line chart"}
+        aria-label={title ?? 'line chart'}
         className="overflow-visible"
       >
         <line
@@ -219,9 +211,7 @@ function LineChart({
           className="stroke-border"
           strokeWidth={1}
         />
-        {area && areaPath && (
-          <path d={areaPath} style={{ fill: color(0), opacity: 0.12 }} />
-        )}
+        {area && areaPath && <path d={areaPath} style={{ fill: color(0), opacity: 0.12 }} />}
         <path
           d={path}
           fill="none"
@@ -254,7 +244,7 @@ function LineChart({
         ))}
       </svg>
     </Figure>
-  )
+  );
 }
 
 /** Part-to-whole breakdown. Each slice is a categorical color + legend. */
@@ -267,31 +257,31 @@ function DonutChart({
   centerLabel,
   className,
 }: ChartProps & { centerLabel?: string }) {
-  const size = height
-  const cx = size / 2
-  const cy = size / 2
-  const r = size / 2 - 4
-  const inner = r * 0.62
-  const total = data.reduce((s, d) => s + Math.max(0, d.value), 0)
+  const size = height;
+  const cx = size / 2;
+  const cy = size / 2;
+  const r = size / 2 - 4;
+  const inner = r * 0.62;
+  const total = data.reduce((s, d) => s + Math.max(0, d.value), 0);
 
-  let angle = -Math.PI / 2
+  let angle = -Math.PI / 2;
   const arcs = data.map((d, i) => {
-    const frac = total > 0 ? Math.max(0, d.value) / total : 0
-    const start = angle
-    const end = angle + frac * Math.PI * 2
-    angle = end
-    const large = end - start > Math.PI ? 1 : 0
-    const p = (rad: number, a: number) => [cx + rad * Math.cos(a), cy + rad * Math.sin(a)]
-    const [x1, y1] = p(r, start)
-    const [x2, y2] = p(r, end)
-    const [x3, y3] = p(inner, end)
-    const [x4, y4] = p(inner, start)
+    const frac = total > 0 ? Math.max(0, d.value) / total : 0;
+    const start = angle;
+    const end = angle + frac * Math.PI * 2;
+    angle = end;
+    const large = end - start > Math.PI ? 1 : 0;
+    const p = (rad: number, a: number) => [cx + rad * Math.cos(a), cy + rad * Math.sin(a)];
+    const [x1, y1] = p(r, start);
+    const [x2, y2] = p(r, end);
+    const [x3, y3] = p(inner, end);
+    const [x4, y4] = p(inner, start);
     const d3 =
       frac === 0
-        ? ""
-        : `M${x1},${y1} A${r},${r} 0 ${large} 1 ${x2},${y2} L${x3},${y3} A${inner},${inner} 0 ${large} 0 ${x4},${y4} Z`
-    return { datum: d, d: d3, i }
-  })
+        ? ''
+        : `M${x1},${y1} A${r},${r} 0 ${large} 1 ${x2},${y2} L${x3},${y3} A${inner},${inner} 0 ${large} 0 ${x4},${y4} Z`;
+    return { datum: d, d: d3, i };
+  });
 
   return (
     <Figure title={title} caption={caption} className={className}>
@@ -301,7 +291,7 @@ function DonutChart({
           width={size}
           height={size}
           role="img"
-          aria-label={title ?? "donut chart"}
+          aria-label={title ?? 'donut chart'}
           className="max-w-full shrink-0"
         >
           {arcs.map(({ datum, d, i }) => (
@@ -339,7 +329,7 @@ function DonutChart({
         </div>
       </div>
     </Figure>
-  )
+  );
 }
 
 /** Tiny inline trend line for stat rows — no axes, no labels. */
@@ -349,25 +339,25 @@ function Sparkline({
   height = 28,
   className,
 }: {
-  data: number[]
-  width?: number
-  height?: number
-  className?: string
+  data: number[];
+  width?: number;
+  height?: number;
+  className?: string;
 }) {
-  if (data.length < 2) return null
-  const max = Math.max(...data)
-  const min = Math.min(...data)
-  const range = max - min || 1
-  const step = width / (data.length - 1)
+  if (data.length < 2) return null;
+  const max = Math.max(...data);
+  const min = Math.min(...data);
+  const range = max - min || 1;
+  const step = width / (data.length - 1);
   const path = data
-    .map((v, i) => `${i === 0 ? "M" : "L"}${i * step},${height - ((v - min) / range) * height}`)
-    .join(" ")
+    .map((v, i) => `${i === 0 ? 'M' : 'L'}${i * step},${height - ((v - min) / range) * height}`)
+    .join(' ');
   return (
     <svg
       viewBox={`0 0 ${width} ${height}`}
       width={width}
       height={height}
-      className={cn("overflow-visible", className)}
+      className={cn('overflow-visible', className)}
       aria-hidden
     >
       <path
@@ -379,7 +369,7 @@ function Sparkline({
         strokeLinecap="round"
       />
     </svg>
-  )
+  );
 }
 
-export { BarChart, LineChart, DonutChart, Sparkline }
+export { BarChart, LineChart, DonutChart, Sparkline };

@@ -17,12 +17,12 @@ import { BarChart, LineChart, DonutChart, Sparkline } from '@koeti/ui'
 
 ## Which one
 
-| Data's job | Component |
-|---|---|
-| A metric over ordered time | `LineChart` (set `area={false}` for a bare line) |
-| Compare magnitudes across categories | `BarChart` |
-| Part-to-whole breakdown | `DonutChart` (renders its own legend) |
-| Trend inside a `StatCard` / table row | `Sparkline` (takes `number[]`) |
+| Data's job                            | Component                                        |
+| ------------------------------------- | ------------------------------------------------ |
+| A metric over ordered time            | `LineChart` (set `area={false}` for a bare line) |
+| Compare magnitudes across categories  | `BarChart`                                       |
+| Part-to-whole breakdown               | `DonutChart` (renders its own legend)            |
+| Trend inside a `StatCard` / table row | `Sparkline` (takes `number[]`)                   |
 
 `StatCard` takes it further: pass `delta={8}` for a colored ▲/▼ change badge
 (`deltaGoodDirection="down"` when less is better, e.g. expenses/churn) and

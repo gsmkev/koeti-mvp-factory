@@ -28,7 +28,11 @@
     "getStarted": "Começar",
     "loading": "Carregando…",
     "baseFeatures": ["Uso ilimitado", "Membros do espaço ilimitados", "Suporte por e-mail"],
-    "plusFeatures": ["Tudo do Base, e:", "Acesso antecipado a novos recursos", "Suporte 24/7 + acesso ao Slack"]
+    "plusFeatures": [
+      "Tudo do Base, e:",
+      "Acesso antecipado a novos recursos",
+      "Suporte 24/7 + acesso ao Slack"
+    ]
   },
   "overview": {
     "title": "Visão geral",

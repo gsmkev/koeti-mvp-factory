@@ -1,2 +1,2 @@
 // Server-side by default
-export { track, identify } from './server'
+export { track, identify } from './server';

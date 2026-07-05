@@ -11,14 +11,14 @@ Use them before grepping files — it's 5–10x cheaper in tokens.
 
 CRG gives you ~8 queryable tools via MCP. Prefer these over grep/Read for:
 
-| Question | Tool to use |
-|---|---|
-| Where is `functionName` defined? | `find_definition` |
-| Who calls `functionName`? | `find_callers` |
-| What does `file.ts` import/export? | `get_file_context` |
-| Blast radius of changing `@koeti/db`? | `get_impact_radius` |
-| What does this module do? | `get_community_summary` |
-| Find all usages of a pattern | `search_graph` (keyword or semantic) |
+| Question                              | Tool to use                          |
+| ------------------------------------- | ------------------------------------ |
+| Where is `functionName` defined?      | `find_definition`                    |
+| Who calls `functionName`?             | `find_callers`                       |
+| What does `file.ts` import/export?    | `get_file_context`                   |
+| Blast radius of changing `@koeti/db`? | `get_impact_radius`                  |
+| What does this module do?             | `get_community_summary`              |
+| Find all usages of a pattern          | `search_graph` (keyword or semantic) |
 
 CRG covers the full monorepo — packages + apps. One query answers across all of `@koeti/*` and `apps/*`.
 
@@ -33,12 +33,14 @@ CRG covers the full monorepo — packages + apps. One query answers across all o
 ## When to use the graph vs. files
 
 **Use graph first:**
+
 - Tracing how auth flows from `@koeti/auth` into an app
 - Finding all places where `db.insert` is called
 - Checking what a package exports before importing it
 - Estimating impact of changing a shared package
 
 **Read the file directly:**
+
 - Implementing new code (you need the full file)
 - Debugging a specific function whose location you already know
 - Reading a config file
@@ -103,11 +105,11 @@ When a new SaaS is scaffolded with `pnpm create-mvp`, the graph picks it up auto
 
 From the article benchmarks (1,052-file monorepo, 5,780 nodes):
 
-| Query | grep+Read | CRG |
-|---|---|---|
-| Find a function definition | ~594 tokens | ~115 tokens |
-| Who calls X? | ~1,109 tokens | ~80 tokens |
-| Impact radius | incomplete | ~70 tokens |
+| Query                      | grep+Read     | CRG         |
+| -------------------------- | ------------- | ----------- |
+| Find a function definition | ~594 tokens   | ~115 tokens |
+| Who calls X?               | ~1,109 tokens | ~80 tokens  |
+| Impact radius              | incomplete    | ~70 tokens  |
 
 Full 37-lookup session: CRG ~20k tokens vs grep ~110k tokens (5.5x difference).
 

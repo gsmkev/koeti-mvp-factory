@@ -14,5 +14,5 @@ export type {
   Invitation,
   NewInvitation,
   TeamDataWithMembers,
-} from '@koeti/db'
-export { ActivityType } from '@koeti/db'
+} from '@koeti/db';
+export { ActivityType } from '@koeti/db';

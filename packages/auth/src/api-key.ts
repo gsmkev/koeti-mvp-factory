@@ -4,20 +4,20 @@
 // code runs in node and edge runtimes.
 
 export function generateApiKey() {
-  const bytes = crypto.getRandomValues(new Uint8Array(32))
-  return `koeti_${toHex(bytes)}`
+  const bytes = crypto.getRandomValues(new Uint8Array(32));
+  return `koeti_${toHex(bytes)}`;
 }
 
 export async function hashApiKey(key: string) {
-  const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(key))
-  return toHex(new Uint8Array(digest))
+  const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(key));
+  return toHex(new Uint8Array(digest));
 }
 
 // Enough to identify a key in the UI without revealing it.
 export function apiKeyPrefix(key: string) {
-  return key.slice(0, 14)
+  return key.slice(0, 14);
 }
 
 function toHex(bytes: Uint8Array) {
-  return Array.from(bytes, (b) => b.toString(16).padStart(2, '0')).join('')
+  return Array.from(bytes, (b) => b.toString(16).padStart(2, '0')).join('');
 }

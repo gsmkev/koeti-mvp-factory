@@ -1,0 +1,12 @@
+# Build output & deps — never format generated or vendored files.
+node_modules
+.next
+.turbo
+dist
+build
+coverage
+
+# Generated: Drizzle migrations + snapshots, lockfiles.
+**/lib/db/migrations/**
+pnpm-lock.yaml
+*.min.js

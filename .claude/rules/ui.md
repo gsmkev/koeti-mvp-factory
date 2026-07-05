@@ -1,7 +1,7 @@
 ---
 paths:
-  - "**/app/**/*.tsx"
-  - "**/components/**/*.tsx"
+  - '**/app/**/*.tsx'
+  - '**/components/**/*.tsx'
 ---
 
 # UI rules
@@ -13,11 +13,16 @@ URL-persistent page state (filters, tabs, search) → nuqs, see `.claude/rules/u
 ## Component imports
 
 ```ts
-import { Button, Input, Card, CardContent, CardHeader, CardTitle, Label, cn } from '@koeti/ui'
-import { Avatar, AvatarFallback } from '@koeti/ui'
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@koeti/ui'
+import { Button, Input, Card, CardContent, CardHeader, CardTitle, Label, cn } from '@koeti/ui';
+import { Avatar, AvatarFallback } from '@koeti/ui';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@koeti/ui';
 // Dashboard composites — prefer these over hand-rolling:
-import { PageHeader, DataTable, EmptyState, StatCard, SubmitButton } from '@koeti/ui'
+import { PageHeader, DataTable, EmptyState, StatCard, SubmitButton } from '@koeti/ui';
 ```
 
 For team-scoped CRUD pages, follow the full recipe in `.claude/rules/crud.md`.
@@ -48,10 +53,10 @@ app/
 
 ```ts
 // Client components
-import { track } from '@koeti/analytics/client'
-track('button_clicked', { label: 'upgrade' })
+import { track } from '@koeti/analytics/client';
+track('button_clicked', { label: 'upgrade' });
 
 // Server components / actions
-import { track } from '@koeti/analytics/server'
-track('subscription_started', { plan: 'pro', userId: String(user.id) })
+import { track } from '@koeti/analytics/server';
+track('subscription_started', { plan: 'pro', userId: String(user.id) });
 ```

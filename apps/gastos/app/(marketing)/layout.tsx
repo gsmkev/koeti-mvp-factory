@@ -1,4 +1,5 @@
 'use client';
+// Layout for the marketing segment.
 
 import Link from 'next/link';
 import { Suspense } from 'react';
@@ -13,7 +14,7 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuTrigger
+  DropdownMenuTrigger,
 } from '@koeti/ui';
 import { signOut } from '@/app/(login)/actions';
 import { useRouter } from 'next/navigation';
@@ -101,11 +102,7 @@ function UserMenu() {
   );
 }
 
-export default function MarketingLayout({
-  children
-}: {
-  children: React.ReactNode;
-}) {
+export default function MarketingLayout({ children }: { children: React.ReactNode }) {
   const t = useTranslations('nav');
   return (
     <section className="flex min-h-screen flex-col">
@@ -113,9 +110,7 @@ export default function MarketingLayout({
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6 sm:px-8">
           <Link href="/" className="flex items-center gap-2.5">
             <BrandMark />
-            <span className="font-display text-lg font-semibold text-foreground">
-              {APP_NAME}
-            </span>
+            <span className="font-display text-lg font-semibold text-foreground">{APP_NAME}</span>
           </Link>
           <div className="flex items-center gap-3 sm:gap-5">
             <LocaleSwitcher />
@@ -129,9 +124,7 @@ export default function MarketingLayout({
       <div className="flex-1">{children}</div>
       <footer className="border-t border-border">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-6 sm:px-8">
-          <p className="text-sm text-muted-foreground">
-            {t('footerTagline', { app: APP_NAME })}
-          </p>
+          <p className="text-sm text-muted-foreground">{t('footerTagline', { app: APP_NAME })}</p>
           <Link
             href="/pricing"
             className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"

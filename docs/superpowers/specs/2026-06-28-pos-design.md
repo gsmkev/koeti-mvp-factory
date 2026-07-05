@@ -23,12 +23,12 @@ Stock is decremented atomically when a sale is created. Cancelling a sale restor
 
 ## Pages
 
-| Route | Purpose |
-|-------|---------|
-| `/pos` | POS screen — search products, build cart, checkout |
-| `/sales` | Sale history — view, cancel |
-| `/inventory` | Product catalog — create, edit, adjust stock |
-| `/suppliers` | Supplier list — create, edit; record and edit payments |
+| Route        | Purpose                                                      |
+| ------------ | ------------------------------------------------------------ |
+| `/pos`       | POS screen — search products, build cart, checkout           |
+| `/sales`     | Sale history — view, cancel                                  |
+| `/inventory` | Product catalog — create, edit, adjust stock                 |
+| `/suppliers` | Supplier list — create, edit; record and edit payments       |
 | `/dashboard` | KPIs: sales by period, top products, supplier payments total |
 
 ## Business logic (`lib/`)

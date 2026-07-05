@@ -1,20 +1,14 @@
-import * as React from "react"
+// data table — exported via @koeti/ui.
+import * as React from 'react';
 
-import { cn } from "../utils"
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "./table"
+import { cn } from '../utils';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './table';
 
 export type DataTableColumn<T> = {
-  header: React.ReactNode
-  cell: (row: T) => React.ReactNode
-  className?: string
-}
+  header: React.ReactNode;
+  cell: (row: T) => React.ReactNode;
+  className?: string;
+};
 
 // Typed rows-and-columns table for the common dashboard list page.
 // Server-component friendly (no hooks); compose Table* directly when you
@@ -26,14 +20,14 @@ function DataTable<T>({
   empty,
   className,
 }: {
-  columns: DataTableColumn<T>[]
-  rows: T[]
-  rowKey: (row: T) => string | number
-  empty?: React.ReactNode
-  className?: string
+  columns: DataTableColumn<T>[];
+  rows: T[];
+  rowKey: (row: T) => string | number;
+  empty?: React.ReactNode;
+  className?: string;
 }) {
   if (rows.length === 0 && empty !== undefined) {
-    return <>{empty}</>
+    return <>{empty}</>;
   }
   return (
     <Table data-slot="data-table" className={className}>
@@ -58,7 +52,7 @@ function DataTable<T>({
         ))}
       </TableBody>
     </Table>
-  )
+  );
 }
 
-export { DataTable }
+export { DataTable };

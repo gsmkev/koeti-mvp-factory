@@ -10,7 +10,9 @@
     "smoke": "node scripts/smoke.mjs",
     "bootstrap": "node scripts/bootstrap.mjs",
     "verify-app": "node scripts/verify-app.mjs",
-    "e2e-app": "node scripts/e2e-app.mjs"
+    "e2e-app": "node scripts/e2e-app.mjs",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
   },
   "devDependencies": {
     "playwright": "^1.61.1",

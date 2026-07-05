@@ -9,6 +9,7 @@ argument-hint: <saas-name>
 ## Step 1 — Locate the spec and plan
 
 Read:
+
 - `docs/superpowers/specs/` — find the spec for `$ARGUMENTS`
 - `docs/superpowers/plans/` — find the implementation plan for `$ARGUMENTS`
 
@@ -27,6 +28,7 @@ If `apps/$ARGUMENTS/` already exists, skip this step.
 Use `superpowers:executing-plans` or `superpowers:subagent-driven-development` to implement the plan task by task.
 
 **At every task:**
+
 - Check the relevant `.claude/rules/` file for the pattern before writing code
 - DB work → `.claude/rules/db.md`
 - Auth/actions → `.claude/rules/auth.md`

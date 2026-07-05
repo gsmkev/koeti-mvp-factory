@@ -10,24 +10,24 @@ consumable from another MVP by plain link.
 `app/(dashboard)/dashboard/<entity>/search-params.ts`:
 
 ```ts
-import { createLoader, parseAsStringEnum, parseAsString } from 'nuqs/server'
+import { createLoader, parseAsStringEnum, parseAsString } from 'nuqs/server';
 
 export const loadSearchParams = createLoader({
   category: parseAsStringEnum(['a', 'b', 'c']),
   q: parseAsString,
-})
+});
 ```
 
 Page reads typed params and passes them to the query (which must still scope by
 `teamId`):
 
 ```tsx
-import type { SearchParams } from 'nuqs/server'
-import { loadSearchParams } from './search-params'
+import type { SearchParams } from 'nuqs/server';
+import { loadSearchParams } from './search-params';
 
 export default async function Page({ searchParams }: { searchParams: Promise<SearchParams> }) {
-  const { category } = await loadSearchParams(searchParams)
-  const rows = await getThings(team.id, category ?? undefined)
+  const { category } = await loadSearchParams(searchParams);
+  const rows = await getThings(team.id, category ?? undefined);
   // filter UI = plain <Link href="?category=a"> badges — no client JS needed
 }
 ```
@@ -37,9 +37,9 @@ Worked example: `apps/gastos/app/(dashboard)/dashboard/gastos/`.
 ## Client pattern (interactive widgets only)
 
 ```tsx
-'use client'
-import { useQueryState, parseAsString } from 'nuqs'
-const [q, setQ] = useQueryState('q', parseAsString.withDefault(''))
+'use client';
+import { useQueryState, parseAsString } from 'nuqs';
+const [q, setQ] = useQueryState('q', parseAsString.withDefault(''));
 ```
 
 Wrap the component in `<Suspense>` when the page is otherwise static. Import

@@ -1,3 +1,4 @@
+// Page — route /sign-up.
 import { Suspense } from 'react';
 import { googleConfigured } from '@koeti/auth';
 import { Login } from '../login';

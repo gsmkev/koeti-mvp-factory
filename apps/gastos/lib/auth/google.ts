@@ -1,15 +1,9 @@
+// gastos lib — google.
 import { randomBytes } from 'crypto';
 import { eq } from 'drizzle-orm';
 import { db } from '@/lib/db/drizzle';
 import { hashPassword } from '@/lib/auth/session';
-import {
-  users,
-  teams,
-  teamMembers,
-  activityLogs,
-  ActivityType,
-  type NewUser,
-} from '@koeti/db';
+import { users, teams, teamMembers, activityLogs, ActivityType, type NewUser } from '@koeti/db';
 
 // redirect_uri must match a URI registered in the Google Cloud Console exactly.
 // Prod pins the canonical BASE_URL (the Host header is client-suppliable);
@@ -26,11 +20,7 @@ export function googleCallbackUri(request: Request) {
 // profile. OAuth users have no password: we store an unverifiable random hash
 // so password sign-in can never match.
 export async function upsertGoogleUser(profile: { email: string; name?: string }) {
-  const [existing] = await db
-    .select()
-    .from(users)
-    .where(eq(users.email, profile.email))
-    .limit(1);
+  const [existing] = await db.select().from(users).where(eq(users.email, profile.email)).limit(1);
   if (existing && !existing.deletedAt) {
     // Google has proved ownership of this email, so the verified Google user
     // keeps the account. But this row may have been pre-registered by an

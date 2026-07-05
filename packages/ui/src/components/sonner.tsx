@@ -1,6 +1,7 @@
-"use client"
+'use client';
+// sonner — exported via @koeti/ui.
 
-import { Toaster as Sonner, type ToasterProps } from "sonner"
+import { Toaster as Sonner, type ToasterProps } from 'sonner';
 
 function Toaster({ ...props }: ToasterProps) {
   return (
@@ -9,14 +10,14 @@ function Toaster({ ...props }: ToasterProps) {
       className="toaster group"
       style={
         {
-          "--normal-bg": "var(--popover)",
-          "--normal-text": "var(--popover-foreground)",
-          "--normal-border": "var(--border)",
+          '--normal-bg': 'var(--popover)',
+          '--normal-text': 'var(--popover-foreground)',
+          '--normal-border': 'var(--border)',
         } as React.CSSProperties
       }
       {...props}
     />
-  )
+  );
 }
 
-export { Toaster }
+export { Toaster };

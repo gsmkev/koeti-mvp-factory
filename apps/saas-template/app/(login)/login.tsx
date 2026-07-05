@@ -1,4 +1,5 @@
 'use client';
+// Login — component for the login segment.
 
 import Link from 'next/link';
 import { useActionState } from 'react';
@@ -26,7 +27,7 @@ export function Login({
   const oauthError = searchParams.get('error') === 'oauth';
   const [state, formAction, pending] = useActionState<ActionState, FormData>(
     mode === 'signin' ? signIn : signUp,
-    { error: '' }
+    { error: '' },
   );
 
   return (
@@ -108,9 +109,7 @@ export function Login({
                 id="password"
                 name="password"
                 type="password"
-                autoComplete={
-                  mode === 'signin' ? 'current-password' : 'new-password'
-                }
+                autoComplete={mode === 'signin' ? 'current-password' : 'new-password'}
                 defaultValue={state.password}
                 required
                 minLength={8}
@@ -165,7 +164,7 @@ export function Login({
           style={{
             backgroundImage:
               'linear-gradient(to right, var(--sidebar-border) 1px, transparent 1px), linear-gradient(to bottom, var(--sidebar-border) 1px, transparent 1px)',
-            backgroundSize: '32px 32px'
+            backgroundSize: '32px 32px',
           }}
         />
         <div className="relative" />

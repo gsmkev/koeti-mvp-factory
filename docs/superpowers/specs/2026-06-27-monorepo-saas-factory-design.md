@@ -60,12 +60,14 @@ All SaaS apps share the same infrastructure (single Postgres instance, single St
 ## Core Packages
 
 ### `@koeti/db`
+
 - Drizzle base schema: `users`, `teams`, `team_members`, `activity_logs`, `invitations`
 - Exported base schema object: `baseSchema` (used by apps to compose their drizzle instance)
 - Exported types: `User`, `Team`, `TeamMember`, `ActivityLog`, `Invitation`, and their `New*` variants
 - Does NOT export a `db` instance — each app creates its own (see DB Pattern below)
 
 ### `@koeti/auth`
+
 - JWT session management: `signToken`, `verifyToken`, `getSession`, `setSession`
 - Password helpers: `hashPassword`, `comparePasswords`
 - DB-aware helpers (require app's db): `getUser`, `getTeamForUser`
@@ -73,6 +75,7 @@ All SaaS apps share the same infrastructure (single Postgres instance, single St
 - Middleware factory: `createAuthMiddleware(protectedRoutes)`
 
 ### `@koeti/billing`
+
 - Stripe client (pre-configured from `STRIPE_SECRET_KEY`)
 - `createCheckoutSession({ team, priceId })`
 - `createCustomerPortalSession(team)`
@@ -80,26 +83,31 @@ All SaaS apps share the same infrastructure (single Postgres instance, single St
 - `getStripePrices()`, `getStripeProducts()`
 
 ### `@koeti/ui`
+
 - All shadcn/ui components pre-populated (Button, Input, Card, Label, Avatar, DropdownMenu, RadioGroup, etc.)
 - `cn()` utility re-exported
 - Tailwind CSS required as peer dependency (configured via `@koeti/config`)
 
 ### Frontend Design: `design-taste-frontend` skill
+
 All frontend work in any SaaS (landing pages, dashboards, components, forms) must be implemented using the `design-taste-frontend` skill (from tasteskill.dev). This is enforced to prevent generic/templated UIs. The skill reads the SaaS spec, infers the right design direction for that product, and ships non-templated interfaces. LLMs invoke it before implementing any UI surface, passing the SaaS brief as context.
 
 ### `@koeti/email`
+
 - Resend client (configured from `RESEND_API_KEY`)
 - Base templates: `WelcomeEmail`, `PasswordResetEmail`
 - `sendEmail({ to, subject, template })` — provider-agnostic send function
 - Apps add their own templates by creating React Email components locally
 
 ### `@koeti/analytics`
+
 - PostHog client (configured from `NEXT_PUBLIC_POSTHOG_KEY`, `POSTHOG_HOST`)
 - `track(event: string, props?: Record<string, unknown>)`
 - `identify(userId: string, traits?: Record<string, unknown>)`
 - Server-side and client-side variants exported separately
 
 ### `@koeti/config`
+
 - `tsconfig.base.json` — base TypeScript config for all packages and apps
 - `tsconfig.nextjs.json` — extends base, adds Next.js specifics
 - `eslint/index.js` — shared ESLint ruleset
@@ -112,39 +120,44 @@ All frontend work in any SaaS (landing pages, dashboards, components, forms) mus
 The base schema lives in `@koeti/db`. Each app composes its own Drizzle instance by spreading the base schema with its own tables.
 
 ### `apps/<name>/lib/db/index.ts`
-```ts
-import { baseSchema } from '@koeti/db'
-import * as appSchema from './schema'
-import { drizzle } from 'drizzle-orm/postgres-js'
-import postgres from 'postgres'
 
-const client = postgres(process.env.POSTGRES_URL!)
-export const db = drizzle(client, { schema: { ...baseSchema, ...appSchema } })
+```ts
+import { baseSchema } from '@koeti/db';
+import * as appSchema from './schema';
+import { drizzle } from 'drizzle-orm/postgres-js';
+import postgres from 'postgres';
+
+const client = postgres(process.env.POSTGRES_URL!);
+export const db = drizzle(client, { schema: { ...baseSchema, ...appSchema } });
 ```
 
 ### `apps/<name>/drizzle.config.ts`
+
 ```ts
-import { defineConfig } from 'drizzle-kit'
+import { defineConfig } from 'drizzle-kit';
 
 export default defineConfig({
   schema: ['../../packages/db/src/schema.ts', './lib/db/schema.ts'],
   out: './lib/db/migrations',
   dialect: 'postgresql',
   dbCredentials: { url: process.env.POSTGRES_URL! },
-})
+});
 ```
 
 ### `apps/<name>/lib/db/schema.ts` (app-specific tables only)
+
 ```ts
-import { pgTable, serial, integer, varchar, timestamp } from 'drizzle-orm/pg-core'
-import { users } from '@koeti/db'
+import { pgTable, serial, integer, varchar, timestamp } from 'drizzle-orm/pg-core';
+import { users } from '@koeti/db';
 
 // Only define THIS app's tables here. Never redefine users/teams/etc.
 export const myTable = pgTable('my_table', {
   id: serial('id').primaryKey(),
-  userId: integer('user_id').notNull().references(() => users.id),
+  userId: integer('user_id')
+    .notNull()
+    .references(() => users.id),
   // ...app-specific columns
-})
+});
 ```
 
 ---
@@ -185,6 +198,7 @@ apps/<name>/
 ```
 
 **Rules:**
+
 - Never import from another app (`apps/*`)
 - Never run `npx shadcn add` — all components are in `@koeti/ui`
 - Never reimplement auth — use `@koeti/auth`
@@ -197,11 +211,13 @@ apps/<name>/
 ## `create-mvp` Generator
 
 **Invocation:**
+
 ```bash
 pnpm create-mvp <saas-name>
 ```
 
 **What it does:**
+
 1. Copies the minimal structure from `apps/saas-template/` into `apps/<saas-name>/`
 2. Replaces all occurrences of `saas-template` / `@koeti/saas-template` with the new name
 3. Generates `package.json` with `name: "@koeti/<saas-name>"` and `workspace:*` deps on all core packages
@@ -219,14 +235,14 @@ pnpm create-mvp <saas-name>
 
 Instead of a single large AGENTS.md, the LLM context is split by load trigger:
 
-| File | Loads when | Contains |
-|---|---|---|
-| `CLAUDE.md` | Every session | Commands, core rules, package imports, pointers |
-| `.claude/rules/db.md` | Editing `lib/db/**`, `drizzle.config.ts` | Canonical DB pattern verbatim |
-| `.claude/rules/auth.md` | Editing `middleware.ts`, `lib/auth/**`, `lib/actions/**` | Auth import table, action wrapper pattern |
-| `.claude/rules/billing.md` | Editing `api/stripe/**`, `lib/payments/**` | Webhook DI pattern, checkout/portal pattern |
-| `.claude/rules/ui.md` | Editing `app/**/*.tsx`, `components/**/*.tsx` | design-taste-frontend trigger, component imports |
-| `.claude/skills/create-saas/` | `/create-saas <name>` invocation | Full autonomous SaaS implementation workflow |
+| File                          | Loads when                                               | Contains                                         |
+| ----------------------------- | -------------------------------------------------------- | ------------------------------------------------ |
+| `CLAUDE.md`                   | Every session                                            | Commands, core rules, package imports, pointers  |
+| `.claude/rules/db.md`         | Editing `lib/db/**`, `drizzle.config.ts`                 | Canonical DB pattern verbatim                    |
+| `.claude/rules/auth.md`       | Editing `middleware.ts`, `lib/auth/**`, `lib/actions/**` | Auth import table, action wrapper pattern        |
+| `.claude/rules/billing.md`    | Editing `api/stripe/**`, `lib/payments/**`               | Webhook DI pattern, checkout/portal pattern      |
+| `.claude/rules/ui.md`         | Editing `app/**/*.tsx`, `components/**/*.tsx`            | design-taste-frontend trigger, component imports |
+| `.claude/skills/create-saas/` | `/create-saas <name>` invocation                         | Full autonomous SaaS implementation workflow     |
 
 This replaces AGENTS.md. Context is loaded only when relevant, reducing token waste per session.
 
@@ -237,10 +253,10 @@ This replaces AGENTS.md. Context is loaded only when relevant, reducing token wa
 ```json
 {
   "pipeline": {
-    "build":      { "dependsOn": ["^build"], "outputs": [".next/**"] },
-    "dev":        { "cache": false, "persistent": true },
-    "lint":       { "dependsOn": ["^lint"] },
-    "test":       { "dependsOn": ["^build"] },
+    "build": { "dependsOn": ["^build"], "outputs": [".next/**"] },
+    "dev": { "cache": false, "persistent": true },
+    "lint": { "dependsOn": ["^lint"] },
+    "test": { "dependsOn": ["^build"] },
     "db:migrate": { "cache": false }
   }
 }
@@ -259,6 +275,7 @@ pnpm build                                         # build all (Turbo cached)
 ## Eject Path
 
 If a SaaS grows beyond the monorepo:
+
 1. Copy `apps/<name>/` to a new repository
 2. Publish `@koeti/*` packages to npm or private registry
 3. Replace `workspace:*` references with pinned versions
@@ -270,21 +287,25 @@ If a SaaS grows beyond the monorepo:
 Two tools maintain queryable code graphs to reduce token consumption for autonomous LLM agents.
 
 ### code-review-graph (CRG)
+
 - SQLite-backed dependency graph with MCP tools exposed to Claude Code / Codex
 - Configured with focused 8-tool set (`CRG_TOOLS` env var) — reduces schema overhead ~70%
 - Updated automatically via Claude Code Stop hook (~0.425s, non-blocking)
 - Scope: entire monorepo root (covers all packages + all apps in one graph)
 
 ### graphify
+
 - AST-based community graph → `graphify-out/GRAPH_REPORT.md` + `graph.html`
 - Updated via `post-commit` git hook only (~10s, runs in background)
 - NOT in Claude hooks — 10s updates cause process pile-up in autonomous sessions
 
 ### Integration with AGENTS.md
+
 `AGENTS.md` contains a pointer to `docs/agent/knowledge-graph.md` (not inline docs).
 This activates graph usage without bloating context on every session.
 
 ### One graph per monorepo
+
 A single CRG database at the repo root covers `packages/*` and `apps/*`.
 New SaaS apps are automatically included after the next commit or Claude session turn.
 

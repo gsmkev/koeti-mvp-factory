@@ -1,4 +1,5 @@
 'use client';
+// Page — route /dashboard/general.
 
 import { useActionState } from 'react';
 import { useTranslations } from 'next-intl';
@@ -24,11 +25,7 @@ type AccountFormProps = {
   emailValue?: string;
 };
 
-function AccountForm({
-  state,
-  nameValue = '',
-  emailValue = ''
-}: AccountFormProps) {
+function AccountForm({ state, nameValue = '', emailValue = '' }: AccountFormProps) {
   const t = useTranslations('account');
   return (
     <>
@@ -63,21 +60,12 @@ function AccountForm({
 
 function AccountFormWithData({ state }: { state: ActionState }) {
   const { data: user } = useSWR<User>('/api/user', fetcher);
-  return (
-    <AccountForm
-      state={state}
-      nameValue={user?.name ?? ''}
-      emailValue={user?.email ?? ''}
-    />
-  );
+  return <AccountForm state={state} nameValue={user?.name ?? ''} emailValue={user?.email ?? ''} />;
 }
 
 export default function GeneralPage() {
   const t = useTranslations('account');
-  const [state, formAction] = useActionState<ActionState, FormData>(
-    updateAccount,
-    {}
-  );
+  const [state, formAction] = useActionState<ActionState, FormData>(updateAccount, {});
 
   return (
     <section className="flex-1 space-y-6 p-4 lg:p-8">
@@ -92,12 +80,8 @@ export default function GeneralPage() {
             <Suspense fallback={<AccountForm state={state} />}>
               <AccountFormWithData state={state} />
             </Suspense>
-            {state.error && (
-              <p className="text-destructive text-sm">{state.error}</p>
-            )}
-            {state.success && (
-              <p className="text-success text-sm">{state.success}</p>
-            )}
+            {state.error && <p className="text-destructive text-sm">{state.error}</p>}
+            {state.success && <p className="text-success text-sm">{state.success}</p>}
             <SubmitButton pendingText={t('saving')}>{t('save')}</SubmitButton>
           </form>
         </CardContent>

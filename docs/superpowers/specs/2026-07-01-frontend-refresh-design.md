@@ -32,27 +32,29 @@ starts from something good, not a blank template.
 
 ## New `@koeti/ui` components
 
-| Component | Purpose |
-|---|---|
-| `Table` (+ Header/Row/Cell/etc.) | Replaces raw `<table>` in inventory, sales, suppliers, dashboard |
-| `Select` | Replaces raw `<select>` (supplier picker in payment-form) |
-| `Dialog` | Replaces the always-visible/toggle-open inline edit forms |
-| `Tabs` | Settings sub-nav (general/activity/security) |
-| `Badge` | Sale status, low-stock indicators |
-| `Textarea` | Longer form fields (e.g. supplier contact) |
-| `Switch` | Boolean settings (no urgent consumer yet, but a real gap in the primitive set) |
-| `Skeleton` | Loading states (e.g. `/pos` product grid while `/api/products` fetches) |
-| `Separator` | Replaces ad-hoc `border-t` divs |
-| `Sonner` (toast) | Replaces inline "Guardado"/error `<p>` tags scattered through every form |
+| Component                        | Purpose                                                                        |
+| -------------------------------- | ------------------------------------------------------------------------------ |
+| `Table` (+ Header/Row/Cell/etc.) | Replaces raw `<table>` in inventory, sales, suppliers, dashboard               |
+| `Select`                         | Replaces raw `<select>` (supplier picker in payment-form)                      |
+| `Dialog`                         | Replaces the always-visible/toggle-open inline edit forms                      |
+| `Tabs`                           | Settings sub-nav (general/activity/security)                                   |
+| `Badge`                          | Sale status, low-stock indicators                                              |
+| `Textarea`                       | Longer form fields (e.g. supplier contact)                                     |
+| `Switch`                         | Boolean settings (no urgent consumer yet, but a real gap in the primitive set) |
+| `Skeleton`                       | Loading states (e.g. `/pos` product grid while `/api/products` fetches)        |
+| `Separator`                      | Replaces ad-hoc `border-t` divs                                                |
+| `Sonner` (toast)                 | Replaces inline "Guardado"/error `<p>` tags scattered through every form       |
 
 ## Page inventory
 
 **apps/saas-template** (new generic baseline):
+
 - Landing (home)
 - Pricing
 - Dashboard shell
 
 **apps/pos** (redesigned on the same components + its own theme):
+
 - Landing (home)
 - Pricing
 - `/pos`
@@ -70,6 +72,7 @@ schema.
 ## Error / empty / loading states
 
 Standardize once, apply everywhere:
+
 - `Skeleton` while data loads.
 - A consistent empty-state pattern (icon + short copy) — already used ad hoc in koeti-pos,
   formalized as the one pattern every list/table uses.

@@ -1,29 +1,30 @@
-import * as React from "react"
+// resource field — exported via @koeti/ui.
+import * as React from 'react';
 
-import { Input } from "./input"
-import { Textarea } from "./textarea"
+import { Input } from './input';
+import { Textarea } from './textarea';
 
 export type ResourceField = {
-  name: string
-  label: string
-  type?: "text" | "number" | "date" | "email" | "textarea" | "select"
-  placeholder?: string
-  required?: boolean
-  step?: string
+  name: string;
+  label: string;
+  type?: 'text' | 'number' | 'date' | 'email' | 'textarea' | 'select';
+  placeholder?: string;
+  required?: boolean;
+  step?: string;
   /** for type: "select" */
-  options?: { value: string; label: string }[]
-  defaultValue?: string
-}
+  options?: { value: string; label: string }[];
+  defaultValue?: string;
+};
 
 export function FieldControl({
   field,
-  idPrefix = "resource",
+  idPrefix = 'resource',
   defaultValue,
 }: {
-  field: ResourceField
-  idPrefix?: string
+  field: ResourceField;
+  idPrefix?: string;
   /** overrides field.defaultValue (used by the edit dialog to prefill from the row) */
-  defaultValue?: string
+  defaultValue?: string;
 }) {
   const common = {
     id: `${idPrefix}-${field.name}`,
@@ -31,9 +32,9 @@ export function FieldControl({
     placeholder: field.placeholder,
     required: field.required,
     defaultValue: defaultValue ?? field.defaultValue,
-  }
-  if (field.type === "textarea") return <Textarea {...common} />
-  if (field.type === "select")
+  };
+  if (field.type === 'textarea') return <Textarea {...common} />;
+  if (field.type === 'select')
     return (
       // ponytail: native select — works in server-component forms without client wiring
       <select
@@ -46,6 +47,6 @@ export function FieldControl({
           </option>
         ))}
       </select>
-    )
-  return <Input {...common} type={field.type ?? "text"} step={field.step} />
+    );
+  return <Input {...common} type={field.type ?? 'text'} step={field.step} />;
 }

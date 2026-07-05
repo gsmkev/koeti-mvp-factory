@@ -1,5 +1,6 @@
-import { Body, Container, Head, Heading, Html, Link, Preview, Text } from '@react-email/components'
-import { defaultLocale, type Locale } from '@koeti/i18n/config'
+// @koeti/email — password reset.
+import { Body, Container, Head, Heading, Html, Link, Preview, Text } from '@react-email/components';
+import { defaultLocale, type Locale } from '@koeti/i18n/config';
 
 const copy = {
   en: {
@@ -23,19 +24,19 @@ const copy = {
     cta: 'Redefinir senha',
     subject: 'Redefina sua senha do {app}',
   },
-} as const satisfies Record<Locale, Record<string, string>>
+} as const satisfies Record<Locale, Record<string, string>>;
 
 export function passwordResetSubject(app: string, locale: Locale = defaultLocale) {
-  return copy[locale].subject.replace('{app}', app)
+  return copy[locale].subject.replace('{app}', app);
 }
 
 interface PasswordResetEmailProps {
-  resetLink: string
-  locale?: Locale
+  resetLink: string;
+  locale?: Locale;
 }
 
 export function PasswordResetEmail({ resetLink, locale = defaultLocale }: PasswordResetEmailProps) {
-  const c = copy[locale]
+  const c = copy[locale];
   return (
     <Html>
       <Head />
@@ -48,5 +49,5 @@ export function PasswordResetEmail({ resetLink, locale = defaultLocale }: Passwo
         </Container>
       </Body>
     </Html>
-  )
+  );
 }

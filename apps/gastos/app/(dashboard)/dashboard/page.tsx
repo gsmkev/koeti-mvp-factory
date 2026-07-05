@@ -1,5 +1,6 @@
-import Link from 'next/link'
-import { ArrowRight, Receipt } from 'lucide-react'
+// Page — route /dashboard.
+import Link from 'next/link';
+import { ArrowRight, Receipt } from 'lucide-react';
 import {
   Badge,
   Button,
@@ -16,39 +17,39 @@ import {
   PrintButton,
   StatCard,
   topN,
-} from '@koeti/ui'
-import { getTranslations } from 'next-intl/server'
-import { getExpenses, getMonthTotal, getTeamForUser } from '@/lib/db/queries'
+} from '@koeti/ui';
+import { getTranslations } from 'next-intl/server';
+import { getExpenses, getMonthTotal, getTeamForUser } from '@/lib/db/queries';
 
-const money = (n: number) =>
-  `$${n.toLocaleString('es', { minimumFractionDigits: 2 })}`
+const money = (n: number) => `$${n.toLocaleString('es', { minimumFractionDigits: 2 })}`;
 
 export default async function ResumenPage() {
-  const team = await getTeamForUser()
-  if (!team) throw new Error('Team not found')
+  const team = await getTeamForUser();
+  if (!team) throw new Error('Team not found');
   const [expenses, monthTotal, t, tcat] = await Promise.all([
     getExpenses(team.id),
     getMonthTotal(team.id),
     getTranslations('overview'),
     getTranslations('categories'),
-  ])
-  const catLabel = (c: string) => (['viaticos', 'materiales', 'software', 'otros'].includes(c) ? tcat(c) : c)
+  ]);
+  const catLabel = (c: string) =>
+    ['viaticos', 'materiales', 'software', 'otros'].includes(c) ? tcat(c) : c;
 
-  const monthStart = new Date()
-  monthStart.setDate(1)
-  const monthKey = monthStart.toISOString().slice(0, 7)
-  const monthCount = expenses.filter((e) => e.spentAt.startsWith(monthKey)).length
-  const recent = expenses.slice(0, 5)
+  const monthStart = new Date();
+  monthStart.setDate(1);
+  const monthKey = monthStart.toISOString().slice(0, 7);
+  const monthCount = expenses.filter((e) => e.spentAt.startsWith(monthKey)).length;
+  const recent = expenses.slice(0, 5);
 
   // Month-over-month delta (for expenses, spending less is good → deltaGoodDirection="down").
-  const prevMonth = new Date(monthStart)
-  prevMonth.setMonth(prevMonth.getMonth() - 1)
-  const prevKey = prevMonth.toISOString().slice(0, 7)
+  const prevMonth = new Date(monthStart);
+  prevMonth.setMonth(prevMonth.getMonth() - 1);
+  const prevKey = prevMonth.toISOString().slice(0, 7);
   const prevTotal = expenses
     .filter((e) => e.spentAt.startsWith(prevKey))
-    .reduce((s, e) => s + Number(e.amount), 0)
+    .reduce((s, e) => s + Number(e.amount), 0);
   const monthDelta =
-    prevTotal > 0 ? Math.round(((monthTotal - prevTotal) / prevTotal) * 100) : undefined
+    prevTotal > 0 ? Math.round(((monthTotal - prevTotal) / prevTotal) * 100) : undefined;
 
   // Raw rows → chart data in one line each (helpers scope nothing — the query did).
   const byCategory = topN(
@@ -59,11 +60,15 @@ export default async function ResumenPage() {
     ),
     5,
     tcat('otros'),
+  );
+  const byDay = groupSum(
+    expenses,
+    (e) => e.spentAt.slice(0, 10),
+    (e) => Number(e.amount),
   )
-  const byDay = groupSum(expenses, (e) => e.spentAt.slice(0, 10), (e) => Number(e.amount))
     .sort((a, b) => a.label.localeCompare(b.label))
     .slice(-14)
-    .map((d) => ({ ...d, label: d.label.slice(5) })) // MM-DD
+    .map((d) => ({ ...d, label: d.label.slice(5) })); // MM-DD
 
   return (
     <section className="flex-1 space-y-6 p-4 lg:p-8">
@@ -129,9 +134,7 @@ export default async function ResumenPage() {
               { header: t('colDate'), cell: (e) => e.spentAt },
               {
                 header: t('colCategory'),
-                cell: (e) => (
-                  <Badge variant="secondary">{catLabel(e.category)}</Badge>
-                ),
+                cell: (e) => <Badge variant="secondary">{catLabel(e.category)}</Badge>,
               },
               { header: t('colDescription'), cell: (e) => e.description },
               {
@@ -152,5 +155,5 @@ export default async function ResumenPage() {
         </CardContent>
       </Card>
     </section>
-  )
+  );
 }

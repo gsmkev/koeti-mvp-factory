@@ -1,13 +1,8 @@
 'use client';
+// Page — route /dashboard/team.
 
 import { Avatar, AvatarFallback, AvatarImage } from '@koeti/ui';
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardFooter
-} from '@koeti/ui';
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@koeti/ui';
 import { customerPortalAction } from '@/lib/payments/actions';
 import { useActionState } from 'react';
 import { useTranslations } from 'next-intl';
@@ -34,7 +29,7 @@ function roleLabel(t: (key: string) => string, role: string) {
     viewer: 'roleViewer',
     member: 'roleMember',
     admin: 'roleAdmin',
-    owner: 'roleOwner'
+    owner: 'roleOwner',
   };
   return keys[role] ? t(keys[role]) : role;
 }
@@ -71,8 +66,8 @@ function ManageSubscription() {
                 {teamData?.subscriptionStatus === 'active'
                   ? t('billedMonthly')
                   : teamData?.subscriptionStatus === 'trialing'
-                  ? t('trialPeriod')
-                  : t('noSubscription')}
+                    ? t('trialPeriod')
+                    : t('noSubscription')}
               </p>
             </div>
             <form action={customerPortalAction}>
@@ -112,10 +107,7 @@ function TeamMembersSkeleton() {
 function TeamMembers() {
   const t = useTranslations('team');
   const { data: teamData } = useSWR<TeamDataWithMembers>('/api/team', fetcher);
-  const [removeState, removeAction] = useActionState<ActionState, FormData>(
-    removeTeamMember,
-    {}
-  );
+  const [removeState, removeAction] = useActionState<ActionState, FormData>(removeTeamMember, {});
 
   const getUserDisplayName = (user: Pick<User, 'id' | 'name' | 'email'>) => {
     return user.name || user.email || '';
@@ -162,9 +154,7 @@ function TeamMembers() {
                   </AvatarFallback>
                 </Avatar>
                 <div>
-                  <p className="font-medium">
-                    {getUserDisplayName(member.user)}
-                  </p>
+                  <p className="font-medium">{getUserDisplayName(member.user)}</p>
                   <p className="text-sm text-muted-foreground capitalize">
                     {roleLabel(t, member.role)}
                   </p>
@@ -181,9 +171,7 @@ function TeamMembers() {
             </li>
           ))}
         </ul>
-        {removeState?.error && (
-          <p className="text-destructive mt-4">{removeState.error}</p>
-        )}
+        {removeState?.error && <p className="text-destructive mt-4">{removeState.error}</p>}
       </CardContent>
     </Card>
   );
@@ -205,10 +193,7 @@ function InviteTeamMember() {
   const { data: user } = useSWR<User>('/api/user', fetcher);
   // Cosmetic gate only — the server action enforces the admin requirement.
   const canInvite = user?.role === 'owner' || user?.role === 'admin' || user?.role === 'superadmin';
-  const [inviteState, inviteAction] = useActionState<ActionState, FormData>(
-    inviteTeamMember,
-    {}
-  );
+  const [inviteState, inviteAction] = useActionState<ActionState, FormData>(inviteTeamMember, {});
 
   return (
     <Card>
@@ -256,12 +241,8 @@ function InviteTeamMember() {
               </div>
             </RadioGroup>
           </div>
-          {inviteState?.error && (
-            <p className="text-destructive">{inviteState.error}</p>
-          )}
-          {inviteState?.success && (
-            <p className="text-success">{inviteState.success}</p>
-          )}
+          {inviteState?.error && <p className="text-destructive">{inviteState.error}</p>}
+          {inviteState?.success && <p className="text-success">{inviteState.success}</p>}
           <SubmitButton pendingText={t('inviting')} disabled={!canInvite}>
             <PlusCircle className="mr-2 h-4 w-4" />
             {t('inviteMember')}
@@ -270,9 +251,7 @@ function InviteTeamMember() {
       </CardContent>
       {!canInvite && (
         <CardFooter>
-          <p className="text-sm text-muted-foreground">
-            {t('adminOnlyInvite')}
-          </p>
+          <p className="text-sm text-muted-foreground">{t('adminOnlyInvite')}</p>
         </CardFooter>
       )}
     </Card>
