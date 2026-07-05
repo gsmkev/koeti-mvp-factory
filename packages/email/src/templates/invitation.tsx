@@ -1,5 +1,6 @@
-import { Body, Container, Head, Heading, Html, Link, Preview, Text } from '@react-email/components'
-import { defaultLocale, type Locale } from '@koeti/i18n/config'
+// @koeti/email — invitation.
+import { Body, Container, Head, Heading, Html, Link, Preview, Text } from '@react-email/components';
+import { defaultLocale, type Locale } from '@koeti/i18n/config';
 
 const copy = {
   en: {
@@ -23,17 +24,17 @@ const copy = {
     cta: 'Aceitar convite',
     subject: 'Você foi convidado para o {team}',
   },
-} as const satisfies Record<Locale, Record<string, string>>
+} as const satisfies Record<Locale, Record<string, string>>;
 
 export function invitationSubject(teamName: string, locale: Locale = defaultLocale) {
-  return copy[locale].subject.replace('{team}', teamName)
+  return copy[locale].subject.replace('{team}', teamName);
 }
 
 interface InvitationEmailProps {
-  teamName: string
-  inviterEmail: string
-  inviteLink: string
-  locale?: Locale
+  teamName: string;
+  inviterEmail: string;
+  inviteLink: string;
+  locale?: Locale;
 }
 
 export function InvitationEmail({
@@ -42,8 +43,8 @@ export function InvitationEmail({
   inviteLink,
   locale = defaultLocale,
 }: InvitationEmailProps) {
-  const c = copy[locale]
-  const fill = (s: string) => s.replace('{team}', teamName).replace('{inviter}', inviterEmail)
+  const c = copy[locale];
+  const fill = (s: string) => s.replace('{team}', teamName).replace('{inviter}', inviterEmail);
   return (
     <Html>
       <Head />
@@ -56,5 +57,5 @@ export function InvitationEmail({
         </Container>
       </Body>
     </Html>
-  )
+  );
 }

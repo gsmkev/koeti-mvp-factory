@@ -1,9 +1,10 @@
-"use client"
+'use client';
+// print button — exported via @koeti/ui.
 
-import * as React from "react"
-import { Printer } from "lucide-react"
+import * as React from 'react';
+import { Printer } from 'lucide-react';
 
-import { Button } from "./button"
+import { Button } from './button';
 
 /*
  * One-click "export this dashboard as a visual report". Uses the browser's
@@ -11,10 +12,7 @@ import { Button } from "./button"
  * globals.css — no PDF library. data-print-hide keeps the button off the page.
  * Drop it in a PageHeader's `actions`.
  */
-function PrintButton({
-  children = "Print / PDF",
-  ...props
-}: React.ComponentProps<typeof Button>) {
+function PrintButton({ children = 'Print / PDF', ...props }: React.ComponentProps<typeof Button>) {
   return (
     <Button
       type="button"
@@ -27,7 +25,7 @@ function PrintButton({
       <Printer />
       {children}
     </Button>
-  )
+  );
 }
 
-export { PrintButton }
+export { PrintButton };

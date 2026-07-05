@@ -43,28 +43,47 @@ Working in a fresh worktree? Run `pnpm bootstrap` first — `.env.local` files d
 ## Package imports
 
 ```ts
-import { getSession, setSession, hashPassword, verifyToken, validatedAction, createAuthMiddleware } from '@koeti/auth'
-import { rateLimit, signOneTimeToken, verifyOneTimeToken } from '@koeti/auth' // brute-force guard + purpose-scoped tokens (password reset)
-import { roleAtLeast, isSuperadmin, type TeamRole } from '@koeti/auth' // RBAC: viewer<member<admin<owner + SUPERADMIN_EMAIL — see .claude/rules/auth.md
-import { generateApiKey, hashApiKey, apiKeyPrefix } from '@koeti/auth' // team API keys for MVP-to-MVP auth
-import { baseSchema } from '@koeti/db'
-import type { User, Team, TeamMember, ApiKey } from '@koeti/db'
-import { createCheckoutSession, handleSubscriptionChange, stripe, isSubscribed } from '@koeti/billing' // isSubscribed = plan gating
-import { Button, Input, Card, cn } from '@koeti/ui'
-import { PageHeader, DataTable, EmptyState, StatCard, SubmitButton, ResourcePanel } from '@koeti/ui' // dashboard composites
-import { BarChart, LineChart, DonutChart, Sparkline, type ChartDatum } from '@koeti/ui' // zero-dep SVG charts (RSC-safe) — see .claude/rules/charts.md
-import { groupSum, countBy, topN } from '@koeti/ui' // rows → {label,value}[] for charts (topN folds extras into "Other")
-import { PrintButton } from '@koeti/ui' // one-click dashboard → PDF via native print (styled by @media print)
-import { createLoader, parseAsStringEnum } from 'nuqs/server' // typed URL state — see .claude/rules/url-state.md
-import { LocaleSwitcher, locales, defaultLocale, type Locale } from '@koeti/i18n' // en/es/pt via cookie — see .claude/rules/i18n.md
-import { createRequestConfig } from '@koeti/i18n/server' // for each app's i18n/request.ts
-import { getTranslations, getLocale } from 'next-intl/server' // server: t() in RSC/actions; useTranslations() in client components
-import { crudActions } from '@/lib/crud' // team-scoped CRUD actions factory (per app; optional minRole)
-import { requireRole, withTeam, teamRoleFor } from '@/lib/auth/middleware' // per-app RBAC: requireRole('viewer') in pages, withTeam(fn, 'admin') in actions
-import { getTeamFromApiKey } from '@/lib/auth/api-key' // Bearer koeti_… auth for app/api routes (per app)
-import { toCsv, csvResponse } from '@/lib/csv' // CSV export helper (per app)
-import { sendEmail, WelcomeEmail, PasswordResetEmail, InvitationEmail } from '@koeti/email'
-import { track, identify } from '@koeti/analytics/server'
+import {
+  getSession,
+  setSession,
+  hashPassword,
+  verifyToken,
+  validatedAction,
+  createAuthMiddleware,
+} from '@koeti/auth';
+import { rateLimit, signOneTimeToken, verifyOneTimeToken } from '@koeti/auth'; // brute-force guard + purpose-scoped tokens (password reset)
+import { roleAtLeast, isSuperadmin, type TeamRole } from '@koeti/auth'; // RBAC: viewer<member<admin<owner + SUPERADMIN_EMAIL — see .claude/rules/auth.md
+import { generateApiKey, hashApiKey, apiKeyPrefix } from '@koeti/auth'; // team API keys for MVP-to-MVP auth
+import { baseSchema } from '@koeti/db';
+import type { User, Team, TeamMember, ApiKey } from '@koeti/db';
+import {
+  createCheckoutSession,
+  handleSubscriptionChange,
+  stripe,
+  isSubscribed,
+} from '@koeti/billing'; // isSubscribed = plan gating
+import { Button, Input, Card, cn } from '@koeti/ui';
+import {
+  PageHeader,
+  DataTable,
+  EmptyState,
+  StatCard,
+  SubmitButton,
+  ResourcePanel,
+} from '@koeti/ui'; // dashboard composites
+import { BarChart, LineChart, DonutChart, Sparkline, type ChartDatum } from '@koeti/ui'; // zero-dep SVG charts (RSC-safe) — see .claude/rules/charts.md
+import { groupSum, countBy, topN } from '@koeti/ui'; // rows → {label,value}[] for charts (topN folds extras into "Other")
+import { PrintButton } from '@koeti/ui'; // one-click dashboard → PDF via native print (styled by @media print)
+import { createLoader, parseAsStringEnum } from 'nuqs/server'; // typed URL state — see .claude/rules/url-state.md
+import { LocaleSwitcher, locales, defaultLocale, type Locale } from '@koeti/i18n'; // en/es/pt via cookie — see .claude/rules/i18n.md
+import { createRequestConfig } from '@koeti/i18n/server'; // for each app's i18n/request.ts
+import { getTranslations, getLocale } from 'next-intl/server'; // server: t() in RSC/actions; useTranslations() in client components
+import { crudActions } from '@/lib/crud'; // team-scoped CRUD actions factory (per app; optional minRole)
+import { requireRole, withTeam, teamRoleFor } from '@/lib/auth/middleware'; // per-app RBAC: requireRole('viewer') in pages, withTeam(fn, 'admin') in actions
+import { getTeamFromApiKey } from '@/lib/auth/api-key'; // Bearer koeti_… auth for app/api routes (per app)
+import { toCsv, csvResponse } from '@/lib/csv'; // CSV export helper (per app)
+import { sendEmail, WelcomeEmail, PasswordResetEmail, InvitationEmail } from '@koeti/email';
+import { track, identify } from '@koeti/analytics/server';
 ```
 
 ## Knowledge graph
@@ -84,6 +103,7 @@ Every user-facing string goes through `t()` — the factory ships en/es/pt via a
 `@koeti/i18n`; each app adds only its business messages. See `.claude/rules/i18n.md`.
 
 <!-- code-review-graph MCP tools -->
+
 ## MCP Tools: code-review-graph
 
 **IMPORTANT: This project has a knowledge graph. ALWAYS use the
@@ -104,16 +124,16 @@ Fall back to Grep/Glob/Read **only** when the graph doesn't cover what you need.
 
 ### Key Tools
 
-| Tool | Use when |
-| ------ | ---------- |
-| `detect_changes` | Reviewing code changes — gives risk-scored analysis |
-| `get_review_context` | Need source snippets for review — token-efficient |
-| `get_impact_radius` | Understanding blast radius of a change |
-| `get_affected_flows` | Finding which execution paths are impacted |
-| `query_graph` | Tracing callers, callees, imports, tests, dependencies |
-| `semantic_search_nodes` | Finding functions/classes by name or keyword |
-| `get_architecture_overview` | Understanding high-level codebase structure |
-| `refactor_tool` | Planning renames, finding dead code |
+| Tool                        | Use when                                               |
+| --------------------------- | ------------------------------------------------------ |
+| `detect_changes`            | Reviewing code changes — gives risk-scored analysis    |
+| `get_review_context`        | Need source snippets for review — token-efficient      |
+| `get_impact_radius`         | Understanding blast radius of a change                 |
+| `get_affected_flows`        | Finding which execution paths are impacted             |
+| `query_graph`               | Tracing callers, callees, imports, tests, dependencies |
+| `semantic_search_nodes`     | Finding functions/classes by name or keyword           |
+| `get_architecture_overview` | Understanding high-level codebase structure            |
+| `refactor_tool`             | Planning renames, finding dead code                    |
 
 ### Workflow
 

@@ -1,3 +1,4 @@
+// gastos lib — stripe.
 export {
   stripe,
   createCheckoutSession,
@@ -5,4 +6,4 @@ export {
   handleSubscriptionChange,
   getStripePrices,
   getStripeProducts,
-} from '@koeti/billing'
+} from '@koeti/billing';

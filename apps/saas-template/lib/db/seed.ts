@@ -1,3 +1,4 @@
+// saas-template lib — seed.
 import { stripe } from '../payments/stripe';
 import { db } from './drizzle';
 import { users, teams, teamMembers } from '@koeti/db';
@@ -6,7 +7,9 @@ import { eq } from 'drizzle-orm';
 
 async function createStripeProducts() {
   if (!process.env.STRIPE_SECRET_KEY) {
-    console.log('STRIPE_SECRET_KEY not set — skipping Stripe products (pricing page will be empty).');
+    console.log(
+      'STRIPE_SECRET_KEY not set — skipping Stripe products (pricing page will be empty).',
+    );
     return;
   }
 

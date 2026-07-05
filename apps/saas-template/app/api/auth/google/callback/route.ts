@@ -1,3 +1,4 @@
+// API route (GET) — /api/auth/google/callback.
 import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
 import { getGoogleProfile } from '@koeti/auth';

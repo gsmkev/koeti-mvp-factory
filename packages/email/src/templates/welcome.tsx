@@ -1,5 +1,6 @@
-import { Body, Container, Head, Heading, Html, Preview, Text } from '@react-email/components'
-import { defaultLocale, type Locale } from '@koeti/i18n/config'
+// @koeti/email — welcome.
+import { Body, Container, Head, Heading, Html, Preview, Text } from '@react-email/components';
+import { defaultLocale, type Locale } from '@koeti/i18n/config';
 
 // react-email renders outside the request, so there's no next-intl context —
 // email copy lives here as a small per-locale dict instead. Keep it in sync
@@ -23,19 +24,19 @@ const copy = {
     body: 'Sua conta foi criada. Você já pode entrar e começar.',
     subject: 'Boas-vindas!',
   },
-} as const satisfies Record<Locale, Record<string, string>>
+} as const satisfies Record<Locale, Record<string, string>>;
 
 export function welcomeSubject(locale: Locale = defaultLocale) {
-  return copy[locale].subject
+  return copy[locale].subject;
 }
 
 interface WelcomeEmailProps {
-  name: string
-  locale?: Locale
+  name: string;
+  locale?: Locale;
 }
 
 export function WelcomeEmail({ name, locale = defaultLocale }: WelcomeEmailProps) {
-  const c = copy[locale]
+  const c = copy[locale];
   return (
     <Html>
       <Head />
@@ -47,5 +48,5 @@ export function WelcomeEmail({ name, locale = defaultLocale }: WelcomeEmailProps
         </Container>
       </Body>
     </Html>
-  )
+  );
 }

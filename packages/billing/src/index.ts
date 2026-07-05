@@ -1,3 +1,4 @@
+// @koeti/billing — public entry (re-exports).
 export {
   stripe,
   createCheckoutSession,
@@ -5,5 +6,5 @@ export {
   handleSubscriptionChange,
   getStripePrices,
   getStripeProducts,
-} from './stripe'
-export { isSubscribed } from './plan'
+} from './stripe';
+export { isSubscribed } from './plan';

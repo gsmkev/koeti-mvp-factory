@@ -10,37 +10,33 @@ import {
   PageHeader,
   PrintButton,
   StatCard,
-} from '@koeti/ui'
-import { getTranslations } from 'next-intl/server'
-import { getTeamForUser } from '@/lib/db/queries'
+} from '@koeti/ui';
+import { getTranslations } from 'next-intl/server';
+import { getTeamForUser } from '@/lib/db/queries';
 
 // Placeholder chart data — replace with real queries scoped by team.id.
 // Charts are zero-dependency SVG (render in server components, no client JS).
-const trendValues = [12, 18, 15, 27, 32, 24, 38]
-const breakdownValues = [42, 31, 18, 9]
+const trendValues = [12, 18, 15, 27, 32, 24, 38];
+const breakdownValues = [42, 31, 18, 9];
 
 export default async function OverviewPage() {
-  const team = await getTeamForUser()
-  if (!team) throw new Error('Team not found')
+  const team = await getTeamForUser();
+  if (!team) throw new Error('Team not found');
 
-  const t = await getTranslations('overview')
-  const tc = await getTranslations('common')
-  const days = t.raw('days') as string[]
-  const trend = trendValues.map((value, i) => ({ label: days[i], value }))
+  const t = await getTranslations('overview');
+  const tc = await getTranslations('common');
+  const days = t.raw('days') as string[];
+  const trend = trendValues.map((value, i) => ({ label: days[i], value }));
   const breakdown = [
     { label: t('sourceDirect'), value: breakdownValues[0] },
     { label: t('sourceSearch'), value: breakdownValues[1] },
     { label: t('sourceSocial'), value: breakdownValues[2] },
     { label: t('sourceEmail'), value: breakdownValues[3] },
-  ]
+  ];
 
   return (
     <section className="flex-1 space-y-6 p-4 lg:p-8">
-      <PageHeader
-        title={t('title')}
-        description={t('description')}
-        actions={<PrintButton />}
-      />
+      <PageHeader title={t('title')} description={t('description')} actions={<PrintButton />} />
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <StatCard label={t('statTeamMembers')} value={team.teamMembers.length} />
         <StatCard label={t('statPlan')} value={team.planName ?? tc('free')} />
@@ -60,7 +56,11 @@ export default async function OverviewPage() {
         </Card>
         <Card>
           <CardContent className="pt-6">
-            <DonutChart title={t('chartBySource')} data={breakdown} centerLabel={t('centerVisits')} />
+            <DonutChart
+              title={t('chartBySource')}
+              data={breakdown}
+              centerLabel={t('centerVisits')}
+            />
           </CardContent>
         </Card>
         <Card className="lg:col-span-3">
@@ -70,5 +70,5 @@ export default async function OverviewPage() {
         </Card>
       </div>
     </section>
-  )
+  );
 }

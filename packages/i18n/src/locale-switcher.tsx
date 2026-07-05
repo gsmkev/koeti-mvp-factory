@@ -1,22 +1,23 @@
-'use client'
+'use client';
+// @koeti/i18n — locale switcher.
 
-import { useLocale } from 'next-intl'
-import { useRouter } from 'next/navigation'
-import { useTransition } from 'react'
-import { locales, localeNames, LOCALE_COOKIE, type Locale } from './config'
+import { useLocale } from 'next-intl';
+import { useRouter } from 'next/navigation';
+import { useTransition } from 'react';
+import { locales, localeNames, LOCALE_COOKIE, type Locale } from './config';
 
 // ponytail: native <select> instead of a Radix component — one dependency-free
 // element, keyboard/a11y for free, no client JS beyond the change handler.
 // Sets the cookie directly (no server action needed) and refreshes so the
 // server re-renders with the new locale.
 export function LocaleSwitcher({ className = '' }: { className?: string }) {
-  const active = useLocale() as Locale
-  const router = useRouter()
-  const [pending, startTransition] = useTransition()
+  const active = useLocale() as Locale;
+  const router = useRouter();
+  const [pending, startTransition] = useTransition();
 
   function change(next: Locale) {
-    document.cookie = `${LOCALE_COOKIE}=${next}; path=/; max-age=31536000; samesite=lax`
-    startTransition(() => router.refresh())
+    document.cookie = `${LOCALE_COOKIE}=${next}; path=/; max-age=31536000; samesite=lax`;
+    startTransition(() => router.refresh());
   }
 
   return (
@@ -33,5 +34,5 @@ export function LocaleSwitcher({ className = '' }: { className?: string }) {
         </option>
       ))}
     </select>
-  )
+  );
 }

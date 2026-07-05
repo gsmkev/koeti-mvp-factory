@@ -30,14 +30,14 @@ pnpm --filter @koeti/<name> db:migrate    # apply migrations
 
 ## Layout
 
-| Path | Purpose |
-|---|---|
-| `apps/saas-template/` | The template every new SaaS is cloned from |
-| `apps/<name>/` | One SaaS per directory, owns `lib/db/schema.ts` for its tables |
-| `packages/auth,db,billing,ui,email,analytics,config` | Shared infrastructure (`@koeti/*`) |
-| `scripts/create-mvp.mjs` | Scaffolder |
-| `scripts/verify-app.mjs` | Per-app runtime verification (public + authenticated pages) |
-| `scripts/e2e-app.mjs` | Per-app browser E2E (sign-up + CRUD via ResourcePanel forms) |
+| Path                                                 | Purpose                                                        |
+| ---------------------------------------------------- | -------------------------------------------------------------- |
+| `apps/saas-template/`                                | The template every new SaaS is cloned from                     |
+| `apps/<name>/`                                       | One SaaS per directory, owns `lib/db/schema.ts` for its tables |
+| `packages/auth,db,billing,ui,email,analytics,config` | Shared infrastructure (`@koeti/*`)                             |
+| `scripts/create-mvp.mjs`                             | Scaffolder                                                     |
+| `scripts/verify-app.mjs`                             | Per-app runtime verification (public + authenticated pages)    |
+| `scripts/e2e-app.mjs`                                | Per-app browser E2E (sign-up + CRUD via ResourcePanel forms)   |
 
 ## AFK mode
 

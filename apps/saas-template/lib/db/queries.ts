@@ -1,38 +1,46 @@
-import { desc, and, eq, isNull, sql } from 'drizzle-orm'
-import { db } from './drizzle'
-import { verifyToken } from '@koeti/auth'
-import { cookies } from 'next/headers'
-import { activityLogs, apiKeys, teamMembers, teams, users } from '@koeti/db'
+// saas-template lib — queries.
+import { desc, and, eq, isNull, sql } from 'drizzle-orm';
+import { db } from './drizzle';
+import { verifyToken } from '@koeti/auth';
+import { cookies } from 'next/headers';
+import { activityLogs, apiKeys, teamMembers, teams, users } from '@koeti/db';
 
 export async function getUser() {
-  const sessionCookie = (await cookies()).get('session')
-  if (!sessionCookie?.value) return null
-  const sessionData = await verifyToken(sessionCookie.value)
-  if (!sessionData?.user || typeof sessionData.user.id !== 'number') return null
-  if (new Date(sessionData.expires) < new Date()) return null
+  const sessionCookie = (await cookies()).get('session');
+  if (!sessionCookie?.value) return null;
+  const sessionData = await verifyToken(sessionCookie.value);
+  if (!sessionData?.user || typeof sessionData.user.id !== 'number') return null;
+  if (new Date(sessionData.expires) < new Date()) return null;
   const user = await db
     .select()
     .from(users)
     .where(and(eq(users.id, sessionData.user.id), isNull(users.deletedAt)))
-    .limit(1)
-  return user[0] ?? null
+    .limit(1);
+  return user[0] ?? null;
 }
 
 export async function getTeamByStripeCustomerId(customerId: string) {
-  const result = await db.select().from(teams).where(eq(teams.stripeCustomerId, customerId)).limit(1)
-  return result[0] ?? null
+  const result = await db
+    .select()
+    .from(teams)
+    .where(eq(teams.stripeCustomerId, customerId))
+    .limit(1);
+  return result[0] ?? null;
 }
 
 export async function updateTeamSubscription(
   teamId: number,
   data: {
-    stripeSubscriptionId: string | null
-    stripeProductId: string | null
-    planName: string | null
-    subscriptionStatus: string
-  }
+    stripeSubscriptionId: string | null;
+    stripeProductId: string | null;
+    planName: string | null;
+    subscriptionStatus: string;
+  },
 ) {
-  await db.update(teams).set({ ...data, updatedAt: new Date() }).where(eq(teams.id, teamId))
+  await db
+    .update(teams)
+    .set({ ...data, updatedAt: new Date() })
+    .where(eq(teams.id, teamId));
 }
 
 export async function getUserWithTeam(userId: number) {
@@ -41,13 +49,13 @@ export async function getUserWithTeam(userId: number) {
     .from(users)
     .leftJoin(teamMembers, eq(users.id, teamMembers.userId))
     .where(eq(users.id, userId))
-    .limit(1)
-  return result[0]
+    .limit(1);
+  return result[0];
 }
 
 export async function getActivityLogs() {
-  const user = await getUser()
-  if (!user) throw new Error('User not authenticated')
+  const user = await getUser();
+  if (!user) throw new Error('User not authenticated');
   return await db
     .select({
       id: activityLogs.id,
@@ -60,7 +68,7 @@ export async function getActivityLogs() {
     .leftJoin(users, eq(activityLogs.userId, users.id))
     .where(eq(activityLogs.userId, user.id))
     .orderBy(desc(activityLogs.timestamp))
-    .limit(10)
+    .limit(10);
 }
 
 // Cross-tenant by design — callers MUST gate with isSuperadmin() first.
@@ -77,7 +85,7 @@ export async function getAdminTeamsOverview() {
     .from(teams)
     .leftJoin(teamMembers, eq(teams.id, teamMembers.teamId))
     .groupBy(teams.id)
-    .orderBy(desc(teams.createdAt))
+    .orderBy(desc(teams.createdAt));
 }
 
 export async function getApiKeys(teamId: number) {
@@ -85,12 +93,12 @@ export async function getApiKeys(teamId: number) {
     .select()
     .from(apiKeys)
     .where(eq(apiKeys.teamId, teamId))
-    .orderBy(desc(apiKeys.createdAt))
+    .orderBy(desc(apiKeys.createdAt));
 }
 
 export async function getTeamForUser() {
-  const user = await getUser()
-  if (!user) return null
+  const user = await getUser();
+  if (!user) return null;
   const result = await db.query.teamMembers.findFirst({
     where: eq(teamMembers.userId, user.id),
     with: {
@@ -102,6 +110,6 @@ export async function getTeamForUser() {
         },
       },
     },
-  })
-  return result?.team ?? null
+  });
+  return result?.team ?? null;
 }

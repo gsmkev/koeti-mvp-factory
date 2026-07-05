@@ -1,3 +1,4 @@
+// API route (GET) — /api/user.
 import { getUser } from '@/lib/db/queries';
 
 export async function GET() {

@@ -12,7 +12,7 @@ Today an autonomous run of `create-saas` still requires:
 - ~60 lines of hand-rolled server actions per CRUD entity, each an opportunity
   to forget team scoping or `revalidatePath`.
 - ~50 lines of page JSX per entity.
-- No per-app runtime check: `pnpm smoke` tests the *template*, not the app the
+- No per-app runtime check: `pnpm smoke` tests the _template_, not the app the
   LLM just built. SSR crashes on authenticated pages (the most common LLM
   failure) go undetected until a human clicks around.
 

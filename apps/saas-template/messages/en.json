@@ -28,7 +28,11 @@
     "getStarted": "Get Started",
     "loading": "Loading…",
     "baseFeatures": ["Unlimited usage", "Unlimited workspace members", "Email support"],
-    "plusFeatures": ["Everything in Base, and:", "Early access to new features", "24/7 support + Slack access"]
+    "plusFeatures": [
+      "Everything in Base, and:",
+      "Early access to new features",
+      "24/7 support + Slack access"
+    ]
   },
   "overview": {
     "title": "Overview",

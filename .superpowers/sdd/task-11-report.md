@@ -9,7 +9,7 @@ product features to sell yet).
 Design plan produced and followed:
 
 - **Subject reframe**: rather than inventing fake product copy, the honest
-  subject of this page *is* the scaffold itself — the real infrastructure this
+  subject of this page _is_ the scaffold itself — the real infrastructure this
   template ships with (auth, billing, teams). Framing the copy around that
   keeps it content-neutral (no vertical/product assumption) while still being
   specific and true, avoiding generic "Build Your SaaS Faster" filler.
@@ -41,6 +41,7 @@ Design plan produced and followed:
 ## Implementation
 
 Replaced `apps/saas-template/app/(dashboard)/page.tsx` entirely:
+
 - Server component, no client state, no new data fetching.
 - Uses `Button`, `Card`, `CardContent`, `CardHeader`, `CardTitle` from
   `@koeti/ui` (all pre-existing) plus `next/link` for internal navigation.
@@ -51,7 +52,7 @@ Replaced `apps/saas-template/app/(dashboard)/page.tsx` entirely:
   monospace tag, a plain-language title, and one sentence of user-facing
   copy (active voice, concrete, no marketing fluff).
 - Closing CTA: centered headline + `Create your account` button (`/sign-up`)
-  + `Sign in` text link (`/sign-in`).
+  - `Sign in` text link (`/sign-in`).
 - Deleted `apps/saas-template/app/(dashboard)/terminal.tsx` — it was only
   imported by the old page (fake animated `git clone` terminal) and is now
   dead code with no other references in the app.
@@ -65,6 +66,7 @@ scaffold (`/sign-up`, `/sign-in`, `/pricing`).
 ```
 $ pnpm --filter @koeti/saas-template exec tsc --noEmit
 ```
+
 Output: no errors (clean exit, no stdout/stderr).
 
 ## Local verification

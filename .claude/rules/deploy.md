@@ -1,12 +1,12 @@
 ---
 paths:
-  - "turbo.json"
-  - "pnpm-workspace.yaml"
-  - "**/next.config.ts"
-  - "**/proxy.ts"
-  - "**/middleware.ts"
-  - "**/package.json"
-  - "**/.vercel/**"
+  - 'turbo.json'
+  - 'pnpm-workspace.yaml'
+  - '**/next.config.ts'
+  - '**/proxy.ts'
+  - '**/middleware.ts'
+  - '**/package.json'
+  - '**/.vercel/**'
 ---
 
 # Deploy pattern (Vercel)
@@ -23,6 +23,7 @@ vercel link --repo --yes               # monorepo-aware link, writes .vercel/rep
 ```
 
 After linking, confirm in the dashboard (no CLI/API equivalent exists for these):
+
 - **Root Directory** → `apps/<app-name>`
 - **Include files outside the root directory in the Build Step** → enabled (required for the
   build to see sibling `packages/*` and the root lockfile)
@@ -96,10 +97,10 @@ the build — it deploys clean and then 500s on every single request in producti
 
 ```ts
 // middleware.ts (old)
-export const middleware = _middleware
+export const middleware = _middleware;
 
 // proxy.ts (new)
-export default _middleware
+export default _middleware;
 ```
 
 ## After every deploy

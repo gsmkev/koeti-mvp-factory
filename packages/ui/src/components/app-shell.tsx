@@ -1,30 +1,31 @@
-'use client'
+'use client';
+// app shell — exported via @koeti/ui.
 
-import * as React from 'react'
-import { Menu, X } from 'lucide-react'
+import * as React from 'react';
+import { Menu, X } from 'lucide-react';
 
-import { cn } from '../utils'
-import { Button } from './button'
-import { ThemeToggle } from './theme-toggle'
+import { cn } from '../utils';
+import { Button } from './button';
+import { ThemeToggle } from './theme-toggle';
 
 export type AppShellNavItem = {
-  href: string
-  label: string
-  icon?: React.ReactNode
-}
+  href: string;
+  label: string;
+  icon?: React.ReactNode;
+};
 
 export type AppShellNavGroup = {
-  label?: string
-  items: AppShellNavItem[]
-}
+  label?: string;
+  items: AppShellNavItem[];
+};
 
 type LinkLike = React.ComponentType<{
-  href: string
-  className?: string
-  children: React.ReactNode
-  onClick?: () => void
-  'aria-current'?: 'page'
-}>
+  href: string;
+  className?: string;
+  children: React.ReactNode;
+  onClick?: () => void;
+  'aria-current'?: 'page';
+}>;
 
 function NavList({
   nav,
@@ -32,10 +33,10 @@ function NavList({
   Link,
   onNavigate,
 }: {
-  nav: AppShellNavGroup[]
-  pathname: string
-  Link: LinkLike
-  onNavigate?: () => void
+  nav: AppShellNavGroup[];
+  pathname: string;
+  Link: LinkLike;
+  onNavigate?: () => void;
 }) {
   return (
     <nav className="flex-1 space-y-6 overflow-y-auto px-3 py-4">
@@ -47,7 +48,7 @@ function NavList({
             </p>
           )}
           {group.items.map((item) => {
-            const active = pathname === item.href
+            const active = pathname === item.href;
             return (
               <Link
                 key={item.href}
@@ -58,20 +59,18 @@ function NavList({
                   'flex items-center gap-2.5 rounded-md px-3 py-2 text-sm font-medium transition-colors',
                   active
                     ? 'bg-sidebar-accent text-sidebar-accent-foreground'
-                    : 'text-sidebar-foreground/75 hover:bg-sidebar-accent/60 hover:text-sidebar-foreground'
+                    : 'text-sidebar-foreground/75 hover:bg-sidebar-accent/60 hover:text-sidebar-foreground',
                 )}
               >
-                {item.icon && (
-                  <span className="[&>svg]:size-4 [&>svg]:shrink-0">{item.icon}</span>
-                )}
+                {item.icon && <span className="[&>svg]:size-4 [&>svg]:shrink-0">{item.icon}</span>}
                 {item.label}
               </Link>
-            )
+            );
           })}
         </div>
       ))}
     </nav>
-  )
+  );
 }
 
 // App shell with a dark sidebar (desktop) and a drawer (mobile).
@@ -85,16 +84,16 @@ function AppShell({
   linkComponent,
   children,
 }: {
-  brand: React.ReactNode
-  nav: AppShellNavGroup[]
-  footer?: React.ReactNode
-  pathname: string
-  linkComponent?: LinkLike
-  children: React.ReactNode
+  brand: React.ReactNode;
+  nav: AppShellNavGroup[];
+  footer?: React.ReactNode;
+  pathname: string;
+  linkComponent?: LinkLike;
+  children: React.ReactNode;
 }) {
-  const [open, setOpen] = React.useState(false)
-  const Link = linkComponent ?? ((props) => <a {...props} />)
-  const close = React.useCallback(() => setOpen(false), [])
+  const [open, setOpen] = React.useState(false);
+  const Link = linkComponent ?? ((props) => <a {...props} />);
+  const close = React.useCallback(() => setOpen(false), []);
 
   const sidebarContent = (
     <>
@@ -105,7 +104,7 @@ function AppShell({
       <NavList nav={nav} pathname={pathname} Link={Link} onNavigate={close} />
       {footer && <div className="border-t border-sidebar-border p-3">{footer}</div>}
     </>
-  )
+  );
 
   return (
     <div
@@ -134,11 +133,7 @@ function AppShell({
       {/* Mobile drawer */}
       {open && (
         <div className="fixed inset-0 z-50 lg:hidden">
-          <div
-            className="absolute inset-0 bg-black/50"
-            aria-hidden
-            onClick={close}
-          />
+          <div className="absolute inset-0 bg-black/50" aria-hidden onClick={close} />
           <div className="absolute inset-y-0 left-0 flex w-72 flex-col bg-sidebar text-sidebar-foreground shadow-xl">
             {sidebarContent}
             <Button
@@ -158,7 +153,7 @@ function AppShell({
         <main className="flex-1">{children}</main>
       </div>
     </div>
-  )
+  );
 }
 
-export { AppShell }
+export { AppShell };

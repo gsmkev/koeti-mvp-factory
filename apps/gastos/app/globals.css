@@ -1,5 +1,6 @@
-@import "tailwindcss";
-@import "tw-animate-css";
+/* Global styles: Tailwind layers + light/dark theme tokens. */
+@import 'tailwindcss';
+@import 'tw-animate-css';
 
 /* Workspace packages are symlinked into node_modules, which Tailwind's
    auto-detection skips — scan @koeti/ui sources explicitly. */
@@ -151,19 +152,19 @@
    and keeps cards from splitting across pages. Add data-print-hide to anything
    else that shouldn't appear on paper (a <PrintButton> carries it already). */
 @media print {
-  [data-slot="app-shell"] {
+  [data-slot='app-shell'] {
     display: block !important;
   }
-  [data-slot="app-shell"] > aside,
-  [data-slot="app-shell"] > header,
+  [data-slot='app-shell'] > aside,
+  [data-slot='app-shell'] > header,
   [data-print-hide] {
     display: none !important;
   }
   main {
     width: 100% !important;
   }
-  [data-slot="card"],
-  [data-slot="stat-card"] {
+  [data-slot='card'],
+  [data-slot='stat-card'] {
     break-inside: avoid;
     box-shadow: none !important;
   }

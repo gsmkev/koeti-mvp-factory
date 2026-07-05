@@ -2,5 +2,5 @@
 // Gate a feature:   if (!isSubscribed(team)) redirect('/pricing')
 // Gate in UI:       isSubscribed(team) ? <Feature/> : <UpgradeNudge/>
 export function isSubscribed(team: { subscriptionStatus: string | null }) {
-  return team.subscriptionStatus === 'active' || team.subscriptionStatus === 'trialing'
+  return team.subscriptionStatus === 'active' || team.subscriptionStatus === 'trialing';
 }

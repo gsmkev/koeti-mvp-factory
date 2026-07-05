@@ -8,15 +8,15 @@ gastado del mes en curso.
 
 ### expenses (team-scoped)
 
-| column | type | notes |
-|---|---|---|
-| id | serial PK | |
-| teamId | integer FK → teams | scoping |
-| amount | numeric(10,2) | positive, form input `number` step 0.01 |
-| category | varchar(50) | one of: viaticos, materiales, software, otros |
-| description | varchar(255) | required |
-| spentAt | date | defaults to today in the form |
-| createdAt | timestamp | defaultNow |
+| column      | type               | notes                                         |
+| ----------- | ------------------ | --------------------------------------------- |
+| id          | serial PK          |                                               |
+| teamId      | integer FK → teams | scoping                                       |
+| amount      | numeric(10,2)      | positive, form input `number` step 0.01       |
+| category    | varchar(50)        | one of: viaticos, materiales, software, otros |
+| description | varchar(255)       | required                                      |
+| spentAt     | date               | defaults to today in the form                 |
+| createdAt   | timestamp          | defaultNow                                    |
 
 CRUD via `crudActions` (create + delete; edit is out of scope). Page via
 `ResourcePanel` at `/dashboard/gastos` with a `StatCard` row above showing the

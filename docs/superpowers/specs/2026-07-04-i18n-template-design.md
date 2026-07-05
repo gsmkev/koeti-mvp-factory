@@ -50,8 +50,8 @@ Namespacing de claves: baseline usa namespaces `auth.*`, `dashboard.*`, `billing
 
 - `i18n/request.ts`:
   ```ts
-  import { createRequestConfig } from '@koeti/i18n/server'
-  export default createRequestConfig((locale) => import(`../messages/${locale}.json`))
+  import { createRequestConfig } from '@koeti/i18n/server';
+  export default createRequestConfig((locale) => import(`../messages/${locale}.json`));
   ```
 - `messages/{en,es,pt}.json` — strings **de negocio** de la app.
 - `next.config.ts` — envuelto con `createNextIntlPlugin('./i18n/request.ts')`.

@@ -1,3 +1,4 @@
+// API route (GET) — /api/auth/google.
 import { randomBytes } from 'crypto';
 import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';

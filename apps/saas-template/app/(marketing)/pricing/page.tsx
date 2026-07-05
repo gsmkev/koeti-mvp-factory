@@ -1,3 +1,4 @@
+// Page — route /pricing.
 import { checkoutAction } from '@/lib/payments/actions';
 import { ArrowRight, Check } from 'lucide-react';
 import { getStripePrices, getStripeProducts } from '@/lib/payments/stripe';
@@ -40,9 +41,7 @@ export default async function PricingPage() {
         <h1 className="mt-4 text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl">
           {t('title')}
         </h1>
-        <p className="mt-4 max-w-lg text-lg text-muted-foreground">
-          {t('subtitle')}
-        </p>
+        <p className="mt-4 max-w-lg text-lg text-muted-foreground">{t('subtitle')}</p>
       </div>
 
       <div className="mt-12 grid gap-6 md:grid-cols-2">
@@ -93,9 +92,7 @@ function PricingCard({
     <Card className={highlight ? 'border-foreground/30 shadow-md' : undefined}>
       <CardHeader>
         <div>
-          <span className="font-mono text-xs text-muted-foreground">
-            [{name.toLowerCase()}]
-          </span>
+          <span className="font-mono text-xs text-muted-foreground">[{name.toLowerCase()}]</span>
           <CardTitle className="mt-1 text-2xl">{name}</CardTitle>
           <p className="mt-1 text-sm text-muted-foreground">
             {t('freeTrial', { days: trialDays })}

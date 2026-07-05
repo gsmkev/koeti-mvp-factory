@@ -1,5 +1,6 @@
-export * from './schema'
+// @koeti/db — public entry (re-exports).
+export * from './schema';
 
 // Grouped export for spreading into app drizzle instances
-import * as schema from './schema'
-export const baseSchema = schema
+import * as schema from './schema';
+export const baseSchema = schema;

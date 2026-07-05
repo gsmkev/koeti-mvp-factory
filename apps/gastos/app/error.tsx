@@ -1,4 +1,5 @@
 'use client';
+// Error boundary for /.
 
 import { useEffect } from 'react';
 import Link from 'next/link';
@@ -7,7 +8,7 @@ import { Button } from '@koeti/ui';
 
 export default function Error({
   error,
-  reset
+  reset,
 }: {
   error: Error & { digest?: string };
   reset: () => void;
@@ -22,7 +23,9 @@ export default function Error({
       <h1 className="text-2xl font-semibold tracking-tight">{t('title')}</h1>
       <p className="mt-2 max-w-md text-sm text-muted-foreground">
         {t('description')}
-        {error.digest && <span className="mt-1 block font-mono text-xs">{t('ref', { digest: error.digest })}</span>}
+        {error.digest && (
+          <span className="mt-1 block font-mono text-xs">{t('ref', { digest: error.digest })}</span>
+        )}
       </p>
       <div className="mt-6 flex gap-3">
         <Button onClick={reset}>{t('tryAgain')}</Button>

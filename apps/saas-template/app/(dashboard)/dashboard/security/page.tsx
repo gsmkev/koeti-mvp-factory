@@ -1,4 +1,5 @@
 'use client';
+// Page — route /dashboard/security.
 
 import { Input } from '@koeti/ui';
 import { Card, CardContent, CardHeader, CardTitle } from '@koeti/ui';
@@ -24,15 +25,12 @@ type DeleteState = {
 
 export default function SecurityPage() {
   const t = useTranslations('security');
-  const [passwordState, passwordAction] = useActionState<
-    PasswordState,
-    FormData
-  >(updatePassword, {});
-
-  const [deleteState, deleteAction] = useActionState<DeleteState, FormData>(
-    deleteAccount,
-    {}
+  const [passwordState, passwordAction] = useActionState<PasswordState, FormData>(
+    updatePassword,
+    {},
   );
+
+  const [deleteState, deleteAction] = useActionState<DeleteState, FormData>(deleteAccount, {});
 
   return (
     <section className="flex-1 space-y-6 p-4 lg:p-8">
@@ -106,9 +104,7 @@ export default function SecurityPage() {
           <CardTitle>{t('deleteCard')}</CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-sm text-muted-foreground mb-4">
-            {t('deleteWarning')}
-          </p>
+          <p className="text-sm text-muted-foreground mb-4">{t('deleteWarning')}</p>
           <form action={deleteAction} className="space-y-4">
             <div>
               <Label htmlFor="delete-password" className="mb-2">
@@ -124,9 +120,7 @@ export default function SecurityPage() {
                 defaultValue={deleteState.password}
               />
             </div>
-            {deleteState.error && (
-              <p className="text-destructive text-sm">{deleteState.error}</p>
-            )}
+            {deleteState.error && <p className="text-destructive text-sm">{deleteState.error}</p>}
             <SubmitButton
               variant="destructive"
               className="bg-destructive hover:bg-destructive/90"

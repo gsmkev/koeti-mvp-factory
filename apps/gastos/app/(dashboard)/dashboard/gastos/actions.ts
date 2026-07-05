@@ -1,8 +1,9 @@
-'use server'
+'use server';
+// Server actions for /dashboard/gastos.
 
-import { z } from 'zod'
-import { crudActions } from '@/lib/crud'
-import { expenses } from '@/lib/db/schema'
+import { z } from 'zod';
+import { crudActions } from '@/lib/crud';
+import { expenses } from '@/lib/db/schema';
 
 const actions = crudActions(expenses, {
   path: '/dashboard/gastos',
@@ -12,7 +13,7 @@ const actions = crudActions(expenses, {
     description: z.string().min(1, 'La descripción es requerida').max(255),
     spentAt: z.string().min(1, 'La fecha es requerida'),
   }),
-})
-export const createExpense = actions.create
-export const updateExpense = actions.update
-export const deleteExpense = actions.remove
+});
+export const createExpense = actions.create;
+export const updateExpense = actions.update;
+export const deleteExpense = actions.remove;

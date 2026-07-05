@@ -1,9 +1,10 @@
-import type { MetadataRoute } from 'next'
+// Generated robots.txt.
+import type { MetadataRoute } from 'next';
 
 export default function robots(): MetadataRoute.Robots {
-  const base = process.env.BASE_URL ?? 'http://localhost:3000'
+  const base = process.env.BASE_URL ?? 'http://localhost:3000';
   return {
     rules: { userAgent: '*', allow: '/', disallow: ['/dashboard', '/api'] },
     sitemap: `${base}/sitemap.xml`,
-  }
+  };
 }

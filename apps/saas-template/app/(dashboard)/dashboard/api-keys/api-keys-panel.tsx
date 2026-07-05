@@ -1,9 +1,10 @@
-'use client'
+'use client';
+// ApiKeysPanel — component for /dashboard/api-keys.
 
-import { useActionState, useState } from 'react'
-import { useTranslations } from 'next-intl'
-import { Check, Copy, KeyRound } from 'lucide-react'
-import type { ApiKey } from '@koeti/db'
+import { useActionState, useState } from 'react';
+import { useTranslations } from 'next-intl';
+import { Check, Copy, KeyRound } from 'lucide-react';
+import type { ApiKey } from '@koeti/db';
 import {
   Badge,
   Button,
@@ -17,15 +18,15 @@ import {
   Label,
   PageHeader,
   SubmitButton,
-} from '@koeti/ui'
-import { createApiKey, revokeApiKey } from './actions'
+} from '@koeti/ui';
+import { createApiKey, revokeApiKey } from './actions';
 
-type CreateState = { key?: string; error?: string }
-type RevokeState = { success?: string; error?: string }
+type CreateState = { key?: string; error?: string };
+type RevokeState = { success?: string; error?: string };
 
 function OneTimeKey({ value }: { value: string }) {
-  const t = useTranslations('apiKeys')
-  const [copied, setCopied] = useState(false)
+  const t = useTranslations('apiKeys');
+  const [copied, setCopied] = useState(false);
 
   return (
     <div className="space-y-2 rounded-lg border bg-muted/50 p-4">
@@ -40,9 +41,9 @@ function OneTimeKey({ value }: { value: string }) {
           size="sm"
           aria-label={t('copyAria')}
           onClick={async () => {
-            await navigator.clipboard.writeText(value)
-            setCopied(true)
-            setTimeout(() => setCopied(false), 2000)
+            await navigator.clipboard.writeText(value);
+            setCopied(true);
+            setTimeout(() => setCopied(false), 2000);
           }}
         >
           {copied ? <Check className="size-4" /> : <Copy className="size-4" />}
@@ -50,13 +51,13 @@ function OneTimeKey({ value }: { value: string }) {
         </Button>
       </div>
     </div>
-  )
+  );
 }
 
 export function ApiKeysPanel({ keys }: { keys: ApiKey[] }) {
-  const t = useTranslations('apiKeys')
-  const [createState, createAction] = useActionState<CreateState, FormData>(createApiKey, {})
-  const [revokeState, revokeAction] = useActionState<RevokeState, FormData>(revokeApiKey, {})
+  const t = useTranslations('apiKeys');
+  const [createState, createAction] = useActionState<CreateState, FormData>(createApiKey, {});
+  const [revokeState, revokeAction] = useActionState<RevokeState, FormData>(revokeApiKey, {});
 
   return (
     <section className="flex-1 space-y-6 p-4 lg:p-8">
@@ -81,9 +82,7 @@ export function ApiKeysPanel({ keys }: { keys: ApiKey[] }) {
               />
               <p className="mt-1 text-xs text-muted-foreground">{t('nameHint')}</p>
             </div>
-            {createState.error && (
-              <p className="text-destructive text-sm">{createState.error}</p>
-            )}
+            {createState.error && <p className="text-destructive text-sm">{createState.error}</p>}
             {createState.key && <OneTimeKey value={createState.key} />}
             <SubmitButton pendingText={t('creating')}>{t('create')}</SubmitButton>
           </form>
@@ -103,9 +102,7 @@ export function ApiKeysPanel({ keys }: { keys: ApiKey[] }) {
               { header: t('colName'), cell: (k: ApiKey) => k.name },
               {
                 header: t('colKey'),
-                cell: (k: ApiKey) => (
-                  <code className="font-mono text-xs">{k.keyPrefix}…</code>
-                ),
+                cell: (k: ApiKey) => <code className="font-mono text-xs">{k.keyPrefix}…</code>,
               },
               {
                 header: t('colCreated'),
@@ -134,7 +131,7 @@ export function ApiKeysPanel({ keys }: { keys: ApiKey[] }) {
                       action={revokeAction}
                       onSubmit={(e) => {
                         if (!confirm(t('revokeConfirm', { name: k.name }))) {
-                          e.preventDefault()
+                          e.preventDefault();
                         }
                       }}
                       className="inline"
@@ -150,15 +147,11 @@ export function ApiKeysPanel({ keys }: { keys: ApiKey[] }) {
             rows={keys}
             rowKey={(k) => k.id}
             empty={
-              <EmptyState
-                icon={KeyRound}
-                title={t('emptyTitle')}
-                description={t('emptyDesc')}
-              />
+              <EmptyState icon={KeyRound} title={t('emptyTitle')} description={t('emptyDesc')} />
             }
           />
         </CardContent>
       </Card>
     </section>
-  )
+  );
 }

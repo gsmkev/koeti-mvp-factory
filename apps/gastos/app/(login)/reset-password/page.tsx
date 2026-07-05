@@ -1,3 +1,4 @@
+// Page — route /reset-password.
 import { Suspense } from 'react';
 import type { Metadata } from 'next';
 import { ResetPasswordForm } from '../password';

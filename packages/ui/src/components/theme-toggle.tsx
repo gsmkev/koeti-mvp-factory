@@ -1,9 +1,10 @@
-'use client'
+'use client';
+// theme toggle — exported via @koeti/ui.
 
-import * as React from 'react'
-import { Moon, Sun } from 'lucide-react'
+import * as React from 'react';
+import { Moon, Sun } from 'lucide-react';
 
-import { cn } from '../utils'
+import { cn } from '../utils';
 
 // Dark mode with zero deps. The CSS ships a full `.dark` token set (globals.css);
 // all that was missing is something to toggle the class. Preference is persisted
@@ -12,23 +13,23 @@ import { cn } from '../utils'
 // Runs in <head> before React hydrates — reads the saved/ system preference and
 // sets `.dark` on <html> synchronously. Requires suppressHydrationWarning on <html>.
 export function ThemeScript() {
-  const js = `try{var t=localStorage.getItem('theme');if(t==='dark'||(!t&&matchMedia('(prefers-color-scheme: dark)').matches))document.documentElement.classList.add('dark')}catch(e){}`
-  return <script dangerouslySetInnerHTML={{ __html: js }} />
+  const js = `try{var t=localStorage.getItem('theme');if(t==='dark'||(!t&&matchMedia('(prefers-color-scheme: dark)').matches))document.documentElement.classList.add('dark')}catch(e){}`;
+  return <script dangerouslySetInnerHTML={{ __html: js }} />;
 }
 
 export function ThemeToggle({ className }: { className?: string }) {
-  const [dark, setDark] = React.useState(false)
+  const [dark, setDark] = React.useState(false);
   // Class is set by ThemeScript before hydration; sync state on mount.
   React.useEffect(() => {
-    setDark(document.documentElement.classList.contains('dark'))
-  }, [])
+    setDark(document.documentElement.classList.contains('dark'));
+  }, []);
 
   function toggle() {
-    const next = !dark
-    setDark(next)
-    document.documentElement.classList.toggle('dark', next)
+    const next = !dark;
+    setDark(next);
+    document.documentElement.classList.toggle('dark', next);
     try {
-      localStorage.setItem('theme', next ? 'dark' : 'light')
+      localStorage.setItem('theme', next ? 'dark' : 'light');
     } catch {}
   }
 
@@ -41,10 +42,10 @@ export function ThemeToggle({ className }: { className?: string }) {
         // text-current + foreground/10 hover so it reads correctly in both the
         // dark sidebar and a light marketing header.
         'inline-flex size-8 shrink-0 items-center justify-center rounded-md text-current/70 transition-colors hover:bg-foreground/10 hover:text-current',
-        className
+        className,
       )}
     >
       {dark ? <Sun className="size-4" /> : <Moon className="size-4" />}
     </button>
-  )
+  );
 }

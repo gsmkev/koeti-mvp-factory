@@ -1,11 +1,5 @@
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  EmptyState,
-  PageHeader,
-} from '@koeti/ui';
+// Page — route /dashboard/activity.
+import { Card, CardContent, CardHeader, CardTitle, EmptyState, PageHeader } from '@koeti/ui';
 import {
   Settings,
   LogOut,
@@ -42,12 +36,9 @@ function getRelativeTime(t: T, date: Date) {
   const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
 
   if (diffInSeconds < 60) return t('justNow');
-  if (diffInSeconds < 3600)
-    return t('minutesAgo', { count: Math.floor(diffInSeconds / 60) });
-  if (diffInSeconds < 86400)
-    return t('hoursAgo', { count: Math.floor(diffInSeconds / 3600) });
-  if (diffInSeconds < 604800)
-    return t('daysAgo', { count: Math.floor(diffInSeconds / 86400) });
+  if (diffInSeconds < 3600) return t('minutesAgo', { count: Math.floor(diffInSeconds / 60) });
+  if (diffInSeconds < 86400) return t('hoursAgo', { count: Math.floor(diffInSeconds / 3600) });
+  if (diffInSeconds < 604800) return t('daysAgo', { count: Math.floor(diffInSeconds / 86400) });
   return date.toLocaleDateString();
 }
 
@@ -84,10 +75,7 @@ export default async function ActivityPage() {
             <ul className="space-y-4">
               {logs.map((log) => {
                 const Icon = iconMap[log.action as ActivityType] || Settings;
-                const formattedAction = formatAction(
-                  t,
-                  log.action as ActivityType
-                );
+                const formattedAction = formatAction(t, log.action as ActivityType);
 
                 return (
                   <li key={log.id} className="flex items-center space-x-4">

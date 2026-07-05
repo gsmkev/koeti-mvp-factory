@@ -1,3 +1,4 @@
+// Custom 404 page.
 import Link from 'next/link';
 import { getTranslations } from 'next-intl/server';
 import { Button } from '@koeti/ui';

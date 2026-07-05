@@ -1,3 +1,4 @@
+// API route (GET) — /api/team.
 import { apiRateLimitOk, getTeamFromApiKey } from '@/lib/auth/api-key';
 import { getTeamForUser } from '@/lib/db/queries';
 

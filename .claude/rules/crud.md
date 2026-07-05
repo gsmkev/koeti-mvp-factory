@@ -1,8 +1,8 @@
 ---
 paths:
-  - "**/lib/db/schema.ts"
-  - "**/lib/crud.ts"
-  - "**/app/(dashboard)/**"
+  - '**/lib/db/schema.ts'
+  - '**/lib/crud.ts'
+  - '**/app/(dashboard)/**'
 ---
 
 # CRUD recipe
@@ -16,12 +16,14 @@ Add the table to `lib/db/schema.ts`. Team-scoped entities always carry `teamId`:
 ```ts
 export const projects = pgTable('projects', {
   id: serial('id').primaryKey(),
-  teamId: integer('team_id').notNull().references(() => teams.id),
+  teamId: integer('team_id')
+    .notNull()
+    .references(() => teams.id),
   name: varchar('name', { length: 255 }).notNull(),
   createdAt: timestamp('created_at').notNull().defaultNow(),
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
-})
-export type Project = typeof projects.$inferSelect
+});
+export type Project = typeof projects.$inferSelect;
 ```
 
 Then: `pnpm --filter @koeti/<app> db:generate && pnpm --filter @koeti/<app> db:migrate`.
@@ -33,7 +35,11 @@ In `lib/db/queries.ts`. Every query on a team-scoped table filters by `teamId` �
 
 ```ts
 export async function getProjects(teamId: number) {
-  return db.select().from(projects).where(eq(projects.teamId, teamId)).orderBy(desc(projects.createdAt))
+  return db
+    .select()
+    .from(projects)
+    .where(eq(projects.teamId, teamId))
+    .orderBy(desc(projects.createdAt));
 }
 ```
 
@@ -42,21 +48,21 @@ export async function getProjects(teamId: number) {
 `app/(dashboard)/<entity>/actions.ts`. `crudActions` (from `@/lib/crud`) scopes every mutation by `teamId` automatically:
 
 ```ts
-'use server'
+'use server';
 
-import { z } from 'zod'
-import { crudActions } from '@/lib/crud'
-import { projects } from '@/lib/db/schema'
+import { z } from 'zod';
+import { crudActions } from '@/lib/crud';
+import { projects } from '@/lib/db/schema';
 
 const actions = crudActions(projects, {
   path: '/projects',
   schema: z.object({ name: z.string().min(1, 'Name is required') }),
   // minRole: 'member' is the default — viewers are read-only. Use 'admin'
   // for entities only admins should touch.
-})
-export const createProject = actions.create
-export const updateProject = actions.update
-export const deleteProject = actions.remove
+});
+export const createProject = actions.create;
+export const updateProject = actions.update;
+export const deleteProject = actions.remove;
 ```
 
 Use `z.coerce.number()` / `z.coerce.date()` for non-string fields. Logic beyond
@@ -69,15 +75,15 @@ hand-written action in the same file using `withTeam` — scope its `where` by
 `app/(dashboard)/<entity>/page.tsx` — a server component:
 
 ```tsx
-import { ResourcePanel } from '@koeti/ui'
-import { requireRole } from '@/lib/auth/middleware'
-import { getProjects } from '@/lib/db/queries'
-import { createProject, deleteProject } from './actions'
+import { ResourcePanel } from '@koeti/ui';
+import { requireRole } from '@/lib/auth/middleware';
+import { getProjects } from '@/lib/db/queries';
+import { createProject, deleteProject } from './actions';
 
 export default async function ProjectsPage() {
   // One-line RBAC (see .claude/rules/auth.md): 'viewer' = any team member can see.
-  const { team } = await requireRole('viewer')
-  const rows = await getProjects(team.id)
+  const { team } = await requireRole('viewer');
+  const rows = await getProjects(team.id);
 
   return (
     <ResourcePanel
@@ -92,11 +98,11 @@ export default async function ProjectsPage() {
       ]}
       rows={rows}
       rowKey={(p) => p.id}
-      onUpdate={updateProject}   // per-row edit dialog, prefilled from the row via `fields`
+      onUpdate={updateProject} // per-row edit dialog, prefilled from the row via `fields`
       onDelete={deleteProject}
       emptyTitle="No projects yet"
     />
-  )
+  );
 }
 ```
 
@@ -119,15 +125,15 @@ Add the entry to the dashboard nav (`app/(dashboard)/dashboard/layout.tsx` `navI
 `app/api/<entity>/export/route.ts` — session OR API key auth, same filters as the page:
 
 ```ts
-import { apiRateLimitOk, getTeamFromApiKey } from '@/lib/auth/api-key'
-import { csvResponse, toCsv } from '@/lib/csv'
-import { getProjects, getTeamForUser } from '@/lib/db/queries'
+import { apiRateLimitOk, getTeamFromApiKey } from '@/lib/auth/api-key';
+import { csvResponse, toCsv } from '@/lib/csv';
+import { getProjects, getTeamForUser } from '@/lib/db/queries';
 
 export async function GET(request: Request) {
-  if (!apiRateLimitOk(request)) return new Response('Too many requests', { status: 429 })
-  const team = (await getTeamFromApiKey(request)) ?? (await getTeamForUser())
-  if (!team) return new Response('Unauthorized', { status: 401 })
-  return csvResponse(toCsv(await getProjects(team.id)), 'projects.csv')
+  if (!apiRateLimitOk(request)) return new Response('Too many requests', { status: 429 });
+  const team = (await getTeamFromApiKey(request)) ?? (await getTeamForUser());
+  if (!team) return new Response('Unauthorized', { status: 401 });
+  return csvResponse(toCsv(await getProjects(team.id)), 'projects.csv');
 }
 ```
 
