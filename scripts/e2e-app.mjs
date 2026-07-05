@@ -112,12 +112,15 @@ try {
   await page.fill('input[name="email"]', `e2e-${stamp}@test.com`);
   await page.fill('input[name="password"]', 'e2e-password-123');
   await page.click('button[type="submit"]');
-  // New teams land on /onboarding first — name the workspace, then continue.
-  await page.waitForURL('**/onboarding', { timeout: 30_000 });
+  // New teams land on the /onboarding wizard — walk its four steps
+  // (workspace → locale → team → plan; defaults + the free plan are fine).
+  await page.waitForURL('**/onboarding**', { timeout: 30_000 });
   await page.fill('input[name="name"]', `E2E Team ${stamp}`);
-  await page.click('button[type="submit"]');
-  await page.waitForURL('**/dashboard', { timeout: 30_000 });
-  console.log(`  ✅ signed up e2e-${stamp}@test.com → /onboarding → /dashboard`);
+  for (const next of ['step=locale', 'step=team', 'step=plan', '/dashboard']) {
+    await page.locator('button[type="submit"]').first().click();
+    await page.waitForURL((u) => u.href.includes(next), { timeout: 30_000 });
+  }
+  console.log(`  ✅ signed up e2e-${stamp}@test.com → onboarding wizard → /dashboard`);
 
   step('Platform endpoints (uploads + notifications)');
   // page.request shares the session cookie with the browser context

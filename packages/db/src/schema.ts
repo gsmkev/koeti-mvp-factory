@@ -43,6 +43,12 @@ export const teams = pgTable('teams', {
   aiDailyLimit: integer('ai_daily_limit'),
   // Null = owner hasn't finished /onboarding yet (dashboard layout bounces them there).
   onboardingCompletedAt: timestamp('onboarding_completed_at'),
+  // Tenant localization, set in /onboarding. Language is per-user (NEXT_LOCALE
+  // cookie), but money and units are per-tenant: every member sees the same
+  // reports. Format with the native Intl API: new Intl.NumberFormat(locale,
+  // { style: 'currency', currency: team.currency }).
+  currency: varchar('currency', { length: 3 }).notNull().default('USD'),
+  measurementSystem: varchar('measurement_system', { length: 10 }).notNull().default('metric'),
 });
 
 export const teamMembers = pgTable(
