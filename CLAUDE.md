@@ -31,6 +31,9 @@ Before claiming any change works: `pnpm typecheck && pnpm test && pnpm build` mu
 If you touched an app's pages/actions/schema, also run `pnpm verify-app <name>` and `pnpm e2e-app <name>`.
 If you touched `apps/saas-template/` or `scripts/create-mvp.mjs`, also run `pnpm smoke`.
 Working in a fresh worktree? Run `pnpm bootstrap` first — `.env.local` files don't follow git.
+Husky hooks enforce a cheap subset automatically (`pre-commit`: format staged files;
+`pre-push`: `typecheck && test`) — see `.claude/rules/git-hooks.md`. They're a safety net,
+not a replacement for the full checks above.
 
 ## Core rules
 

@@ -6,7 +6,8 @@ dist
 build
 coverage
 
-# Generated: Drizzle migrations + snapshots, lockfiles.
+# Generated: Drizzle migrations + snapshots, lockfiles, Next.js env types.
 **/lib/db/migrations/**
+**/next-env.d.ts
 pnpm-lock.yaml
 *.min.js

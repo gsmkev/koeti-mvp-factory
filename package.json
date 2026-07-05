@@ -12,9 +12,15 @@
     "verify-app": "node scripts/verify-app.mjs",
     "e2e-app": "node scripts/e2e-app.mjs",
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "prepare": "husky"
+  },
+  "lint-staged": {
+    "*": "prettier --ignore-unknown --write"
   },
   "devDependencies": {
+    "husky": "^9.1.7",
+    "lint-staged": "^16.2.5",
     "playwright": "^1.61.1",
     "postgres": "^3.4.5",
     "prettier": "3.9.1",

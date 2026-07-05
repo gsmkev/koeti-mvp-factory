@@ -93,7 +93,9 @@ under `packages/` or `scripts/`, also run the root `pnpm typecheck && pnpm test
 
 ## Phase 6 — Ship
 
-Commit remaining work, push the branch, `gh pr create --draft` with a summary
+Husky's `pre-push` runs `typecheck && test` on `git push` (`.claude/rules/git-hooks.md`) —
+it should pass since Phase 5 already did. Commit remaining work, push the branch,
+`gh pr create --draft` with a summary
 of the spec decisions and verification evidence. Do NOT deploy — first-time
 Vercel setup has dashboard-only steps; leave a "to deploy" note in the PR body
 pointing at `.claude/rules/deploy.md`.
