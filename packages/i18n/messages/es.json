@@ -54,7 +54,8 @@
     "pricing": "Precios",
     "signIn": "Iniciar sesión",
     "getStarted": "Empezar",
-    "footerTagline": "{app} — hecho con el scaffold del factory."
+    "footerTagline": "{app} — hecho con el scaffold del factory.",
+    "insights": "Insights"
   },
   "account": {
     "title": "Configuración general",
@@ -196,7 +197,10 @@
     "invitationSent": "Invitación enviada correctamente",
     "invitationRevoked": "Invitación revocada.",
     "verificationSent": "Email de verificación enviado.",
-    "emailAlreadyVerified": "Tu email ya está verificado."
+    "emailAlreadyVerified": "Tu email ya está verificado.",
+    "aiRateLimited": "Demasiadas solicitudes de IA: vuelve a intentarlo en un minuto.",
+    "aiQuotaExceeded": "Tu equipo alcanzó el límite diario de IA. Se restablece mañana.",
+    "aiUnavailable": "El servicio de IA no está disponible ahora mismo. Inténtalo más tarde."
   },
   "notFound": {
     "code": "404",
@@ -219,5 +223,14 @@
     "resend": "Reenviar enlace",
     "resending": "Enviando…",
     "sent": "Email de verificación enviado — revisá tu bandeja."
+  },
+  "insights": {
+    "title": "Insights",
+    "description": "Anomalías y sugerencias del análisis diario de los datos de tu equipo.",
+    "emptyTitle": "Aún no hay insights",
+    "emptyDesc": "El análisis diario mostrará aquí anomalías y sugerencias.",
+    "dismiss": "Descartar",
+    "kindAnomaly": "Anomalía",
+    "kindSuggestion": "Sugerencia"
   }
 }

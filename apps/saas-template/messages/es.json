@@ -50,5 +50,8 @@
     "sourceSearch": "Búsqueda",
     "sourceSocial": "Redes",
     "sourceEmail": "Email"
+  },
+  "insightMessages": {
+    "activitySpike": "Actividad inusual en la cuenta el {day}: {count} eventos frente a un promedio diario de {avg}."
   }
 }

@@ -3,7 +3,7 @@ import { desc, and, eq, isNull, sql } from 'drizzle-orm';
 import { db } from './drizzle';
 import { verifyToken, credentialFingerprint } from '@koeti/auth';
 import { cookies } from 'next/headers';
-import { activityLogs, apiKeys, invitations, teamMembers, teams, users } from '@koeti/db';
+import { activityLogs, apiKeys, insights, invitations, teamMembers, teams, users } from '@koeti/db';
 
 export async function getUser() {
   const sessionCookie = (await cookies()).get('session');
@@ -94,6 +94,15 @@ export async function getAdminTeamsOverview() {
     .leftJoin(teamMembers, eq(teams.id, teamMembers.teamId))
     .groupBy(teams.id)
     .orderBy(desc(teams.createdAt));
+}
+
+export async function getInsights(teamId: number) {
+  return db
+    .select()
+    .from(insights)
+    .where(and(eq(insights.teamId, teamId), isNull(insights.dismissedAt)))
+    .orderBy(desc(insights.createdAt))
+    .limit(50);
 }
 
 export async function getApiKeys(teamId: number) {

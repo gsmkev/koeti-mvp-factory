@@ -1,5 +1,15 @@
 // @koeti/db — schema.
-import { pgTable, serial, varchar, text, timestamp, integer } from 'drizzle-orm/pg-core';
+import {
+  pgTable,
+  serial,
+  varchar,
+  text,
+  timestamp,
+  integer,
+  date,
+  primaryKey,
+  uniqueIndex,
+} from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
 
 export const users = pgTable('users', {
@@ -27,6 +37,9 @@ export const teams = pgTable('teams', {
   stripeProductId: text('stripe_product_id'),
   planName: varchar('plan_name', { length: 50 }),
   subscriptionStatus: varchar('subscription_status', { length: 20 }),
+  // Per-tenant override of the AI daily quota. Null = inherit the plan / SaaS
+  // default (see resolveAiLimits in @koeti/ai). Set by the superadmin.
+  aiDailyLimit: integer('ai_daily_limit'),
 });
 
 export const teamMembers = pgTable('team_members', {
@@ -94,11 +107,54 @@ export const stripeEvents = pgTable('stripe_events', {
   receivedAt: timestamp('received_at').notNull().defaultNow(),
 });
 
+// Durable half of the AI rate limit: one row per team per day, atomically
+// incremented before each AI call. The per-minute burst guard stays in-memory.
+export const aiUsage = pgTable(
+  'ai_usage',
+  {
+    teamId: integer('team_id')
+      .notNull()
+      .references(() => teams.id),
+    day: date('day').notNull(),
+    requests: integer('requests').notNull().default(0),
+  },
+  (t) => [primaryKey({ columns: [t.teamId, t.day] })],
+);
+
+// Cron-generated findings (anomaly detection + suggestions). Content is stored
+// as an i18n message key + JSON params so the UI renders in the viewer's locale.
+export const insights = pgTable(
+  'insights',
+  {
+    id: serial('id').primaryKey(),
+    teamId: integer('team_id')
+      .notNull()
+      .references(() => teams.id),
+    kind: varchar('kind', { length: 20 }).notNull(), // 'anomaly' | 'suggestion'
+    severity: varchar('severity', { length: 10 }).notNull().default('info'), // 'info' | 'warning'
+    messageKey: varchar('message_key', { length: 100 }).notNull(),
+    params: text('params').notNull().default('{}'),
+    // Stops the daily cron re-inserting the same finding (insert onConflictDoNothing).
+    dedupeKey: varchar('dedupe_key', { length: 200 }).notNull(),
+    createdAt: timestamp('created_at').notNull().defaultNow(),
+    dismissedAt: timestamp('dismissed_at'),
+  },
+  (t) => [uniqueIndex('insights_team_dedupe_idx').on(t.teamId, t.dedupeKey)],
+);
+
 export const teamsRelations = relations(teams, ({ many }) => ({
   teamMembers: many(teamMembers),
   activityLogs: many(activityLogs),
   invitations: many(invitations),
   apiKeys: many(apiKeys),
+  insights: many(insights),
+}));
+
+export const insightsRelations = relations(insights, ({ one }) => ({
+  team: one(teams, {
+    fields: [insights.teamId],
+    references: [teams.id],
+  }),
 }));
 
 export const usersRelations = relations(users, ({ many }) => ({
@@ -160,6 +216,9 @@ export type ApiKey = typeof apiKeys.$inferSelect;
 export type NewApiKey = typeof apiKeys.$inferInsert;
 export type StripeEvent = typeof stripeEvents.$inferSelect;
 export type NewStripeEvent = typeof stripeEvents.$inferInsert;
+export type AiUsage = typeof aiUsage.$inferSelect;
+export type Insight = typeof insights.$inferSelect;
+export type NewInsight = typeof insights.$inferInsert;
 export type TeamDataWithMembers = Team & {
   teamMembers: (TeamMember & {
     user: Pick<User, 'id' | 'name' | 'email'>;

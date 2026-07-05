@@ -3,7 +3,7 @@ import { desc, and, eq, isNull, sql } from 'drizzle-orm';
 import { db } from './drizzle';
 import { verifyToken } from '@koeti/auth';
 import { cookies } from 'next/headers';
-import { activityLogs, apiKeys, teamMembers, teams, users } from '@koeti/db';
+import { activityLogs, apiKeys, insights, teamMembers, teams, users } from '@koeti/db';
 import { expenses } from './schema';
 
 export async function getUser() {
@@ -113,6 +113,15 @@ export async function getTeamForUser() {
     },
   });
   return result?.team ?? null;
+}
+
+export async function getInsights(teamId: number) {
+  return db
+    .select()
+    .from(insights)
+    .where(and(eq(insights.teamId, teamId), isNull(insights.dismissedAt)))
+    .orderBy(desc(insights.createdAt))
+    .limit(50);
 }
 
 // --- expenses ---

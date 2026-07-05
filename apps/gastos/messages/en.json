@@ -25,9 +25,21 @@
     "moduleEquipoDesc": "Expenses live in the team, not on someone's laptop. Invite your people with clear roles.",
     "ledgerThisMonth": "This month",
     "ledgerRows": [
-      { "cat": "viaticos", "desc": "Trip to HQ — client", "amount": "$2,450.00" },
-      { "cat": "software", "desc": "Annual licenses", "amount": "$1,180.00" },
-      { "cat": "materiales", "desc": "Printing & stationery", "amount": "$312.50" }
+      {
+        "cat": "viaticos",
+        "desc": "Trip to HQ — client",
+        "amount": "$2,450.00"
+      },
+      {
+        "cat": "software",
+        "desc": "Annual licenses",
+        "amount": "$1,180.00"
+      },
+      {
+        "cat": "materiales",
+        "desc": "Printing & stationery",
+        "amount": "$312.50"
+      }
     ],
     "ctaTitle": "Drop the spreadsheet today.",
     "ctaSubtitle": "Your team logs, Gastos adds it up. By month's end you already know where the money went.",
@@ -76,5 +88,17 @@
     "colCategory": "Category",
     "colDescription": "Description",
     "colAmount": "Amount"
+  },
+  "insightMessages": {
+    "spendSpike": "Unusual spending on {day}: {total} vs a daily average of {avg}.",
+    "topCategoryShare": "The {category} category holds {share}% of the last 30 days of spending — worth a review.",
+    "possibleDuplicate": "Possible duplicate expense on {day}: \"{description}\" for {total}."
+  },
+  "gastosAi": {
+    "title": "AI monthly summary",
+    "description": "Generate a short AI summary of the last 30 days of expenses: totals, patterns and a saving tip.",
+    "generate": "Generate summary",
+    "generating": "Generating…",
+    "noData": "No expenses in the last 30 days to summarize."
   }
 }
