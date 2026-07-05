@@ -11,18 +11,24 @@ Adding a team-scoped entity (the 90% case for MVP features)? Follow these 5 step
 
 ## 1. Schema
 
-Add the table to `lib/db/schema.ts`. Team-scoped entities always carry `teamId`:
+Add the table to `lib/db/schema.ts`. Team-scoped entities always carry `teamId`
+**and an index on the list's query columns** — the list page will filter by them
+on every render:
 
 ```ts
-export const projects = pgTable('projects', {
-  id: serial('id').primaryKey(),
-  teamId: integer('team_id')
-    .notNull()
-    .references(() => teams.id),
-  name: varchar('name', { length: 255 }).notNull(),
-  createdAt: timestamp('created_at').notNull().defaultNow(),
-  updatedAt: timestamp('updated_at').notNull().defaultNow(),
-});
+export const projects = pgTable(
+  'projects',
+  {
+    id: serial('id').primaryKey(),
+    teamId: integer('team_id')
+      .notNull()
+      .references(() => teams.id),
+    name: varchar('name', { length: 255 }).notNull(),
+    createdAt: timestamp('created_at').notNull().defaultNow(),
+    updatedAt: timestamp('updated_at').notNull().defaultNow(),
+  },
+  (t) => [index('projects_team_idx').on(t.teamId, t.createdAt)],
+);
 export type Project = typeof projects.$inferSelect;
 ```
 
@@ -42,6 +48,25 @@ export async function getProjects(teamId: number) {
     .orderBy(desc(projects.createdAt));
 }
 ```
+
+**Lists that grow without bound get pagination** (an expenses log does; a
+settings list of 10 API keys doesn't). Fetch `PAGE_SIZE + 1` rows — the extra
+row signals `hasMore` — with the page number in the URL (`.claude/rules/url-state.md`):
+
+```ts
+export const PAGE_SIZE = 50;
+export async function getProjects(teamId: number, page?: number) {
+  const q = db.select().from(projects).where(eq(projects.teamId, teamId)).orderBy(/* … */);
+  if (!page) return q; // CSV export keeps the unpaginated call
+  return q.limit(PAGE_SIZE + 1).offset((page - 1) * PAGE_SIZE);
+}
+```
+
+In the page: `hasMore = fetched.length > PAGE_SIZE`, `rows = fetched.slice(0, PAGE_SIZE)`,
+then `<Pagination page={page} hasMore={hasMore} hrefFor={…} linkComponent={Link} />`
+(from `@koeti/ui`) below the panel — `hrefFor` rebuilds the query string so
+filters survive page changes. Labels: `t('common.prevPage')` / `t('common.nextPage')`.
+Worked example: `apps/gastos/app/(dashboard)/dashboard/gastos/`.
 
 ## 3. Actions — use the factory
 

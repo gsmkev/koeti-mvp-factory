@@ -80,6 +80,7 @@ function AppShell({
   brand,
   nav,
   footer,
+  actions,
   pathname,
   linkComponent,
   children,
@@ -87,6 +88,8 @@ function AppShell({
   brand: React.ReactNode;
   nav: AppShellNavGroup[];
   footer?: React.ReactNode;
+  /** Icon-sized controls next to the theme toggle (e.g. a notifications bell). */
+  actions?: React.ReactNode;
   pathname: string;
   linkComponent?: LinkLike;
   children: React.ReactNode;
@@ -99,7 +102,10 @@ function AppShell({
     <>
       <div className="flex h-16 shrink-0 items-center justify-between border-b border-sidebar-border px-5">
         {brand}
-        <ThemeToggle />
+        <div className="flex items-center gap-1">
+          {actions}
+          <ThemeToggle />
+        </div>
       </div>
       <NavList nav={nav} pathname={pathname} Link={Link} onNavigate={close} />
       {footer && <div className="border-t border-sidebar-border p-3">{footer}</div>}
@@ -119,15 +125,18 @@ function AppShell({
       {/* Mobile top bar */}
       <header className="sticky top-0 z-40 flex h-14 items-center justify-between border-b border-sidebar-border bg-sidebar px-4 text-sidebar-foreground lg:hidden">
         {brand}
-        <Button
-          variant="ghost"
-          size="icon"
-          className="text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-foreground"
-          onClick={() => setOpen(true)}
-          aria-label="Open navigation"
-        >
-          <Menu className="size-5" />
-        </Button>
+        <div className="flex items-center gap-1">
+          {actions}
+          <Button
+            variant="ghost"
+            size="icon"
+            className="text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-foreground"
+            onClick={() => setOpen(true)}
+            aria-label="Open navigation"
+          >
+            <Menu className="size-5" />
+          </Button>
+        </div>
       </header>
 
       {/* Mobile drawer */}

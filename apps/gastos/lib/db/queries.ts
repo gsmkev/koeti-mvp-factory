@@ -125,12 +125,18 @@ export async function getInsights(teamId: number) {
 }
 
 // --- expenses ---
-export async function getExpenses(teamId: number, category?: string) {
-  return db
+export const EXPENSES_PAGE_SIZE = 50;
+
+// `page` pagina la vista (trae PAGE_SIZE + 1 filas: la extra señala hasMore);
+// sin `page` devuelve todo — el export CSV depende de eso.
+export async function getExpenses(teamId: number, category?: string, page?: number) {
+  const q = db
     .select()
     .from(expenses)
     .where(and(eq(expenses.teamId, teamId), category ? eq(expenses.category, category) : undefined))
     .orderBy(desc(expenses.spentAt), desc(expenses.id));
+  if (!page) return q;
+  return q.limit(EXPENSES_PAGE_SIZE + 1).offset((page - 1) * EXPENSES_PAGE_SIZE);
 }
 
 export async function getMonthTotal(teamId: number) {

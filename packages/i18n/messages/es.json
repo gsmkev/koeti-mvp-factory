@@ -216,7 +216,9 @@
     "goHome": "Ir al inicio"
   },
   "common": {
-    "free": "Gratis"
+    "free": "Gratis",
+    "prevPage": "Página anterior",
+    "nextPage": "Página siguiente"
   },
   "verifyBanner": {
     "message": "Verificá tu email para asegurar tu cuenta.",
@@ -232,5 +234,12 @@
     "dismiss": "Descartar",
     "kindAnomaly": "Anomalía",
     "kindSuggestion": "Sugerencia"
+  },
+  "notifications": {
+    "title": "Notificaciones",
+    "empty": "Sin notificaciones todavía",
+    "aria": "Notificaciones",
+    "ariaUnread": "Notificaciones ({count} sin leer)",
+    "insightsNew": "{count, plural, one {# nuevo insight para tu equipo} other {# nuevos insights para tu equipo}}"
   }
 }

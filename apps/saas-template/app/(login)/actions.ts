@@ -16,10 +16,10 @@ import {
   type NewTeamMember,
   type NewActivityLog,
   ActivityType,
+  consumeRateLimit,
 } from '@koeti/db';
 import { comparePasswords, hashPassword, setSession } from '@/lib/auth/session';
 import {
-  rateLimit,
   signOneTimeToken,
   verifyOneTimeToken,
   isSuperadmin,
@@ -53,6 +53,11 @@ async function clientIp() {
   const h = await headers();
   return h.get('x-forwarded-for')?.split(',')[0]?.trim() || 'local';
 }
+
+// Durable, cross-instance fixed window (Postgres) for the auth brute-force
+// guards — the in-memory rateLimit only holds per instance, which is not
+// enough on multi-instance deploys. Burst paths (AI, API throttle) keep it.
+const limitOk = (key: string, limit: number) => consumeRateLimit(db, key, { limit });
 
 // next-intl types getLocale() as string; our request config (i18n/request.ts)
 // only ever resolves to a supported Locale, so this narrowing is safe.
@@ -119,8 +124,8 @@ export const signIn = validatedAction(signInSchema, async (data, formData) => {
   const t = await getTranslations('errors');
 
   if (
-    !rateLimit(`signin:${await clientIp()}`, { limit: 10 }) ||
-    !rateLimit(`signin:${email.toLowerCase()}`, { limit: 10 })
+    !(await limitOk(`signin:${await clientIp()}`, 10)) ||
+    !(await limitOk(`signin:${email.toLowerCase()}`, 10))
   ) {
     return { error: t('tooManyAttempts'), email, password };
   }
@@ -180,7 +185,7 @@ export const signUp = validatedAction(signUpSchema, async (data, formData) => {
   const { email, password, inviteId } = data;
   const t = await getTranslations('errors');
 
-  if (!rateLimit(`signup:${await clientIp()}`, { limit: 5 })) {
+  if (!(await limitOk(`signup:${await clientIp()}`, 5))) {
     return { error: t('tooManyAttempts'), email, password };
   }
 
@@ -317,8 +322,8 @@ const forgotPasswordSchema = z.object({
 export const forgotPassword = validatedAction(forgotPasswordSchema, async (data) => {
   const t = await getTranslations('errors');
   if (
-    !rateLimit(`forgot:${await clientIp()}`, { limit: 5 }) ||
-    !rateLimit(`forgot:${data.email.toLowerCase()}`, { limit: 5 })
+    !(await limitOk(`forgot:${await clientIp()}`, 5)) ||
+    !(await limitOk(`forgot:${data.email.toLowerCase()}`, 5))
   ) {
     return { error: t('tooManyAttempts') };
   }
@@ -653,7 +658,7 @@ export const resendVerification = validatedActionWithUser(z.object({}), async (_
   if (user.emailVerified) {
     return { success: t('emailAlreadyVerified') };
   }
-  if (!rateLimit(`verify:${user.id}`, { limit: 5 })) {
+  if (!(await limitOk(`verify:${user.id}`, 5))) {
     return { error: t('tooManyAttempts') };
   }
   const locale = await currentLocale();

@@ -2,10 +2,18 @@
 import Link from 'next/link';
 import type { SearchParams } from 'nuqs/server';
 import { Download } from 'lucide-react';
-import { Badge, Button, ResourcePanel, StatCard, cn, type ResourceField } from '@koeti/ui';
+import {
+  Badge,
+  Button,
+  Pagination,
+  ResourcePanel,
+  StatCard,
+  cn,
+  type ResourceField,
+} from '@koeti/ui';
 import { getTranslations } from 'next-intl/server';
 import { requireRole } from '@/lib/auth/middleware';
-import { getExpenses, getMonthTotal } from '@/lib/db/queries';
+import { EXPENSES_PAGE_SIZE, getExpenses, getMonthTotal } from '@/lib/db/queries';
 import { createExpense, deleteExpense, updateExpense } from './actions';
 import { CATEGORIES, loadGastosSearchParams } from './search-params';
 
@@ -18,13 +26,24 @@ export default async function GastosPage({
   // exigen 'member' vía crudActions (los viewers son solo lectura).
   const { team } = await requireRole('viewer');
   // URL = estado: ?categoria=software filtra y es deep-linkable desde otro MVP
-  const { categoria } = await loadGastosSearchParams(searchParams);
-  const [rows, monthTotal, t, tcat] = await Promise.all([
-    getExpenses(team.id, categoria ?? undefined),
+  const { categoria, pagina } = await loadGastosSearchParams(searchParams);
+  const [fetched, monthTotal, t, tcat, tCommon] = await Promise.all([
+    getExpenses(team.id, categoria ?? undefined, pagina),
     getMonthTotal(team.id),
     getTranslations('gastos'),
     getTranslations('categories'),
+    getTranslations('common'),
   ]);
+  // fila PAGE_SIZE + 1 = hay página siguiente
+  const hasMore = fetched.length > EXPENSES_PAGE_SIZE;
+  const rows = fetched.slice(0, EXPENSES_PAGE_SIZE);
+  const hrefFor = (p: number) => {
+    const params = new URLSearchParams();
+    if (categoria) params.set('categoria', categoria);
+    if (p > 1) params.set('pagina', String(p));
+    const qs = params.toString();
+    return `/dashboard/gastos${qs ? `?${qs}` : ''}`;
+  };
   const catLabel = (c: string) =>
     CATEGORIES.includes(c as (typeof CATEGORIES)[number]) ? tcat(c) : c;
 
@@ -113,6 +132,14 @@ export default async function GastosPage({
         onDelete={deleteExpense}
         emptyTitle={t('emptyTitle')}
         emptyDescription={t('emptyDesc')}
+      />
+      <Pagination
+        page={pagina}
+        hasMore={hasMore}
+        hrefFor={hrefFor}
+        linkComponent={Link}
+        prevLabel={tCommon('prevPage')}
+        nextLabel={tCommon('nextPage')}
       />
     </section>
   );
