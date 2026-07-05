@@ -103,7 +103,12 @@
     "roleOwner": "Dono",
     "inviteMember": "Convidar membro",
     "inviting": "Convidando…",
-    "adminOnlyInvite": "Você precisa ser administrador do time para convidar novos membros."
+    "adminOnlyInvite": "Você precisa ser administrador do time para convidar novos membros.",
+    "pendingCard": "Convites pendentes",
+    "noPending": "Nenhum convite pendente.",
+    "revoke": "Revogar",
+    "revoking": "Revogando…",
+    "invitedAs": "Convidado como {role}"
   },
   "activity": {
     "title": "Registro de atividade",
@@ -188,7 +193,10 @@
     "adminOnlyInvite": "Apenas administradores do time podem convidar membros",
     "alreadyMember": "O usuário já é membro deste time",
     "invitationExists": "Já foi enviado um convite para este e-mail",
-    "invitationSent": "Convite enviado com sucesso"
+    "invitationSent": "Convite enviado com sucesso",
+    "invitationRevoked": "Convite revogado.",
+    "verificationSent": "Email de verificação enviado.",
+    "emailAlreadyVerified": "Seu email já está verificado."
   },
   "notFound": {
     "code": "404",
@@ -205,5 +213,11 @@
   },
   "common": {
     "free": "Grátis"
+  },
+  "verifyBanner": {
+    "message": "Verifique seu email para proteger sua conta.",
+    "resend": "Reenviar link",
+    "resending": "Enviando…",
+    "sent": "Email de verificação enviado — confira sua caixa."
   }
 }

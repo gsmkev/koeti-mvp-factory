@@ -88,6 +88,39 @@ Caller side: `fetch(url, { headers: { authorization: 'Bearer koeti_...' } })`.
 `apiRateLimitOk` only throttles Bearer callers (per-IP, 60/min), so session/
 dashboard traffic to the same route is never limited.
 
+## Rate limiting — in-memory, per-instance (know the ceiling)
+
+`rateLimit` (`@koeti/auth`) and `apiRateLimitOk` (`lib/auth/api-key.ts`) keep
+their counters in a process-local `Map`. Two consequences to design around:
+
+- **Multi-instance dilutes the limit.** On Vercel Fluid / any horizontally
+  scaled deploy, each instance has its own window, so the effective limit is
+  `limit × instances`. A "10 attempts / min" sign-in guard becomes 10×N. Fine
+  as a brute-force _speed bump_; not a hard quota.
+- **IP keys are best-effort.** `x-forwarded-for` is client-suppliable, so
+  per-IP keys (sign-up, the API throttle) can be rotated around. The per-email
+  keys on sign-in / forgot-password are the ones header rotation can't bypass —
+  keep pairing an identity key with any IP key.
+
+**Upgrade path** (do it when one app first runs on more than one instance, or
+needs a real quota): swap the `Map` in `rate-limit.ts` for a shared atomic
+store — Upstash Redis (`INCR` + `EXPIRE`) or a Postgres fixed-window row. Same
+`rateLimit(key, opts)` signature, so callers don't change. Until then, the
+in-memory limiter is the deliberate, dependency-free default.
+
+## Session tokens — fingerprinted, revoked on credential change
+
+The session is an HS256 JWT (1-day, refreshed on each GET by the proxy). It
+carries a `fp` claim = last 16 chars of the user's `passwordHash`
+(`credentialFingerprint`). `getUser` rejects a session whose `fp` no longer
+matches the stored hash, so **changing or resetting a password revokes every
+existing session** — no session table needed. `updatePassword` re-issues the
+current session so the acting tab stays signed in; other devices drop on their
+next request. There's no separate allow-list revocation: signing out just
+clears the cookie, and a stolen token stays valid until it expires (≤ 1 day) or
+the password changes. Add a token allow-list only if that window is
+unacceptable for a given app.
+
 ## What comes from `@koeti/auth` vs per-app `lib/auth/middleware.ts`
 
 | Function                                                | Import from             |
@@ -99,6 +132,7 @@ dashboard traffic to the same route is never limited.
 | `createAuthMiddleware`                                  | `@koeti/auth`           |
 | `roleAtLeast`, `isSuperadmin`, `TEAM_ROLES`, `TeamRole` | `@koeti/auth`           |
 | `generateApiKey`, `hashApiKey`, `apiKeyPrefix`          | `@koeti/auth`           |
+| `credentialFingerprint`                                 | `@koeti/auth`           |
 | `validatedActionWithUser`                               | `@/lib/auth/middleware` |
 | `withTeam` (optional `minRole` 2nd arg)                 | `@/lib/auth/middleware` |
 | `requireRole`, `teamRoleFor`                            | `@/lib/auth/middleware` |

@@ -8,6 +8,10 @@ export const users = pgTable('users', {
   email: varchar('email', { length: 255 }).notNull().unique(),
   passwordHash: text('password_hash').notNull(),
   role: varchar('role', { length: 20 }).notNull().default('member'),
+  // Null until the address is confirmed via the verification link. Soft signal
+  // by default (a dashboard banner) — apps that need a hard gate check it in
+  // proxy.ts / requireRole. See email-verification flow in the login actions.
+  emailVerified: timestamp('email_verified'),
   createdAt: timestamp('created_at').notNull().defaultNow(),
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
   deletedAt: timestamp('deleted_at'),
@@ -80,6 +84,16 @@ export const apiKeys = pgTable('api_keys', {
   revokedAt: timestamp('revoked_at'),
 });
 
+// Stripe delivers webhooks at-least-once. We record every processed event id
+// and skip duplicates, so a redelivery can never double-apply a handler (the
+// current subscription handlers are idempotent, but any non-idempotent one an
+// MVP adds — credits, emails — would otherwise double-fire on retry).
+export const stripeEvents = pgTable('stripe_events', {
+  id: text('id').primaryKey(), // Stripe event id (evt_…)
+  type: varchar('type', { length: 100 }).notNull(),
+  receivedAt: timestamp('received_at').notNull().defaultNow(),
+});
+
 export const teamsRelations = relations(teams, ({ many }) => ({
   teamMembers: many(teamMembers),
   activityLogs: many(activityLogs),
@@ -144,6 +158,8 @@ export type Invitation = typeof invitations.$inferSelect;
 export type NewInvitation = typeof invitations.$inferInsert;
 export type ApiKey = typeof apiKeys.$inferSelect;
 export type NewApiKey = typeof apiKeys.$inferInsert;
+export type StripeEvent = typeof stripeEvents.$inferSelect;
+export type NewStripeEvent = typeof stripeEvents.$inferInsert;
 export type TeamDataWithMembers = Team & {
   teamMembers: (TeamMember & {
     user: Pick<User, 'id' | 'name' | 'email'>;

@@ -103,7 +103,12 @@
     "roleOwner": "Dueño",
     "inviteMember": "Invitar miembro",
     "inviting": "Invitando…",
-    "adminOnlyInvite": "Tenés que ser administrador del equipo para invitar nuevos miembros."
+    "adminOnlyInvite": "Tenés que ser administrador del equipo para invitar nuevos miembros.",
+    "pendingCard": "Invitaciones pendientes",
+    "noPending": "No hay invitaciones pendientes.",
+    "revoke": "Revocar",
+    "revoking": "Revocando…",
+    "invitedAs": "Invitado como {role}"
   },
   "activity": {
     "title": "Registro de actividad",
@@ -188,7 +193,10 @@
     "adminOnlyInvite": "Solo los administradores del equipo pueden invitar miembros",
     "alreadyMember": "El usuario ya es miembro de este equipo",
     "invitationExists": "Ya se envió una invitación a este email",
-    "invitationSent": "Invitación enviada correctamente"
+    "invitationSent": "Invitación enviada correctamente",
+    "invitationRevoked": "Invitación revocada.",
+    "verificationSent": "Email de verificación enviado.",
+    "emailAlreadyVerified": "Tu email ya está verificado."
   },
   "notFound": {
     "code": "404",
@@ -205,5 +213,11 @@
   },
   "common": {
     "free": "Gratis"
+  },
+  "verifyBanner": {
+    "message": "Verificá tu email para asegurar tu cuenta.",
+    "resend": "Reenviar enlace",
+    "resending": "Enviando…",
+    "sent": "Email de verificación enviado — revisá tu bandeja."
   }
 }

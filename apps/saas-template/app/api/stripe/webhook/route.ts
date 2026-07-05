@@ -1,5 +1,7 @@
 // API route (POST) — /api/stripe/webhook.
 import { stripe, handleSubscriptionChange } from '@koeti/billing';
+import { stripeEvents } from '@koeti/db';
+import { db } from '@/lib/db/drizzle';
 import { getTeamByStripeCustomerId, updateTeamSubscription } from '@/lib/db/queries';
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
@@ -16,6 +18,18 @@ export async function POST(request: NextRequest) {
     console.error('Webhook signature verification failed.', err);
     return NextResponse.json({ error: 'Webhook signature verification failed.' }, { status: 400 });
   }
+
+  // Idempotency: record the event id first. An empty insert means Stripe already
+  // delivered this event — ack and skip so no handler runs twice on a retry.
+  const firstDelivery = await db
+    .insert(stripeEvents)
+    .values({ id: event.id, type: event.type })
+    .onConflictDoNothing()
+    .returning({ id: stripeEvents.id });
+  if (firstDelivery.length === 0) {
+    return NextResponse.json({ received: true, duplicate: true });
+  }
+
   switch (event.type) {
     case 'customer.subscription.updated':
     case 'customer.subscription.deleted':

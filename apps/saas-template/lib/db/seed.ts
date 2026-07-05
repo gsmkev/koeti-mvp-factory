@@ -49,7 +49,7 @@ async function seed() {
   } else {
     const [user] = await db
       .insert(users)
-      .values([{ email, passwordHash: await hashPassword(password), role: 'owner' }])
+      .values([{ email, passwordHash: await hashPassword(password) }])
       .returning();
     const [team] = await db.insert(teams).values({ name: 'Test Team' }).returning();
     await db.insert(teamMembers).values({ teamId: team.id, userId: user.id, role: 'owner' });

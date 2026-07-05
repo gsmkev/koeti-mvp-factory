@@ -7,7 +7,7 @@ import { customerPortalAction } from '@/lib/payments/actions';
 import { useActionState } from 'react';
 import { useTranslations } from 'next-intl';
 import { TeamDataWithMembers, User } from '@/lib/db/schema';
-import { removeTeamMember, inviteTeamMember } from '@/app/(login)/actions';
+import { removeTeamMember, inviteTeamMember, revokeInvitation } from '@/app/(login)/actions';
 import useSWR from 'swr';
 import { Suspense } from 'react';
 import { Input } from '@koeti/ui';
@@ -258,6 +258,56 @@ function InviteTeamMember() {
   );
 }
 
+type PendingInvitation = { id: number; email: string; role: string; invitedAt: string };
+
+// Admin-only card: the /api/team/invitations endpoint 403s for non-admins, so
+// we skip the fetch entirely for them (cosmetic gate; the revoke action enforces).
+function PendingInvitations() {
+  const t = useTranslations('team');
+  const { data: user } = useSWR<User>('/api/user', fetcher);
+  const canManage = user?.role === 'owner' || user?.role === 'admin' || user?.role === 'superadmin';
+  const { data: invites } = useSWR<PendingInvitation[]>(
+    canManage ? '/api/team/invitations' : null,
+    fetcher,
+  );
+  const [revokeState, revokeAction] = useActionState<ActionState, FormData>(revokeInvitation, {});
+
+  if (!canManage) return null;
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>{t('pendingCard')}</CardTitle>
+      </CardHeader>
+      <CardContent>
+        {!invites?.length ? (
+          <p className="text-muted-foreground">{t('noPending')}</p>
+        ) : (
+          <ul className="space-y-4">
+            {invites.map((inv) => (
+              <li key={inv.id} className="flex items-center justify-between">
+                <div>
+                  <p className="font-medium">{inv.email}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {t('invitedAs', { role: roleLabel(t, inv.role) })}
+                  </p>
+                </div>
+                <form action={revokeAction}>
+                  <input type="hidden" name="invitationId" value={inv.id} />
+                  <SubmitButton variant="outline" size="sm" pendingText={t('revoking')}>
+                    {t('revoke')}
+                  </SubmitButton>
+                </form>
+              </li>
+            ))}
+          </ul>
+        )}
+        {revokeState?.error && <p className="text-destructive mt-4">{revokeState.error}</p>}
+      </CardContent>
+    </Card>
+  );
+}
+
 export default function SettingsPage() {
   const t = useTranslations('team');
   return (
@@ -272,6 +322,7 @@ export default function SettingsPage() {
       <Suspense fallback={<InviteTeamMemberSkeleton />}>
         <InviteTeamMember />
       </Suspense>
+      <PendingInvitations />
     </section>
   );
 }
