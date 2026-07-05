@@ -54,7 +54,8 @@
     "pricing": "Pricing",
     "signIn": "Sign in",
     "getStarted": "Get started",
-    "footerTagline": "{app} — built on the factory scaffold."
+    "footerTagline": "{app} — built on the factory scaffold.",
+    "insights": "Insights"
   },
   "account": {
     "title": "General Settings",
@@ -196,7 +197,10 @@
     "invitationSent": "Invitation sent successfully",
     "invitationRevoked": "Invitation revoked.",
     "verificationSent": "Verification email sent.",
-    "emailAlreadyVerified": "Your email is already verified."
+    "emailAlreadyVerified": "Your email is already verified.",
+    "aiRateLimited": "Too many AI requests — try again in a minute.",
+    "aiQuotaExceeded": "Your team reached today's AI limit. It resets tomorrow.",
+    "aiUnavailable": "The AI service is not available right now. Try again later."
   },
   "notFound": {
     "code": "404",
@@ -219,5 +223,14 @@
     "resend": "Resend link",
     "resending": "Sending…",
     "sent": "Verification email sent — check your inbox."
+  },
+  "insights": {
+    "title": "Insights",
+    "description": "Anomalies and suggestions from the daily analysis of your team's data.",
+    "emptyTitle": "No insights yet",
+    "emptyDesc": "The daily analysis will surface anomalies and suggestions here.",
+    "dismiss": "Dismiss",
+    "kindAnomaly": "Anomaly",
+    "kindSuggestion": "Suggestion"
   }
 }

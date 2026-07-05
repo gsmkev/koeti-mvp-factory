@@ -25,9 +25,21 @@
     "moduleEquipoDesc": "Os gastos ficam no time, não no notebook de alguém. Convide sua gente com funções claras.",
     "ledgerThisMonth": "Este mês",
     "ledgerRows": [
-      { "cat": "viaticos", "desc": "Viagem à matriz — cliente", "amount": "$2.450,00" },
-      { "cat": "software", "desc": "Licenças anuais", "amount": "$1.180,00" },
-      { "cat": "materiales", "desc": "Impressões e papelaria", "amount": "$312,50" }
+      {
+        "cat": "viaticos",
+        "desc": "Viagem à matriz — cliente",
+        "amount": "$2.450,00"
+      },
+      {
+        "cat": "software",
+        "desc": "Licenças anuais",
+        "amount": "$1.180,00"
+      },
+      {
+        "cat": "materiales",
+        "desc": "Impressões e papelaria",
+        "amount": "$312,50"
+      }
     ],
     "ctaTitle": "Largue a planilha hoje.",
     "ctaSubtitle": "Seu time registra, o Gastos soma. No fim do mês você já sabe para onde o dinheiro foi.",
@@ -76,5 +88,17 @@
     "colCategory": "Categoria",
     "colDescription": "Descrição",
     "colAmount": "Valor"
+  },
+  "insightMessages": {
+    "spendSpike": "Gasto incomum em {day}: {total} contra uma média diária de {avg}.",
+    "topCategoryShare": "A categoria {category} concentra {share}% dos gastos dos últimos 30 dias — vale a pena revisar.",
+    "possibleDuplicate": "Possível gasto duplicado em {day}: \"{description}\" de {total}."
+  },
+  "gastosAi": {
+    "title": "Resumo mensal com IA",
+    "description": "Gere um resumo curto com IA dos gastos dos últimos 30 dias: totais, padrões e uma dica de economia.",
+    "generate": "Gerar resumo",
+    "generating": "Gerando…",
+    "noData": "Não há gastos nos últimos 30 dias para resumir."
   }
 }

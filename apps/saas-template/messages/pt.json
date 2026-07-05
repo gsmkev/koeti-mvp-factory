@@ -50,5 +50,8 @@
     "sourceSearch": "Busca",
     "sourceSocial": "Redes",
     "sourceEmail": "E-mail"
+  },
+  "insightMessages": {
+    "activitySpike": "Atividade incomum na conta em {day}: {count} eventos contra uma média diária de {avg}."
   }
 }

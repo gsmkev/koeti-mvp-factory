@@ -7,6 +7,7 @@ import {
   Activity,
   KeyRound,
   LayoutDashboard,
+  Lightbulb,
   LogOut,
   Receipt,
   Settings,
@@ -41,6 +42,7 @@ function useNav(): AppShellNavGroup[] {
       items: [
         { href: '/dashboard', label: t('overview'), icon: <LayoutDashboard /> },
         { href: '/dashboard/gastos', label: tg('navLabel'), icon: <Receipt /> },
+        { href: '/dashboard/insights', label: t('insights'), icon: <Lightbulb /> },
       ],
     },
     {

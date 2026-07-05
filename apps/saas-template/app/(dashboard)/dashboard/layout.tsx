@@ -3,7 +3,16 @@
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { Activity, KeyRound, LayoutDashboard, LogOut, Settings, Shield, Users } from 'lucide-react';
+import {
+  Activity,
+  KeyRound,
+  LayoutDashboard,
+  Lightbulb,
+  LogOut,
+  Settings,
+  Shield,
+  Users,
+} from 'lucide-react';
 import {
   AppShell,
   Avatar,
@@ -27,7 +36,10 @@ function useNav(): AppShellNavGroup[] {
   const t = useTranslations('nav');
   return [
     {
-      items: [{ href: '/dashboard', label: t('overview'), icon: <LayoutDashboard /> }],
+      items: [
+        { href: '/dashboard', label: t('overview'), icon: <LayoutDashboard /> },
+        { href: '/dashboard/insights', label: t('insights'), icon: <Lightbulb /> },
+      ],
     },
     {
       label: t('settings'),

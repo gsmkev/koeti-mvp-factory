@@ -50,5 +50,8 @@
     "sourceSearch": "Search",
     "sourceSocial": "Social",
     "sourceEmail": "Email"
+  },
+  "insightMessages": {
+    "activitySpike": "Unusual account activity on {day}: {count} events vs a daily average of {avg}."
   }
 }
