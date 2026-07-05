@@ -247,5 +247,15 @@
     "aria": "Notificaciones",
     "ariaUnread": "Notificaciones ({count} sin leer)",
     "insightsNew": "{count, plural, one {# nuevo insight para tu equipo} other {# nuevos insights para tu equipo}}"
+  },
+  "onboarding": {
+    "title": "Configura tu espacio de trabajo",
+    "subtitle": "Un par de detalles y listo.",
+    "teamName": "Nombre del espacio de trabajo",
+    "teamNamePlaceholder": "Acme Inc",
+    "invites": "Invita a tu equipo (opcional)",
+    "invitesPlaceholder": "ana@acme.com, luis@acme.com",
+    "invitesHelp": "Separa los correos con comas — cada uno recibirá una invitación por email.",
+    "submit": "Comenzar"
   }
 }

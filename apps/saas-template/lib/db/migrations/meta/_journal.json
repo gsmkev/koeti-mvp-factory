@@ -43,6 +43,13 @@
       "when": 1783286234189,
       "tag": "0005_faulty_wiccan",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1783290811035,
+      "tag": "0006_narrow_hiroim",
+      "breakpoints": true
     }
   ]
 }

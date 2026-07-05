@@ -247,5 +247,15 @@
     "aria": "Notifications",
     "ariaUnread": "Notifications ({count} unread)",
     "insightsNew": "{count, plural, one {# new insight for your team} other {# new insights for your team}}"
+  },
+  "onboarding": {
+    "title": "Set up your workspace",
+    "subtitle": "A couple of details and you're in.",
+    "teamName": "Workspace name",
+    "teamNamePlaceholder": "Acme Inc",
+    "invites": "Invite teammates (optional)",
+    "invitesPlaceholder": "ana@acme.com, luis@acme.com",
+    "invitesHelp": "Separate emails with commas — each one gets an invitation email.",
+    "submit": "Get started"
   }
 }

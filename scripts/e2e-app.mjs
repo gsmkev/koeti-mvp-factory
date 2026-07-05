@@ -112,8 +112,12 @@ try {
   await page.fill('input[name="email"]', `e2e-${stamp}@test.com`);
   await page.fill('input[name="password"]', 'e2e-password-123');
   await page.click('button[type="submit"]');
+  // New teams land on /onboarding first — name the workspace, then continue.
+  await page.waitForURL('**/onboarding', { timeout: 30_000 });
+  await page.fill('input[name="name"]', `E2E Team ${stamp}`);
+  await page.click('button[type="submit"]');
   await page.waitForURL('**/dashboard', { timeout: 30_000 });
-  console.log(`  ✅ signed up e2e-${stamp}@test.com → /dashboard`);
+  console.log(`  ✅ signed up e2e-${stamp}@test.com → /onboarding → /dashboard`);
 
   step('Platform endpoints (uploads + notifications)');
   // page.request shares the session cookie with the browser context

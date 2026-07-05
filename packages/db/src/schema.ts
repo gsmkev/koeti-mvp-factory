@@ -41,6 +41,8 @@ export const teams = pgTable('teams', {
   // Per-tenant override of the AI daily quota. Null = inherit the plan / SaaS
   // default (see resolveAiLimits in @koeti/ai). Set by the superadmin.
   aiDailyLimit: integer('ai_daily_limit'),
+  // Null = owner hasn't finished /onboarding yet (dashboard layout bounces them there).
+  onboardingCompletedAt: timestamp('onboarding_completed_at'),
 });
 
 export const teamMembers = pgTable(
