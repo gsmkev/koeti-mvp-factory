@@ -43,6 +43,20 @@
       "when": 1783286234189,
       "tag": "0005_faulty_wiccan",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1783290811035,
+      "tag": "0006_narrow_hiroim",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1783291826301,
+      "tag": "0007_misty_stellaris",
+      "breakpoints": true
     }
   ]
 }

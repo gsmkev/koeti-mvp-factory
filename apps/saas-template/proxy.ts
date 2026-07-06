@@ -1,7 +1,9 @@
 // Next.js middleware: session refresh + route protection.
 import { createAuthMiddleware } from '@koeti/auth';
 
-const { middleware: _middleware } = createAuthMiddleware({ protectedRoutes: ['/dashboard'] });
+const { middleware: _middleware } = createAuthMiddleware({
+  protectedRoutes: ['/dashboard', '/onboarding'],
+});
 
 // proxy.ts (unlike the old middleware.ts) requires a default export
 export default _middleware;
