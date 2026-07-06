@@ -17,3 +17,4 @@ export {
   PAGOPAR_PERIOD_DAYS,
   type PagoparPayment,
 } from './pagopar';
+export { sifenEnabled, emitSifenInvoice, type SifenInvoiceInput } from './sifen';

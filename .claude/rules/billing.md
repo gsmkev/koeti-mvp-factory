@@ -109,3 +109,27 @@ apps configure env, they don't write Pagopar code.
   `subscriptionStatus='active'`. The webhook enqueues a `pagopar-expire` job
   that downgrades unless a renewal replaced the subscription id. `isSubscribed`
   works unchanged; there is no customer portal — renewals go through `/pricing`.
+
+## SIFEN e-invoicing — the factura is emitted automatically
+
+Paraguayan sales legally need a factura electrónica. The factory emits it via
+**FacturaSend** (facturasend.com.py — REST wrapper over SIFEN's signed-XML
+SOAP; it also renders the KuDE and emails it to the client). Enabled by
+`FACTURASEND_TENANT` + `FACTURASEND_API_KEY` (+ optional
+`FACTURASEND_ESTABLECIMIENTO`/`FACTURASEND_PUNTO`, default `001`); without
+them nothing is emitted.
+
+- On each **paid Pagopar webhook**, a `sifen-invoice` job is enqueued (jobs
+  queue = retries/backoff/dead-letter for a flaky external call). The handler
+  builds the DE from the team's tax identity (RUC → B2B `contribuyente`, CI →
+  B2C) and the paid amount (IVA 10% included), calls
+  `emitSifenInvoice({ buyer, item })`, and records the result in the
+  **`invoices`** table (`order_ref` UNIQUE = can never double-invoice; `cdc`
+  is the legal 44-digit reference).
+- Approval is async on SIFEN's side — the authoritative estado and the
+  KuDE/PDF live in FacturaSend (`POST /de/pdf`, `POST /de/email`).
+- A failed emission dead-letters in the jobs table
+  (`select * from jobs where status='failed'`) — re-run by resetting the row;
+  `order_ref` uniqueness makes re-runs safe.
+- Stripe-side invoicing stays with Stripe (its own invoices). This path is for
+  Pagopar payments, where no one else emits the factura.

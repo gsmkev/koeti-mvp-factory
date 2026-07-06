@@ -4,6 +4,7 @@ import {
   PAGOPAR_PERIOD_DAYS,
   handlePagoparPayment,
   pagoparEnabled,
+  sifenEnabled,
   verifyPagoparWebhook,
 } from '@koeti/billing';
 import { enqueueJob } from '@koeti/db';
@@ -32,6 +33,20 @@ export async function POST(request: NextRequest) {
       { teamId: team.id, order: `pagopar:${payment.numero_pedido}` },
       { teamId: team.id, runAt: new Date(Date.now() + PAGOPAR_PERIOD_DAYS * 86_400_000) },
     );
+    // Invoicing is mandatory in Paraguay: emit the factura electrónica for
+    // this payment in the background (retries + dead-letter for free).
+    if (sifenEnabled()) {
+      await enqueueJob(
+        db,
+        'sifen-invoice',
+        {
+          teamId: team.id,
+          order: `pagopar:${payment.numero_pedido}`,
+          amount: Math.round(Number(payment.monto ?? 0)),
+        },
+        { teamId: team.id },
+      );
+    }
   }
   // Pagopar requires the resultado echoed back as the 200 body — anything
   // else is redelivered every 10 minutes. Handlers are idempotent, and an

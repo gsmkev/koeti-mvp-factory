@@ -116,6 +116,7 @@ export type PagoparPayment = {
   cancelado: boolean;
   hash_pedido: string;
   numero_pedido: string;
+  monto?: string; // "60000.00" — used by the SIFEN invoice job
   token: string;
 };
 
