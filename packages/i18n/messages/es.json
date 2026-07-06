@@ -55,7 +55,8 @@
     "signIn": "Iniciar sesión",
     "getStarted": "Empezar",
     "footerTagline": "{app} — hecho con el scaffold del factory.",
-    "insights": "Insights"
+    "insights": "Insights",
+    "invoices": "Facturas"
   },
   "account": {
     "title": "Configuración general",

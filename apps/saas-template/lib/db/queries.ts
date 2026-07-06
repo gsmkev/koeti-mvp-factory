@@ -3,7 +3,16 @@ import { desc, and, eq, isNull, sql } from 'drizzle-orm';
 import { db } from './drizzle';
 import { verifyToken, credentialFingerprint } from '@koeti/auth';
 import { cookies } from 'next/headers';
-import { activityLogs, apiKeys, insights, invitations, teamMembers, teams, users } from '@koeti/db';
+import {
+  activityLogs,
+  apiKeys,
+  insights,
+  invitations,
+  invoices,
+  teamMembers,
+  teams,
+  users,
+} from '@koeti/db';
 
 export async function getUser() {
   const sessionCookie = (await cookies()).get('session');
@@ -59,6 +68,19 @@ export async function getUserWithTeam(userId: number) {
     .where(eq(users.id, userId))
     .limit(1);
   return result[0];
+}
+
+// SIFEN facturas emitted for this team (written by the sifen-invoice job).
+// Unbounded over time → paginated per .claude/rules/crud.md §2.
+export const INVOICES_PAGE_SIZE = 50;
+export async function getInvoices(teamId: number, page = 1) {
+  return db
+    .select()
+    .from(invoices)
+    .where(eq(invoices.teamId, teamId))
+    .orderBy(desc(invoices.createdAt))
+    .limit(INVOICES_PAGE_SIZE + 1)
+    .offset((page - 1) * INVOICES_PAGE_SIZE);
 }
 
 export async function getActivityLogs() {

@@ -128,6 +128,9 @@ them nothing is emitted.
   is the legal 44-digit reference).
 - Approval is async on SIFEN's side — the authoritative estado and the
   KuDE/PDF live in FacturaSend (`POST /de/pdf`, `POST /de/email`).
+- **`/dashboard/invoices`** (admin+, nav → Settings group) lists the team's
+  emitted facturas: date, number, order, CDC, ₲ amount, estado. Read-only,
+  paginated per crud.md §2.
 - A failed emission dead-letters in the jobs table
   (`select * from jobs where status='failed'`) — re-run by resetting the row;
   `order_ref` uniqueness makes re-runs safe.

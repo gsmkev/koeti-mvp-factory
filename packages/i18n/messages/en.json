@@ -55,7 +55,8 @@
     "signIn": "Sign in",
     "getStarted": "Get started",
     "footerTagline": "{app} — built on the factory scaffold.",
-    "insights": "Insights"
+    "insights": "Insights",
+    "invoices": "Invoices"
   },
   "account": {
     "title": "General Settings",
