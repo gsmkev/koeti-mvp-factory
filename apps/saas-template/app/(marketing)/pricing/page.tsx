@@ -2,6 +2,7 @@
 import { checkoutAction } from '@/lib/payments/actions';
 import { ArrowRight, Check } from 'lucide-react';
 import { getStripePrices, getStripeProducts } from '@/lib/payments/stripe';
+import { getPagoparPlans } from '@koeti/billing';
 import { getTranslations } from 'next-intl/server';
 import {
   Badge,
@@ -32,6 +33,13 @@ export default async function PricingPage() {
   const basePrice = prices.find((price) => price.productId === basePlan?.id);
   const plusPrice = prices.find((price) => price.productId === plusPlan?.id);
 
+  // Pagopar (Stripe alternative, Paraguay) drives the catalog when Stripe has
+  // no key. Prices are whole guaraníes — format with the native Intl API.
+  const pagoparPlans = process.env.STRIPE_SECRET_KEY ? [] : getPagoparPlans();
+  const pyg = new Intl.NumberFormat('es-PY', { style: 'currency', currency: 'PYG' });
+  const basePagopar = pagoparPlans.find((p) => p.name === 'Base');
+  const plusPagopar = pagoparPlans.find((p) => p.name === 'Plus');
+
   return (
     <main className="mx-auto max-w-6xl px-6 py-16 sm:px-8 sm:py-20">
       <div className="max-w-2xl">
@@ -49,8 +57,9 @@ export default async function PricingPage() {
           t={t}
           name={basePlan?.name || 'Base'}
           price={basePrice?.unitAmount || 800}
+          priceLabel={basePagopar ? pyg.format(basePagopar.amount) : undefined}
           interval={basePrice?.interval || 'month'}
-          trialDays={basePrice?.trialPeriodDays || 7}
+          trialDays={basePagopar ? 0 : basePrice?.trialPeriodDays || 7}
           features={t.raw('baseFeatures') as string[]}
           priceId={basePrice?.id}
         />
@@ -58,8 +67,9 @@ export default async function PricingPage() {
           t={t}
           name={plusPlan?.name || 'Plus'}
           price={plusPrice?.unitAmount || 1200}
+          priceLabel={plusPagopar ? pyg.format(plusPagopar.amount) : undefined}
           interval={plusPrice?.interval || 'month'}
-          trialDays={plusPrice?.trialPeriodDays || 7}
+          trialDays={plusPagopar ? 0 : plusPrice?.trialPeriodDays || 7}
           features={t.raw('plusFeatures') as string[]}
           priceId={plusPrice?.id}
           highlight
@@ -73,6 +83,7 @@ function PricingCard({
   t,
   name,
   price,
+  priceLabel,
   interval,
   trialDays,
   features,
@@ -82,6 +93,7 @@ function PricingCard({
   t: T;
   name: string;
   price: number;
+  priceLabel?: string;
   interval: string;
   trialDays: number;
   features: string[];
@@ -94,9 +106,11 @@ function PricingCard({
         <div>
           <span className="font-mono text-xs text-muted-foreground">[{name.toLowerCase()}]</span>
           <CardTitle className="mt-1 text-2xl">{name}</CardTitle>
-          <p className="mt-1 text-sm text-muted-foreground">
-            {t('freeTrial', { days: trialDays })}
-          </p>
+          {trialDays > 0 && (
+            <p className="mt-1 text-sm text-muted-foreground">
+              {t('freeTrial', { days: trialDays })}
+            </p>
+          )}
         </div>
         {highlight && (
           <CardAction>
@@ -106,7 +120,7 @@ function PricingCard({
       </CardHeader>
       <CardContent>
         <p className="text-4xl font-bold text-foreground">
-          ${price / 100}
+          {priceLabel ?? `$${price / 100}`}
           <span className="ml-2 text-base font-normal text-muted-foreground">
             {t('perUser', { interval })}
           </span>
@@ -123,6 +137,7 @@ function PricingCard({
       <CardFooter>
         <form action={checkoutAction} className="w-full">
           <input type="hidden" name="priceId" value={priceId} />
+          <input type="hidden" name="plan" value={name} />
           <SubmitButton
             variant="outline"
             className="w-full rounded-full"

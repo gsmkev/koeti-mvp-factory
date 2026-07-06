@@ -53,5 +53,22 @@
   },
   "insightMessages": {
     "activitySpike": "Unusual account activity on {day}: {count} events vs a daily average of {avg}."
+  },
+  "checkout": {
+    "title": "Checkout",
+    "planSummary": "{plan} plan — {amount} / month",
+    "billingData": "Billing details",
+    "invoiceNote": "Required for your invoice (factura): tax ID and legal name.",
+    "docType": "Document type",
+    "docTypeCi": "Cédula (CI)",
+    "docTypeRuc": "RUC",
+    "taxId": "Document number",
+    "taxIdPlaceholder": "1234567 (CI) or 1234567-8 (RUC)",
+    "businessName": "Legal name (razón social)",
+    "invalid": "Check the document number and legal name.",
+    "pay": "Continue to Pagopar — {amount}",
+    "loading": "Redirecting…",
+    "noPlanTitle": "No plan selected",
+    "noPlanDesc": "Pick a plan on the pricing page to start checkout."
   }
 }

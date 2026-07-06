@@ -49,6 +49,12 @@ export const teams = pgTable('teams', {
   // { style: 'currency', currency: team.currency }).
   currency: varchar('currency', { length: 3 }).notNull().default('USD'),
   measurementSystem: varchar('measurement_system', { length: 10 }).notNull().default('metric'),
+  // Tax identity for legal invoicing (Paraguay: every sale needs a factura
+  // with RUC/CI + razón social). Captured at the first paid checkout
+  // (/dashboard/checkout, Pagopar flow) and reused on renewals.
+  taxDocumentType: varchar('tax_document_type', { length: 3 }).notNull().default('CI'), // 'CI' | 'RUC'
+  taxId: varchar('tax_id', { length: 20 }),
+  businessName: varchar('business_name', { length: 100 }),
 });
 
 export const teamMembers = pgTable(
@@ -186,6 +192,23 @@ export const stripeEvents = pgTable('stripe_events', {
   receivedAt: timestamp('received_at').notNull().defaultNow(),
 });
 
+// SIFEN electronic invoices (facturas) emitted after paid orders — one row per
+// emitted document. `orderRef` is unique so the at-least-once job queue can
+// never double-invoice; `cdc` is the 44-digit national control code (the legal
+// reference — the PDF/KuDE lives with the emission provider).
+export const invoices = pgTable('invoices', {
+  id: serial('id').primaryKey(),
+  teamId: integer('team_id')
+    .notNull()
+    .references(() => teams.id),
+  orderRef: text('order_ref').notNull().unique(), // e.g. 'pagopar:<numero_pedido>'
+  cdc: varchar('cdc', { length: 44 }),
+  number: varchar('number', { length: 20 }),
+  status: varchar('status', { length: 20 }).notNull().default('sent'),
+  amount: integer('amount').notNull(), // whole guaraníes, IVA included
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+});
+
 // Durable half of the AI rate limit: one row per team per day, atomically
 // incremented before each AI call. The per-minute burst guard stays in-memory.
 export const aiUsage = pgTable(
@@ -293,6 +316,8 @@ export type Invitation = typeof invitations.$inferSelect;
 export type NewInvitation = typeof invitations.$inferInsert;
 export type ApiKey = typeof apiKeys.$inferSelect;
 export type NewApiKey = typeof apiKeys.$inferInsert;
+export type Invoice = typeof invoices.$inferSelect;
+export type NewInvoice = typeof invoices.$inferInsert;
 export type StripeEvent = typeof stripeEvents.$inferSelect;
 export type NewStripeEvent = typeof stripeEvents.$inferInsert;
 export type Notification = typeof notifications.$inferSelect;
