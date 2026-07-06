@@ -121,11 +121,12 @@ describe('handlePagoparPayment', () => {
 });
 
 describe('createPagoparOrder', () => {
-  const order = () =>
+  const order = (billing = { taxDocumentType: 'CI', taxId: '1234567', businessName: 'Ana SRL' }) =>
     createPagoparOrder({
       team: { id: 7 },
       user: { email: 'a@b.py', name: 'Ana' },
       plan: { name: 'Base', amount: 60000 },
+      billing,
     });
 
   it('signs the order and returns the checkout URL', async () => {
@@ -138,6 +139,26 @@ describe('createPagoparOrder', () => {
     expect(body.token).toBe(sha1('priv' + body.id_pedido_comercio + '60000'));
     expect(body.monto_total).toBe(60000);
     expect(body.id_pedido_comercio).toMatch(/^7-\d+$/);
+    expect(body.comprador).toMatchObject({
+      tipo_documento: 'CI',
+      documento: '1234567',
+      ruc: '',
+      razon_social: 'Ana SRL',
+    });
+  });
+
+  it('maps a RUC to ruc + bare documento (invoicing data)', async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      json: async () => ({ respuesta: true, resultado: [{ data: 'abc123' }] }),
+    });
+    vi.stubGlobal('fetch', fetchMock);
+    await order({ taxDocumentType: 'RUC', taxId: '1234567-8', businessName: 'Ana SRL' });
+    expect(JSON.parse(fetchMock.mock.calls[0][1].body).comprador).toMatchObject({
+      tipo_documento: 'RUC',
+      ruc: '1234567-8',
+      documento: '1234567',
+      razon_social: 'Ana SRL',
+    });
   });
 
   it('throws on a Pagopar error response', async () => {

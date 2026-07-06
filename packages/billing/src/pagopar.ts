@@ -33,20 +33,25 @@ export function getPagoparPlans(): { name: string; amount: number }[] {
 
 // Creates the order (paso 1) and returns the hosted-checkout URL (paso 2).
 // The caller must persist hash→team before redirecting: the webhook only
-// echoes hash_pedido, never id_pedido_comercio.
+// echoes hash_pedido, never id_pedido_comercio. `billing` is the team's tax
+// identity (teams.taxDocumentType/taxId/businessName) — legally required for
+// the factura, captured by /dashboard/checkout before this is called.
 export async function createPagoparOrder({
   team,
   user,
   plan,
+  billing,
 }: {
   team: { id: number };
   user: { email: string; name?: string | null };
   plan: { name: string; amount: number };
+  billing: { taxDocumentType: string; taxId: string; businessName: string };
 }): Promise<{ hash: string; url: string }> {
   const publicKey = process.env.PAGOPAR_PUBLIC_TOKEN!;
   const privateKey = process.env.PAGOPAR_PRIVATE_TOKEN!;
   const idPedido = `${team.id}-${Date.now()}`;
-  const buyer = user.name || user.email;
+  const buyer = user.name || billing.businessName;
+  const isRuc = billing.taxDocumentType === 'RUC';
   const res = await fetch(`${API}/comercios/2.0/iniciar-transaccion`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -62,20 +67,18 @@ export async function createPagoparOrder({
         .slice(0, 19)
         .replace('T', ' '),
       descripcion_resumen: plan.name,
-      // ponytail: we only know email + name; the rest of the buyer fields are
-      // required by the API shape but accepted empty for digital goods. Wire
-      // real RUC/documento capture if a tenant's invoicing needs it.
       comprador: {
-        ruc: '',
+        // RUC carries a check digit ("1234567-8"); documento is the bare number.
+        ruc: isRuc ? billing.taxId : '',
+        documento: isRuc ? billing.taxId.split('-')[0] : billing.taxId,
+        tipo_documento: isRuc ? 'RUC' : 'CI',
+        razon_social: billing.businessName,
         email: user.email,
         ciudad: '1',
         nombre: buyer,
         telefono: '',
         direccion: '',
-        documento: '',
         coordenadas: '',
-        razon_social: buyer,
-        tipo_documento: 'CI',
         direccion_referencia: null,
       },
       compras_items: [

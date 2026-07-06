@@ -53,5 +53,22 @@
   },
   "insightMessages": {
     "activitySpike": "Actividad inusual en la cuenta el {day}: {count} eventos frente a un promedio diario de {avg}."
+  },
+  "checkout": {
+    "title": "Finalizar compra",
+    "planSummary": "Plan {plan} — {amount} / mes",
+    "billingData": "Datos de facturación",
+    "invoiceNote": "Obligatorios para emitir tu factura: documento fiscal y razón social.",
+    "docType": "Tipo de documento",
+    "docTypeCi": "Cédula (CI)",
+    "docTypeRuc": "RUC",
+    "taxId": "Número de documento",
+    "taxIdPlaceholder": "1234567 (CI) o 1234567-8 (RUC)",
+    "businessName": "Razón social",
+    "invalid": "Revisá el número de documento y la razón social.",
+    "pay": "Continuar a Pagopar — {amount}",
+    "loading": "Redirigiendo…",
+    "noPlanTitle": "Ningún plan seleccionado",
+    "noPlanDesc": "Elegí un plan en la página de precios para iniciar la compra."
   }
 }

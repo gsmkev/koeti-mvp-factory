@@ -88,11 +88,18 @@ apps configure env, they don't write Pagopar code.
 - **Catalog**: `getPagoparPlans()` reads `PAGOPAR_PLANS="Base:60000,Plus:90000"`
   (₲/month — Pagopar has no product API). `/pricing` renders it when Stripe is
   keyless and posts the plan `name` to `checkoutAction`.
-- **Checkout**: `createPagoparOrder({ team, user, plan })` → redirect to the
-  returned hosted-checkout `url`. Before redirecting, the action stores
+- **Checkout is two steps** because invoicing is mandatory in Paraguay: the
+  pricing card posts to `checkoutAction`, which sends the buyer to
+  `/dashboard/checkout?plan=…` to capture the team's tax identity
+  (`teams.taxDocumentType` 'CI'|'RUC', `taxId`, `businessName` — prefilled on
+  renewals). `pagoparCheckoutAction` validates it, saves it, calls
+  `createPagoparOrder({ team, user, plan, billing })` and redirects to the
+  returned hosted-checkout `url`. Before redirecting it stores
   `stripeCustomerId = 'pagopar:<hash>'` and `stripeProductId = 'pagopar:<plan>'`
   on the team — that's the whole hash→team mapping (a team pays through exactly
-  one processor, so the Stripe columns are free).
+  one processor, so the Stripe columns are free). The buyer's RUC/CI + razón
+  social go in the order's `comprador`, so every Pagopar order carries the data
+  the factura needs.
 - **Webhook**: `/api/pagopar/webhook` (set as the "respuesta" URL in the
   Pagopar dashboard) verifies the `sha1(private + hash_pedido)` signature via
   `verifyPagoparWebhook`, applies it with `handlePagoparPayment` (same DI as

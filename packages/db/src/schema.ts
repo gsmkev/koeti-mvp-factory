@@ -49,6 +49,12 @@ export const teams = pgTable('teams', {
   // { style: 'currency', currency: team.currency }).
   currency: varchar('currency', { length: 3 }).notNull().default('USD'),
   measurementSystem: varchar('measurement_system', { length: 10 }).notNull().default('metric'),
+  // Tax identity for legal invoicing (Paraguay: every sale needs a factura
+  // with RUC/CI + razón social). Captured at the first paid checkout
+  // (/dashboard/checkout, Pagopar flow) and reused on renewals.
+  taxDocumentType: varchar('tax_document_type', { length: 3 }).notNull().default('CI'), // 'CI' | 'RUC'
+  taxId: varchar('tax_id', { length: 20 }),
+  businessName: varchar('business_name', { length: 100 }),
 });
 
 export const teamMembers = pgTable(
