@@ -8,3 +8,12 @@ export {
   getStripeProducts,
 } from './stripe';
 export { isSubscribed } from './plan';
+export {
+  pagoparEnabled,
+  getPagoparPlans,
+  createPagoparOrder,
+  verifyPagoparWebhook,
+  handlePagoparPayment,
+  PAGOPAR_PERIOD_DAYS,
+  type PagoparPayment,
+} from './pagopar';

@@ -68,6 +68,7 @@ import {
   stripe,
   isSubscribed,
 } from '@koeti/billing'; // isSubscribed = plan gating
+import { pagoparEnabled, getPagoparPlans, createPagoparOrder } from '@koeti/billing'; // Pagopar (PY), the Stripe alternative — used when STRIPE_SECRET_KEY is empty; see .claude/rules/billing.md
 import { Button, Input, Card, cn } from '@koeti/ui';
 import {
   PageHeader,

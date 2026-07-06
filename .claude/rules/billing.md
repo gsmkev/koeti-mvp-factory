@@ -77,3 +77,28 @@ if (!isSubscribed(team)) redirect('/pricing')
 Gate whole premium screens in the page (redirect) and premium mutations in
 their hand-written action (return `{ error: 'Upgrade required' }`). Free-tier
 limits (e.g. max N records) are one count query + `isSubscribed` in the action.
+
+## Pagopar — the Stripe alternative (Paraguay)
+
+Active when `PAGOPAR_PUBLIC_TOKEN` + `PAGOPAR_PRIVATE_TOKEN` are set and
+`STRIPE_SECRET_KEY` is not. Same graceful degradation as Stripe: no keys →
+empty catalog, checkout no-ops. Everything already ships in the template —
+apps configure env, they don't write Pagopar code.
+
+- **Catalog**: `getPagoparPlans()` reads `PAGOPAR_PLANS="Base:60000,Plus:90000"`
+  (₲/month — Pagopar has no product API). `/pricing` renders it when Stripe is
+  keyless and posts the plan `name` to `checkoutAction`.
+- **Checkout**: `createPagoparOrder({ team, user, plan })` → redirect to the
+  returned hosted-checkout `url`. Before redirecting, the action stores
+  `stripeCustomerId = 'pagopar:<hash>'` and `stripeProductId = 'pagopar:<plan>'`
+  on the team — that's the whole hash→team mapping (a team pays through exactly
+  one processor, so the Stripe columns are free).
+- **Webhook**: `/api/pagopar/webhook` (set as the "respuesta" URL in the
+  Pagopar dashboard) verifies the `sha1(private + hash_pedido)` signature via
+  `verifyPagoparWebhook`, applies it with `handlePagoparPayment` (same DI as
+  Stripe), and must echo `[payment]` back as the 200 body or Pagopar retries
+  every 10 minutes.
+- **No subscriptions**: one paid order = `PAGOPAR_PERIOD_DAYS` (30) of
+  `subscriptionStatus='active'`. The webhook enqueues a `pagopar-expire` job
+  that downgrades unless a renewal replaced the subscription id. `isSubscribed`
+  works unchanged; there is no customer portal — renewals go through `/pricing`.
