@@ -70,5 +70,16 @@
     "loading": "Redirecting…",
     "noPlanTitle": "No plan selected",
     "noPlanDesc": "Pick a plan on the pricing page to start checkout."
+  },
+  "invoices": {
+    "title": "Invoices",
+    "description": "Electronic invoices (SIFEN) emitted for your team's payments.",
+    "date": "Date",
+    "number": "Number",
+    "order": "Order",
+    "amount": "Amount",
+    "status": "Status",
+    "emptyTitle": "No invoices yet",
+    "emptyDesc": "An invoice is emitted automatically after each payment."
   }
 }

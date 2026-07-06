@@ -70,5 +70,16 @@
     "loading": "Redirigiendo…",
     "noPlanTitle": "Ningún plan seleccionado",
     "noPlanDesc": "Elegí un plan en la página de precios para iniciar la compra."
+  },
+  "invoices": {
+    "title": "Facturas",
+    "description": "Facturas electrónicas (SIFEN) emitidas por los pagos de tu equipo.",
+    "date": "Fecha",
+    "number": "Número",
+    "order": "Pedido",
+    "amount": "Monto",
+    "status": "Estado",
+    "emptyTitle": "Todavía no hay facturas",
+    "emptyDesc": "La factura se emite automáticamente después de cada pago."
   }
 }
