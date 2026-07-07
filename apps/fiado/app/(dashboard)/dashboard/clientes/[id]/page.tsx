@@ -121,8 +121,8 @@ export default async function ClienteDetailPage({ params }: { params: Promise<{ 
                 className: 'text-right',
                 cell: (m) => (
                   <Badge variant={m.delta > 0 ? 'destructive' : 'secondary'}>
-                    {m.delta > 0 ? '+' : ''}
-                    {money(m.delta)}
+                    {m.delta > 0 ? '+' : '-'}
+                    {money(Math.abs(m.delta))}
                   </Badge>
                 ),
               },

@@ -19,7 +19,10 @@ const cartItemSchema = z.object({
 });
 
 const schema = z.object({
-  clienteId: z.coerce.number().int().optional(),
+  // The cliente picker's hidden input is always present, empty string when
+  // unset (contado with no customer) — coerce that to undefined instead of
+  // letting z.coerce.number() turn '' into 0 (a non-existent cliente id).
+  clienteId: z.preprocess((v) => (v === '' ? undefined : v), z.coerce.number().int().optional()),
   paymentType: z.enum(['contado', 'fiado']),
   items: z
     .string()
