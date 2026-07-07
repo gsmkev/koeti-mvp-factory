@@ -10,3 +10,7 @@ CREATE DATABASE saas_template OWNER saas_template;
 -- gastos
 CREATE USER gastos WITH PASSWORD 'localdev';
 CREATE DATABASE gastos OWNER gastos;
+
+-- fiado
+CREATE USER fiado WITH PASSWORD 'localdev';
+CREATE DATABASE fiado OWNER fiado;

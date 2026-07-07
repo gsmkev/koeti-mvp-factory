@@ -1,0 +1,85 @@
+{
+  "marketing": {
+    "eyebrow": "Scaffold // 01",
+    "titleLine1": "Resolva a parte chata",
+    "titleLine2": "uma vez só.",
+    "subtitle": "Autenticação, cobrança e contas de time — prontos antes de você escrever a primeira funcionalidade.",
+    "getStarted": "Começar",
+    "viewPricing": "Ver preços",
+    "yourApp": "seu app",
+    "moduleAuthTitle": "Login que simplesmente funciona",
+    "moduleAuthDesc": "E-mail e senha, sessões e logout prontos desde o primeiro dia. Troque o texto, não o encanamento.",
+    "moduleBillingTitle": "Assinaturas resolvidas",
+    "moduleBillingDesc": "Checkout, mudanças de plano e webhooks conectados direto ao Stripe — sem escrever código de cobrança.",
+    "moduleTeamsTitle": "Feito para times",
+    "moduleTeamsDesc": "Toda conta começa dentro de um time, com funções e convites prontos antes do seu primeiro usuário.",
+    "ctaTitle": "Seu produto começa na página um.",
+    "ctaSubtitle": "Tudo acima vem com cada app do factory. O que você construir por cima é seu.",
+    "createAccount": "Crie sua conta",
+    "alreadySignIn": "Já usa? Entre"
+  },
+  "pricing": {
+    "eyebrow": "Scaffold // 02",
+    "title": "Uma base só. Escolha seu plano.",
+    "subtitle": "Todos os planos incluem o scaffold completo — auth, cobrança e contas de time. O Plus adiciona suporte prioritário e acesso antecipado conforme seu time cresce.",
+    "freeTrial": "{days} dias de teste grátis",
+    "perUser": "por usuário / {interval}",
+    "recommended": "Recomendado",
+    "getStarted": "Começar",
+    "loading": "Carregando…",
+    "baseFeatures": ["Uso ilimitado", "Membros do espaço ilimitados", "Suporte por e-mail"],
+    "plusFeatures": [
+      "Tudo do Base, e:",
+      "Acesso antecipado a novos recursos",
+      "Suporte 24/7 + acesso ao Slack"
+    ]
+  },
+  "overview": {
+    "title": "Visão geral",
+    "description": "O que está acontecendo no seu espaço de trabalho.",
+    "statTeamMembers": "Membros do time",
+    "statPlan": "Plano",
+    "statActivityWeek": "Atividade esta semana",
+    "hintVsLastWeek": "vs. a semana passada",
+    "chartActivityWeek": "Atividade esta semana",
+    "chartBySource": "Por origem",
+    "chartDailyActivity": "Atividade diária",
+    "centerVisits": "visitas",
+    "days": ["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb", "Dom"],
+    "sourceDirect": "Direto",
+    "sourceSearch": "Busca",
+    "sourceSocial": "Redes",
+    "sourceEmail": "E-mail"
+  },
+  "insightMessages": {
+    "activitySpike": "Atividade incomum na conta em {day}: {count} eventos contra uma média diária de {avg}."
+  },
+  "checkout": {
+    "title": "Finalizar compra",
+    "planSummary": "Plano {plan} — {amount} / mês",
+    "billingData": "Dados de faturamento",
+    "invoiceNote": "Obrigatórios para emitir sua fatura: documento fiscal e razão social.",
+    "docType": "Tipo de documento",
+    "docTypeCi": "Cédula (CI)",
+    "docTypeRuc": "RUC",
+    "taxId": "Número do documento",
+    "taxIdPlaceholder": "1234567 (CI) ou 1234567-8 (RUC)",
+    "businessName": "Razão social",
+    "invalid": "Confira o número do documento e a razão social.",
+    "pay": "Continuar para o Pagopar — {amount}",
+    "loading": "Redirecionando…",
+    "noPlanTitle": "Nenhum plano selecionado",
+    "noPlanDesc": "Escolha um plano na página de preços para iniciar a compra."
+  },
+  "invoices": {
+    "title": "Faturas",
+    "description": "Faturas eletrônicas (SIFEN) emitidas pelos pagamentos da sua equipe.",
+    "date": "Data",
+    "number": "Número",
+    "order": "Pedido",
+    "amount": "Valor",
+    "status": "Status",
+    "emptyTitle": "Ainda não há faturas",
+    "emptyDesc": "A fatura é emitida automaticamente após cada pagamento."
+  }
+}
