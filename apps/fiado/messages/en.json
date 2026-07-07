@@ -169,8 +169,6 @@
   "ventas": {
     "title": "Sales",
     "description": "Your store's sales history.",
-    "exportCsv": "Export sales",
-    "exportPagosCsv": "Export payments",
     "colDate": "Date",
     "colClient": "Customer",
     "colType": "Type",
@@ -183,7 +181,8 @@
     "filterAria": "Filter sales",
     "filterAll": "All",
     "filterAllClients": "All customers",
-    "filterApply": "Filter"
+    "filterApply": "Filter",
+    "totalPeriodo": "Total for this period"
   },
   "notifications": {
     "overLimit": "{cliente} is over their credit limit: owes {balance} (limit {limit})."
@@ -206,5 +205,35 @@
     "teamSubtitle": "If someone helps you sell, invite them here. You can do this later.",
     "invites": "Employee's email",
     "invitesPlaceholder": "employee@gmail.com"
+  },
+  "auth": {
+    "signUpSubtitle": "Start with a username and a password.",
+    "email": "Username",
+    "emailPlaceholder": "your_username",
+    "name": "Name",
+    "namePlaceholder": "E.g. Jane Doe",
+    "brandQuote": "Ditch the notebook today: every sale on credit gets recorded, with each customer's balance always on hand.",
+    "brandFooter": "{app} — your despensa's tab notebook"
+  },
+  "team": {
+    "title": "Staff",
+    "membersCard": "Who has access",
+    "inviteCard": "Create a login for an employee",
+    "roleMember": "Salesperson",
+    "roleAdmin": "Administrator",
+    "employeeName": "Name",
+    "employeeNamePlaceholder": "E.g. Jane Doe",
+    "employeeUsuario": "Username",
+    "employeeUsuarioPlaceholder": "janedoe",
+    "employeePassword": "Password",
+    "employeePasswordPlaceholder": "At least 8 characters",
+    "inviteMember": "Create login",
+    "inviting": "Creating…",
+    "adminOnlyInvite": "You need to be an administrator to create new logins."
+  },
+  "account": {
+    "title": "My account",
+    "email": "Username",
+    "emailPlaceholder": "your_username"
   }
 }

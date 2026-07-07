@@ -169,8 +169,6 @@
   "ventas": {
     "title": "Ventas",
     "description": "Historial de ventas de tu despensa.",
-    "exportCsv": "Exportar ventas",
-    "exportPagosCsv": "Exportar pagos",
     "colDate": "Fecha",
     "colClient": "Cliente",
     "colType": "Tipo",
@@ -183,7 +181,8 @@
     "filterAria": "Filtrar ventas",
     "filterAll": "Todas",
     "filterAllClients": "Todos los clientes",
-    "filterApply": "Filtrar"
+    "filterApply": "Filtrar",
+    "totalPeriodo": "Total del período"
   },
   "notifications": {
     "overLimit": "{cliente} superó su límite de crédito: debe {balance} (límite {limit})."
@@ -206,5 +205,35 @@
     "teamSubtitle": "Si alguien te ayuda a vender, invitalo acá. Podés hacerlo después.",
     "invites": "Correo del empleado",
     "invitesPlaceholder": "juan@gmail.com"
+  },
+  "auth": {
+    "signUpSubtitle": "Empezá con un usuario y una contraseña.",
+    "email": "Usuario",
+    "emailPlaceholder": "tu_usuario",
+    "name": "Nombre",
+    "namePlaceholder": "Ej: Juan Pérez",
+    "brandQuote": "Dejá el cuaderno hoy: cada venta al fiado queda registrada, con el saldo de cada cliente siempre a mano.",
+    "brandFooter": "{app} — la libreta de fiado de tu despensa"
+  },
+  "team": {
+    "title": "Empleados",
+    "membersCard": "Quiénes tienen acceso",
+    "inviteCard": "Crear un usuario para un empleado",
+    "roleMember": "Vendedor",
+    "roleAdmin": "Administrador",
+    "employeeName": "Nombre",
+    "employeeNamePlaceholder": "Ej: Juan Pérez",
+    "employeeUsuario": "Usuario",
+    "employeeUsuarioPlaceholder": "juanperez",
+    "employeePassword": "Contraseña",
+    "employeePasswordPlaceholder": "Al menos 8 caracteres",
+    "inviteMember": "Crear usuario",
+    "inviting": "Creando…",
+    "adminOnlyInvite": "Tenés que ser administrador para crear usuarios nuevos."
+  },
+  "account": {
+    "title": "Mi cuenta",
+    "email": "Usuario",
+    "emailPlaceholder": "tu_usuario"
   }
 }

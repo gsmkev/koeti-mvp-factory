@@ -75,10 +75,7 @@ function UserMenu() {
         <Avatar className="size-9 cursor-pointer">
           <AvatarImage alt={user.name || ''} />
           <AvatarFallback>
-            {user.email
-              .split(' ')
-              .map((n) => n[0])
-              .join('')}
+            {(user.name || user.email.split('@')[0]).slice(0, 1).toUpperCase()}
           </AvatarFallback>
         </Avatar>
       </DropdownMenuTrigger>

@@ -7,14 +7,14 @@ import { customerPortalAction } from '@/lib/payments/actions';
 import { useActionState } from 'react';
 import { useTranslations } from 'next-intl';
 import { TeamDataWithMembers, User } from '@/lib/db/schema';
-import { removeTeamMember, inviteTeamMember, revokeInvitation } from '@/app/(login)/actions';
-import useSWR from 'swr';
+import { removeTeamMember } from '@/app/(login)/actions';
+import { createEmployee } from './actions';
+import useSWR, { mutate } from 'swr';
 import { Suspense } from 'react';
 import { Input } from '@koeti/ui';
 import { RadioGroup, RadioGroupItem } from '@koeti/ui';
 import { Label, PageHeader, SubmitButton } from '@koeti/ui';
 import { PlusCircle } from 'lucide-react';
-import { ExportDataCard } from '@/components/export-data-card';
 
 type ActionState = {
   error?: string;
@@ -110,8 +110,10 @@ function TeamMembers() {
   const { data: teamData } = useSWR<TeamDataWithMembers>('/api/team', fetcher);
   const [removeState, removeAction] = useActionState<ActionState, FormData>(removeTeamMember, {});
 
+  // Never show the synthetic "usuario@fiado.local" suffix — fall back to
+  // just the "usuario" part if no name was set.
   const getUserDisplayName = (user: Pick<User, 'id' | 'name' | 'email'>) => {
-    return user.name || user.email || '';
+    return user.name || user.email?.split('@')[0] || '';
   };
 
   if (!teamData?.teamMembers?.length) {
@@ -178,7 +180,7 @@ function TeamMembers() {
   );
 }
 
-function InviteTeamMemberSkeleton() {
+function CreateEmployeeSkeleton() {
   const t = useTranslations('team');
   return (
     <Card className="h-[260px]">
@@ -189,12 +191,26 @@ function InviteTeamMemberSkeleton() {
   );
 }
 
-function InviteTeamMember() {
+// Reemplaza la invitación por email: el dueño crea la cuenta del empleado
+// ahí mismo (usuario + contraseña que le da en persona) — nadie necesita
+// correo ni aceptar un enlace. RBAC reducido a dos roles reales para una
+// despensa: quién vende y quién administra (viewer/owner no se ofrecen).
+function CreateEmployee() {
   const t = useTranslations('team');
   const { data: user } = useSWR<User>('/api/user', fetcher);
-  // Cosmetic gate only — the server action enforces the admin requirement.
-  const canInvite = user?.role === 'owner' || user?.role === 'admin' || user?.role === 'superadmin';
-  const [inviteState, inviteAction] = useActionState<ActionState, FormData>(inviteTeamMember, {});
+  // `user.role` is the GLOBAL role column (only ever distinguishes
+  // superadmin) — the caller's role in THIS team lives on teamMembers.role,
+  // so it has to come from /api/team instead (pre-existing bug in the
+  // template's cosmetic gate: it always read the wrong field, so this form
+  // stayed disabled for every real owner/admin).
+  const { data: team } = useSWR<TeamDataWithMembers>('/api/team', fetcher);
+  const teamRole = team?.teamMembers?.find((m) => m.user.id === user?.id)?.role;
+  const canManage = teamRole === 'owner' || teamRole === 'admin' || user?.role === 'superadmin';
+  const [state, action] = useActionState<ActionState, FormData>(async (_prev, formData) => {
+    const result = (await createEmployee(formData)) ?? {};
+    if (!result.error) mutate('/api/team');
+    return result;
+  }, {});
 
   return (
     <Card>
@@ -202,18 +218,43 @@ function InviteTeamMember() {
         <CardTitle>{t('inviteCard')}</CardTitle>
       </CardHeader>
       <CardContent>
-        <form action={inviteAction} className="space-y-4">
+        <form action={action} className="space-y-4">
           <div>
-            <Label htmlFor="email" className="mb-2">
-              {t('email')}
+            <Label htmlFor="name" className="mb-2">
+              {t('employeeName')}
             </Label>
             <Input
-              id="email"
-              name="email"
-              type="email"
-              placeholder={t('emailPlaceholder')}
+              id="name"
+              name="name"
+              placeholder={t('employeeNamePlaceholder')}
               required
-              disabled={!canInvite}
+              disabled={!canManage}
+            />
+          </div>
+          <div>
+            <Label htmlFor="usuario" className="mb-2">
+              {t('employeeUsuario')}
+            </Label>
+            <Input
+              id="usuario"
+              name="usuario"
+              placeholder={t('employeeUsuarioPlaceholder')}
+              required
+              disabled={!canManage}
+            />
+          </div>
+          <div>
+            <Label htmlFor="password" className="mb-2">
+              {t('employeePassword')}
+            </Label>
+            <Input
+              id="password"
+              name="password"
+              type="password"
+              minLength={8}
+              placeholder={t('employeePasswordPlaceholder')}
+              required
+              disabled={!canManage}
             />
           </div>
           <div>
@@ -222,12 +263,8 @@ function InviteTeamMember() {
               defaultValue="member"
               name="role"
               className="flex flex-wrap gap-x-4"
-              disabled={!canInvite}
+              disabled={!canManage}
             >
-              <div className="flex items-center space-x-2 mt-2">
-                <RadioGroupItem value="viewer" id="viewer" />
-                <Label htmlFor="viewer">{t('roleViewer')}</Label>
-              </div>
               <div className="flex items-center space-x-2 mt-2">
                 <RadioGroupItem value="member" id="member" />
                 <Label htmlFor="member">{t('roleMember')}</Label>
@@ -236,75 +273,21 @@ function InviteTeamMember() {
                 <RadioGroupItem value="admin" id="admin" />
                 <Label htmlFor="admin">{t('roleAdmin')}</Label>
               </div>
-              <div className="flex items-center space-x-2 mt-2">
-                <RadioGroupItem value="owner" id="owner" />
-                <Label htmlFor="owner">{t('roleOwner')}</Label>
-              </div>
             </RadioGroup>
           </div>
-          {inviteState?.error && <p className="text-destructive">{inviteState.error}</p>}
-          {inviteState?.success && <p className="text-success">{inviteState.success}</p>}
-          <SubmitButton pendingText={t('inviting')} disabled={!canInvite}>
+          {state?.error && <p className="text-destructive">{state.error}</p>}
+          {state?.success && <p className="text-success">{state.success}</p>}
+          <SubmitButton pendingText={t('inviting')} disabled={!canManage}>
             <PlusCircle className="mr-2 h-4 w-4" />
             {t('inviteMember')}
           </SubmitButton>
         </form>
       </CardContent>
-      {!canInvite && (
+      {!canManage && (
         <CardFooter>
           <p className="text-sm text-muted-foreground">{t('adminOnlyInvite')}</p>
         </CardFooter>
       )}
-    </Card>
-  );
-}
-
-type PendingInvitation = { id: number; email: string; role: string; invitedAt: string };
-
-// Admin-only card: the /api/team/invitations endpoint 403s for non-admins, so
-// we skip the fetch entirely for them (cosmetic gate; the revoke action enforces).
-function PendingInvitations() {
-  const t = useTranslations('team');
-  const { data: user } = useSWR<User>('/api/user', fetcher);
-  const canManage = user?.role === 'owner' || user?.role === 'admin' || user?.role === 'superadmin';
-  const { data: invites } = useSWR<PendingInvitation[]>(
-    canManage ? '/api/team/invitations' : null,
-    fetcher,
-  );
-  const [revokeState, revokeAction] = useActionState<ActionState, FormData>(revokeInvitation, {});
-
-  if (!canManage) return null;
-
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle>{t('pendingCard')}</CardTitle>
-      </CardHeader>
-      <CardContent>
-        {!invites?.length ? (
-          <p className="text-muted-foreground">{t('noPending')}</p>
-        ) : (
-          <ul className="space-y-4">
-            {invites.map((inv) => (
-              <li key={inv.id} className="flex items-center justify-between">
-                <div>
-                  <p className="font-medium">{inv.email}</p>
-                  <p className="text-sm text-muted-foreground">
-                    {t('invitedAs', { role: roleLabel(t, inv.role) })}
-                  </p>
-                </div>
-                <form action={revokeAction}>
-                  <input type="hidden" name="invitationId" value={inv.id} />
-                  <SubmitButton variant="outline" size="sm" pendingText={t('revoking')}>
-                    {t('revoke')}
-                  </SubmitButton>
-                </form>
-              </li>
-            ))}
-          </ul>
-        )}
-        {revokeState?.error && <p className="text-destructive mt-4">{revokeState.error}</p>}
-      </CardContent>
     </Card>
   );
 }
@@ -320,11 +303,9 @@ export default function SettingsPage() {
       <Suspense fallback={<TeamMembersSkeleton />}>
         <TeamMembers />
       </Suspense>
-      <Suspense fallback={<InviteTeamMemberSkeleton />}>
-        <InviteTeamMember />
+      <Suspense fallback={<CreateEmployeeSkeleton />}>
+        <CreateEmployee />
       </Suspense>
-      <PendingInvitations />
-      <ExportDataCard />
     </section>
   );
 }

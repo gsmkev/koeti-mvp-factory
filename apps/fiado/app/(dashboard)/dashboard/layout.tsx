@@ -78,6 +78,14 @@ function useNav(): AppShellNavGroup[] {
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
+// Falls back to the "usuario" part of a synthetic usuario@fiado.local
+// address instead of ever showing that suffix — a real name is optional at
+// sign-up, so this is the only thing standing between "Juan Pérez" and a
+// raw "juanperez@fiado.local" leaking into the UI.
+function displayName(user: Pick<User, 'name' | 'email'>) {
+  return user.name || user.email.split('@')[0];
+}
+
 function Brand() {
   // Ña Marta cares about "Despensa María", not the product's own name — show
   // her despensa's name as the headline, "Fiado" as a small caption.
@@ -120,13 +128,13 @@ function SidebarUser() {
     <DropdownMenu>
       <DropdownMenuTrigger className="flex w-full cursor-pointer items-center gap-2.5 rounded-md px-2 py-1.5 text-left transition-colors hover:bg-sidebar-accent">
         <Avatar className="size-8">
-          <AvatarFallback>{(user.name || user.email).slice(0, 1).toUpperCase()}</AvatarFallback>
+          <AvatarFallback>{displayName(user).slice(0, 1).toUpperCase()}</AvatarFallback>
         </Avatar>
         <span className="min-w-0 flex-1">
           <span className="block truncate text-sm font-medium text-sidebar-primary">
-            {user.name || user.email}
+            {displayName(user)}
           </span>
-          {user.name && (
+          {user.name && !user.email.endsWith('@fiado.local') && (
             <span className="block truncate text-xs text-sidebar-foreground/60">{user.email}</span>
           )}
         </span>

@@ -1,5 +1,5 @@
 // saas-template lib — queries.
-import { desc, and, eq, isNull, sql } from 'drizzle-orm';
+import { desc, and, eq, gte, isNull, sql } from 'drizzle-orm';
 import { db } from './drizzle';
 import { verifyToken, credentialFingerprint } from '@koeti/auth';
 import { cookies } from 'next/headers';
@@ -208,19 +208,29 @@ export async function getDeudaTotal(teamId: number) {
 
 export const VENTAS_PAGE_SIZE = 50;
 
-// `page` pagina la vista (trae PAGE_SIZE + 1 filas: la extra señala hasMore);
-// sin `page` devuelve todo — el export CSV depende de eso. `tipo` filtra por
-// contado/fiado y `clienteId` por cliente — así Ña Marta puede ver solo las
-// ventas al fiado, o todo lo que le vendió a un cliente puntual.
-export async function getVentas(
-  teamId: number,
-  page?: number,
-  filters?: { tipo?: 'contado' | 'fiado'; clienteId?: number },
-) {
+export type VentasFilters = {
+  tipo?: 'contado' | 'fiado';
+  clienteId?: number;
+  /** Rango [desde, hasta) — hasta es exclusivo. */
+  desde?: Date;
+  hasta?: Date;
+};
+
+function ventasConditions(teamId: number, filters?: VentasFilters) {
   const conditions = [eq(ventas.teamId, teamId)];
   if (filters?.tipo) conditions.push(eq(ventas.paymentType, filters.tipo));
   if (filters?.clienteId) conditions.push(eq(ventas.clienteId, filters.clienteId));
+  if (filters?.desde) conditions.push(gte(ventas.createdAt, filters.desde));
+  if (filters?.hasta) conditions.push(sql`${ventas.createdAt} < ${filters.hasta}`);
+  return and(...conditions);
+}
 
+// `page` pagina la vista (trae PAGE_SIZE + 1 filas: la extra señala hasMore);
+// sin `page` devuelve todo — el export CSV depende de eso. `tipo` filtra por
+// contado/fiado, `clienteId` por cliente, y `desde`/`hasta` por período —
+// así Ña Marta puede ver solo las ventas al fiado, de un cliente puntual, o
+// de un mes en particular.
+export async function getVentas(teamId: number, page?: number, filters?: VentasFilters) {
   const q = db
     .select({
       id: ventas.id,
@@ -232,10 +242,20 @@ export async function getVentas(
     })
     .from(ventas)
     .leftJoin(clientes, eq(ventas.clienteId, clientes.id))
-    .where(and(...conditions))
+    .where(ventasConditions(teamId, filters))
     .orderBy(desc(ventas.createdAt));
   if (!page) return q;
   return q.limit(VENTAS_PAGE_SIZE + 1).offset((page - 1) * VENTAS_PAGE_SIZE);
+}
+
+// Suma del total filtrado completo (no solo la página visible) — para la
+// barra de totales de /dashboard/ventas.
+export async function getVentasTotal(teamId: number, filters?: VentasFilters) {
+  const [row] = await db
+    .select({ total: sql<string>`coalesce(sum(${ventas.total}), 0)` })
+    .from(ventas)
+    .where(ventasConditions(teamId, filters));
+  return Number(row?.total ?? 0);
 }
 
 export async function getVentasForCliente(teamId: number, clienteId: number) {

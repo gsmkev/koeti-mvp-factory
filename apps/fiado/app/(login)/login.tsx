@@ -79,13 +79,26 @@ export function Login({
             <input type="hidden" name="priceId" value={priceId || ''} />
             <input type="hidden" name="inviteId" value={inviteId || ''} />
 
+            {mode === 'signup' && (
+              <div className="space-y-2">
+                <Label htmlFor="name">{t('name')}</Label>
+                <Input
+                  id="name"
+                  name="name"
+                  autoComplete="name"
+                  maxLength={100}
+                  placeholder={t('namePlaceholder')}
+                />
+              </div>
+            )}
+
             <div className="space-y-2">
               <Label htmlFor="email">{t('email')}</Label>
               <Input
                 id="email"
                 name="email"
-                type="email"
-                autoComplete="email"
+                type="text"
+                autoComplete="username"
                 defaultValue={state.email}
                 required
                 maxLength={50}
@@ -94,17 +107,7 @@ export function Login({
             </div>
 
             <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="password">{t('password')}</Label>
-                {mode === 'signin' && (
-                  <Link
-                    href="/forgot-password"
-                    className="text-sm font-medium text-primary underline-offset-4 hover:underline"
-                  >
-                    {t('forgotPassword')}
-                  </Link>
-                )}
-              </div>
+              <Label htmlFor="password">{t('password')}</Label>
               <Input
                 id="password"
                 name="password"

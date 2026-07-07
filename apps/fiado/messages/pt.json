@@ -169,8 +169,6 @@
   "ventas": {
     "title": "Vendas",
     "description": "Histórico de vendas da sua loja.",
-    "exportCsv": "Exportar vendas",
-    "exportPagosCsv": "Exportar pagamentos",
     "colDate": "Data",
     "colClient": "Cliente",
     "colType": "Tipo",
@@ -183,7 +181,8 @@
     "filterAria": "Filtrar vendas",
     "filterAll": "Todas",
     "filterAllClients": "Todos os clientes",
-    "filterApply": "Filtrar"
+    "filterApply": "Filtrar",
+    "totalPeriodo": "Total do período"
   },
   "notifications": {
     "overLimit": "{cliente} ultrapassou o limite de crédito: deve {balance} (limite {limit})."
@@ -206,5 +205,35 @@
     "teamSubtitle": "Se alguém te ajuda a vender, convide aqui. Pode fazer isso depois.",
     "invites": "E-mail do funcionário",
     "invitesPlaceholder": "funcionario@gmail.com"
+  },
+  "auth": {
+    "signUpSubtitle": "Comece com um usuário e uma senha.",
+    "email": "Usuário",
+    "emailPlaceholder": "seu_usuario",
+    "name": "Nome",
+    "namePlaceholder": "Ex: João Silva",
+    "brandQuote": "Largue o caderno hoje: cada venda fiado fica registrada, com o saldo de cada cliente sempre à mão.",
+    "brandFooter": "{app} — o caderno de fiado da sua loja"
+  },
+  "team": {
+    "title": "Funcionários",
+    "membersCard": "Quem tem acesso",
+    "inviteCard": "Criar um usuário para um funcionário",
+    "roleMember": "Vendedor",
+    "roleAdmin": "Administrador",
+    "employeeName": "Nome",
+    "employeeNamePlaceholder": "Ex: João Silva",
+    "employeeUsuario": "Usuário",
+    "employeeUsuarioPlaceholder": "joaosilva",
+    "employeePassword": "Senha",
+    "employeePasswordPlaceholder": "Pelo menos 8 caracteres",
+    "inviteMember": "Criar usuário",
+    "inviting": "Criando…",
+    "adminOnlyInvite": "Você precisa ser administrador para criar novos usuários."
+  },
+  "account": {
+    "title": "Minha conta",
+    "email": "Usuário",
+    "emailPlaceholder": "seu_usuario"
   }
 }

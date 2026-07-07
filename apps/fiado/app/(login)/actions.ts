@@ -114,20 +114,36 @@ async function logActivity(
   await db.insert(activityLogs).values(newActivity);
 }
 
+// Ña Marta types a plain "usuario", not an email — accept either and
+// normalize a bare username to a synthetic local address so `users.email`
+// (shared schema, must stay unique) keeps working with zero schema changes.
+// A value that already looks like an email (has "@") passes through as-is —
+// covers Google sign-in accounts and e2e test fixtures.
+const usernameOrEmail = z
+  .string()
+  .trim()
+  .min(3)
+  .max(255)
+  .transform((v) => (v.includes('@') ? v : `${v.toLowerCase()}@fiado.local`))
+  .pipe(z.string().email('Usuario o email inválido'));
+
 const signInSchema = z.object({
-  email: z.string().email().min(3).max(255),
+  email: usernameOrEmail,
   password: z.string().min(8).max(100),
 });
 
 export const signIn = validatedAction(signInSchema, async (data, formData) => {
   const { email, password } = data;
+  // Redisplay what the person actually typed ("usuario"), not the synthetic
+  // "usuario@fiado.local" the schema transformed it into for the DB lookup.
+  const rawEmail = String(formData.get('email') ?? '').trim();
   const t = await getTranslations('errors');
 
   if (
     !(await limitOk(`signin:${await clientIp()}`, 10)) ||
     !(await limitOk(`signin:${email.toLowerCase()}`, 10))
   ) {
-    return { error: t('tooManyAttempts'), email, password };
+    return { error: t('tooManyAttempts'), email: rawEmail, password };
   }
 
   const userWithTeam = await db
@@ -144,7 +160,7 @@ export const signIn = validatedAction(signInSchema, async (data, formData) => {
   if (userWithTeam.length === 0) {
     return {
       error: t('invalidCredentials'),
-      email,
+      email: rawEmail,
       password,
     };
   }
@@ -156,7 +172,7 @@ export const signIn = validatedAction(signInSchema, async (data, formData) => {
   if (!isPasswordValid) {
     return {
       error: t('invalidCredentials'),
-      email,
+      email: rawEmail,
       password,
     };
   }
@@ -176,17 +192,21 @@ export const signIn = validatedAction(signInSchema, async (data, formData) => {
 });
 
 const signUpSchema = z.object({
-  email: z.string().email(),
+  email: usernameOrEmail,
   password: z.string().min(8),
+  name: z.string().max(100).optional(),
   inviteId: z.string().optional(),
 });
 
 export const signUp = validatedAction(signUpSchema, async (data, formData) => {
-  const { email, password, inviteId } = data;
+  const { email, password, name, inviteId } = data;
+  // Redisplay what the person actually typed ("usuario"), not the synthetic
+  // "usuario@fiado.local" the schema transformed it into for storage.
+  const rawEmail = String(formData.get('email') ?? '').trim();
   const t = await getTranslations('errors');
 
   if (!(await limitOk(`signup:${await clientIp()}`, 5))) {
-    return { error: t('tooManyAttempts'), email, password };
+    return { error: t('tooManyAttempts'), email: rawEmail, password };
   }
 
   const existingUser = await db.select().from(users).where(eq(users.email, email)).limit(1);
@@ -194,7 +214,7 @@ export const signUp = validatedAction(signUpSchema, async (data, formData) => {
   if (existingUser.length > 0) {
     return {
       error: t('createUserFailed'),
-      email,
+      email: rawEmail,
       password,
     };
   }
@@ -207,6 +227,7 @@ export const signUp = validatedAction(signUpSchema, async (data, formData) => {
   const newUser: NewUser = {
     email,
     passwordHash,
+    ...(name ? { name } : {}),
   };
 
   const [createdUser] = await db.insert(users).values(newUser).returning();
@@ -214,7 +235,7 @@ export const signUp = validatedAction(signUpSchema, async (data, formData) => {
   if (!createdUser) {
     return {
       error: t('createUserFailed'),
-      email,
+      email: rawEmail,
       password,
     };
   }
@@ -250,7 +271,7 @@ export const signUp = validatedAction(signUpSchema, async (data, formData) => {
 
       [createdTeam] = await db.select().from(teams).where(eq(teams.id, teamId)).limit(1);
     } else {
-      return { error: t('invalidInvitation'), email, password };
+      return { error: t('invalidInvitation'), email: rawEmail, password };
     }
   } else {
     // Create a new team if there's no invitation. A generic, friendly
@@ -271,7 +292,7 @@ export const signUp = validatedAction(signUpSchema, async (data, formData) => {
     if (!createdTeam) {
       return {
         error: t('createTeamFailed'),
-        email,
+        email: rawEmail,
         password,
       };
     }
@@ -489,7 +510,7 @@ export const deleteAccount = validatedActionWithUser(deleteAccountSchema, async 
 
 const updateAccountSchema = z.object({
   name: z.string().min(1, 'Name is required').max(100),
-  email: z.string().email('Invalid email address'),
+  email: usernameOrEmail,
 });
 
 export const updateAccount = validatedActionWithUser(updateAccountSchema, async (data, _, user) => {
