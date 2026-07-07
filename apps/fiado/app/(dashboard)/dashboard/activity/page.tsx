@@ -13,6 +13,7 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 import { getTranslations } from 'next-intl/server';
+import { requireRole } from '@/lib/auth/middleware';
 import { ActivityType } from '@/lib/db/schema';
 import { getActivityLogs } from '@/lib/db/queries';
 
@@ -72,6 +73,7 @@ function formatAction(t: T, action: string): string {
 }
 
 export default async function ActivityPage() {
+  await requireRole('viewer');
   const logs = await getActivityLogs();
   const t = await getTranslations('activity');
 

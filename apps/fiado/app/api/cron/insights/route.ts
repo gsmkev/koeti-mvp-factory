@@ -1,6 +1,9 @@
 // Daily insights sweep. Vercel cron (see vercel.json) calls this with
 // Authorization: Bearer ${CRON_SECRET}; run it locally with curl the same way.
+// Premium-only (see /pricing): Básico and unsubscribed teams don't get the
+// low-stock / over-limit alerts, so skip generating (and storing) them.
 import { cleanupRateLimits, insights, teams } from '@koeti/db';
+import { isSubscribed } from '@koeti/billing';
 import { db } from '@/lib/db/drizzle';
 import { generateInsights } from '@/lib/ai/insights';
 import { notifyTeam } from '@/lib/notifications';
@@ -14,9 +17,18 @@ export async function GET(request: Request) {
   // ponytail: sequential sweep over all teams — fine at MVP scale; batch or
   // queue it when a sweep stops fitting in one function invocation.
   await cleanupRateLimits(db); // piggyback: drop expired rate-limit windows daily
-  const allTeams = await db.select({ id: teams.id }).from(teams);
+  const allTeams = await db
+    .select({
+      id: teams.id,
+      planName: teams.planName,
+      subscriptionStatus: teams.subscriptionStatus,
+    })
+    .from(teams);
+  const premiumTeams = allTeams.filter(
+    (t) => isSubscribed(t) && t.planName?.toLowerCase() === 'premium',
+  );
   let created = 0;
-  for (const team of allTeams) {
+  for (const team of premiumTeams) {
     const found = await generateInsights(team.id);
     if (found.length === 0) continue;
     const inserted = await db
@@ -36,5 +48,5 @@ export async function GET(request: Request) {
       );
     }
   }
-  return Response.json({ teams: allTeams.length, created });
+  return Response.json({ teams: allTeams.length, premiumTeams: premiumTeams.length, created });
 }

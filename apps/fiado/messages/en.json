@@ -28,11 +28,11 @@
     "basicFeatures": [
       "Unlimited products, customers and sales",
       "Fiado with a per-customer credit limit",
-      "Low-stock and overdue-balance alerts",
       "Up to 3 employee logins"
     ],
     "premiumFeatures": [
       "Everything in Basic, and:",
+      "Low-stock and over-credit-limit alerts",
       "Unlimited employee logins",
       "Priority support"
     ]
@@ -54,7 +54,8 @@
     "emptyDeudaDesc": "Sales on credit will show up here with each customer's balance."
   },
   "insightMessages": {
-    "activitySpike": "Unusual account activity on {day}: {count} events vs a daily average of {avg}."
+    "lowStock": "{producto}: only {stock} left.",
+    "overCreditLimit": "{cliente} went over their credit limit: owes {balance} (limit {limit})."
   },
   "checkout": {
     "title": "Checkout",
@@ -213,11 +214,19 @@
   "auth": {
     "signUpSubtitle": "Start with a username and a password.",
     "email": "Username",
-    "emailPlaceholder": "your_username",
+    "emailPlaceholder": "janedoe",
     "name": "Name",
     "namePlaceholder": "E.g. Jane Doe",
+    "despensaSlug": "Store",
+    "despensaSlugPlaceholder": "janesstore",
+    "despensaSlugHelpSignUp": "A short name for your store, no spaces. You'll use it together with your username to sign in.",
+    "despensaSlugHelpSignIn": "The short name you picked when you created the account.",
     "brandQuote": "Ditch the notebook today: every sale on credit gets recorded, with each customer's balance always on hand.",
     "brandFooter": "{app} — your despensa's tab notebook"
+  },
+  "errors": {
+    "despensaRequired": "Enter your store's name (letters, numbers and dashes, no spaces).",
+    "despensaTaken": "That store name is already taken. Try another one."
   },
   "team": {
     "title": "Staff",

@@ -1,5 +1,5 @@
 // saas-template lib — queries.
-import { desc, and, eq, gte, isNull, lt, sql } from 'drizzle-orm';
+import { desc, and, eq, gte, isNull, lt, lte, sql } from 'drizzle-orm';
 import { db } from './drizzle';
 import { verifyToken, credentialFingerprint } from '@koeti/auth';
 import { cookies } from 'next/headers';
@@ -13,7 +13,7 @@ import {
   teams,
   users,
 } from '@koeti/db';
-import { clientes, pagos, productos, ventas } from './schema';
+import { clientes, pagos, productos, teamSlugs, ventas } from './schema';
 
 export async function getUser() {
   const sessionCookie = (await cookies()).get('session');
@@ -149,6 +149,22 @@ export async function getPendingInvitations(teamId: number) {
     .orderBy(desc(invitations.invitedAt));
 }
 
+// --- team slugs (disambiguates "juan" at despensa A from "juan" at despensa B) ---
+
+export async function getTeamSlug(teamId: number) {
+  const [row] = await db.select().from(teamSlugs).where(eq(teamSlugs.teamId, teamId)).limit(1);
+  return row?.slug ?? null;
+}
+
+export async function getTeamIdBySlug(slug: string) {
+  const [row] = await db.select().from(teamSlugs).where(eq(teamSlugs.slug, slug)).limit(1);
+  return row?.teamId ?? null;
+}
+
+export async function createTeamSlug(teamId: number, slug: string) {
+  await db.insert(teamSlugs).values({ teamId, slug });
+}
+
 export async function getTeamForUser() {
   const user = await getUser();
   if (!user) return null;
@@ -169,12 +185,21 @@ export async function getTeamForUser() {
 
 // --- productos ---
 
+export const STOCK_BAJO = 5;
+
 export async function getProductos(teamId: number) {
   return db
     .select()
     .from(productos)
     .where(eq(productos.teamId, teamId))
     .orderBy(desc(productos.createdAt));
+}
+
+export async function getLowStockProductos(teamId: number) {
+  return db
+    .select()
+    .from(productos)
+    .where(and(eq(productos.teamId, teamId), lte(productos.stock, STOCK_BAJO)));
 }
 
 // --- clientes ---
@@ -194,6 +219,19 @@ export async function getCliente(teamId: number, id: number) {
     .where(and(eq(clientes.id, id), eq(clientes.teamId, teamId)))
     .limit(1);
   return row ?? null;
+}
+
+export async function getClientesOverLimit(teamId: number) {
+  return db
+    .select()
+    .from(clientes)
+    .where(
+      and(
+        eq(clientes.teamId, teamId),
+        sql`${clientes.creditLimit} > 0`,
+        sql`${clientes.balance} > ${clientes.creditLimit}`,
+      ),
+    );
 }
 
 export async function getDeudaTotal(teamId: number) {

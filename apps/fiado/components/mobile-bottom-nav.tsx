@@ -1,7 +1,7 @@
 'use client';
-// Bottom tab bar for the 4 screens a despensa owner uses every day. The
-// hamburger drawer (AppShell) still has everything else (team, billing,
-// activity...) — this is a mobile-only shortcut, not a replacement for it.
+// Bottom tab bar for the 4 screens everyone uses every day. The hamburger
+// drawer (AppShell) still has everything else (settings, activity...) —
+// this is a mobile-only shortcut, not a replacement for it.
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { LayoutDashboard, Package, ShoppingCart, Users } from 'lucide-react';

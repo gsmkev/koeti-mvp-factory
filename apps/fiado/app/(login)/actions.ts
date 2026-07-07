@@ -31,7 +31,13 @@ import { cookies, headers } from 'next/headers';
 import { getLocale, getTranslations } from 'next-intl/server';
 import type { Locale } from '@koeti/i18n/config';
 import { createCheckoutSession } from '@/lib/payments/stripe';
-import { getUser, getUserWithTeam } from '@/lib/db/queries';
+import {
+  createTeamSlug,
+  getTeamIdBySlug,
+  getTeamSlug,
+  getUser,
+  getUserWithTeam,
+} from '@/lib/db/queries';
 import { validatedAction, validatedActionWithUser } from '@/lib/auth/middleware';
 import {
   sendEmail,
@@ -114,36 +120,62 @@ async function logActivity(
   await db.insert(activityLogs).values(newActivity);
 }
 
-// Ña Marta types a plain "usuario", not an email — accept either and
-// normalize a bare username to a synthetic local address so `users.email`
-// (shared schema, must stay unique) keeps working with zero schema changes.
-// A value that already looks like an email (has "@") passes through as-is —
-// covers Google sign-in accounts and e2e test fixtures.
-const usernameOrEmail = z
-  .string()
-  .trim()
-  .min(3)
-  .max(255)
-  .transform((v) => (v.includes('@') ? v : `${v.toLowerCase()}@fiado.local`))
-  .pipe(z.string().email('Usuario o email inválido'));
+// Ña Marta types a plain "usuario", not an email — but a bare username isn't
+// globally unique (two different despensas can each have a "juan"), so it's
+// namespaced by a per-despensa slug the owner picks at sign-up:
+// usuario@<slug>.fiado.local. `users.email` (shared schema, must stay
+// unique) keeps working with zero schema changes to that table — the slug
+// itself lives in fiado's own team_slugs table. A value that already looks
+// like an email (has "@") passes through as-is and needs no slug — covers
+// Google sign-in accounts and e2e test fixtures.
+const usernameOrEmailRaw = z.string().trim().min(3).max(255);
+const slugRegex = /^[a-z0-9-]{3,50}$/;
+
+// Builds the real lookup/storage email from what the person typed. Returns
+// an error instead of throwing so callers can redisplay the form.
+function resolveLoginEmail(rawEmail: string, rawSlug: string): { email: string; error?: string } {
+  if (rawEmail.includes('@')) return { email: rawEmail };
+  const slug = rawSlug.trim().toLowerCase();
+  if (!slugRegex.test(slug)) {
+    return { email: '', error: 'despensaRequired' };
+  }
+  return { email: `${rawEmail.toLowerCase()}@${slug}.fiado.local` };
+}
 
 const signInSchema = z.object({
-  email: usernameOrEmail,
+  email: usernameOrEmailRaw,
+  despensaSlug: z.string().trim().max(50).optional().default(''),
   password: z.string().min(8).max(100),
 });
 
 export const signIn = validatedAction(signInSchema, async (data, formData) => {
-  const { email, password } = data;
+  const { password } = data;
   // Redisplay what the person actually typed ("usuario"), not the synthetic
-  // "usuario@fiado.local" the schema transformed it into for the DB lookup.
+  // "usuario@<slug>.fiado.local" resolved from it for the DB lookup.
   const rawEmail = String(formData.get('email') ?? '').trim();
   const t = await getTranslations('errors');
+
+  const resolved = resolveLoginEmail(rawEmail, data.despensaSlug);
+  if (resolved.error) {
+    return {
+      error: t('despensaRequired'),
+      email: rawEmail,
+      despensaSlug: data.despensaSlug,
+      password,
+    };
+  }
+  const { email } = resolved;
 
   if (
     !(await limitOk(`signin:${await clientIp()}`, 10)) ||
     !(await limitOk(`signin:${email.toLowerCase()}`, 10))
   ) {
-    return { error: t('tooManyAttempts'), email: rawEmail, password };
+    return {
+      error: t('tooManyAttempts'),
+      email: rawEmail,
+      despensaSlug: data.despensaSlug,
+      password,
+    };
   }
 
   const userWithTeam = await db
@@ -161,6 +193,7 @@ export const signIn = validatedAction(signInSchema, async (data, formData) => {
     return {
       error: t('invalidCredentials'),
       email: rawEmail,
+      despensaSlug: data.despensaSlug,
       password,
     };
   }
@@ -173,6 +206,7 @@ export const signIn = validatedAction(signInSchema, async (data, formData) => {
     return {
       error: t('invalidCredentials'),
       email: rawEmail,
+      despensaSlug: data.despensaSlug,
       password,
     };
   }
@@ -192,21 +226,60 @@ export const signIn = validatedAction(signInSchema, async (data, formData) => {
 });
 
 const signUpSchema = z.object({
-  email: usernameOrEmail,
+  email: usernameOrEmailRaw,
   password: z.string().min(8),
   name: z.string().max(100).optional(),
+  despensaSlug: z.string().trim().max(50).optional().default(''),
   inviteId: z.string().optional(),
 });
 
 export const signUp = validatedAction(signUpSchema, async (data, formData) => {
-  const { email, password, name, inviteId } = data;
+  const { password, name, inviteId } = data;
   // Redisplay what the person actually typed ("usuario"), not the synthetic
-  // "usuario@fiado.local" the schema transformed it into for storage.
+  // "usuario@<slug>.fiado.local" resolved from it for storage.
   const rawEmail = String(formData.get('email') ?? '').trim();
   const t = await getTranslations('errors');
 
   if (!(await limitOk(`signup:${await clientIp()}`, 5))) {
-    return { error: t('tooManyAttempts'), email: rawEmail, password };
+    return {
+      error: t('tooManyAttempts'),
+      email: rawEmail,
+      despensaSlug: data.despensaSlug,
+      password,
+    };
+  }
+
+  const usingUsername = !rawEmail.includes('@');
+  // New despensa (no invite) picking a bare username also picks the slug
+  // that disambiguates them from every other "juan" in the app. The invite
+  // path is currently unreachable from the UI (onboarding dropped its
+  // email-invite step) — kept minimal, not slug-aware.
+  let email: string;
+  let slugToPersist: string | null = null;
+  if (!usingUsername) {
+    email = rawEmail;
+  } else if (inviteId) {
+    email = `${rawEmail.toLowerCase()}@fiado.local`;
+  } else {
+    const slug = data.despensaSlug.trim().toLowerCase();
+    if (!slugRegex.test(slug)) {
+      return {
+        error: t('despensaRequired'),
+        email: rawEmail,
+        despensaSlug: data.despensaSlug,
+        password,
+      };
+    }
+    if (await getTeamIdBySlug(slug)) {
+      return {
+        error: t('despensaTaken'),
+        email: rawEmail,
+        despensaSlug: data.despensaSlug,
+        password,
+      };
+    }
+    email = `${rawEmail.toLowerCase()}@${slug}.fiado.local`;
+    slugToPersist = slug;
   }
 
   const existingUser = await db.select().from(users).where(eq(users.email, email)).limit(1);
@@ -215,6 +288,7 @@ export const signUp = validatedAction(signUpSchema, async (data, formData) => {
     return {
       error: t('createUserFailed'),
       email: rawEmail,
+      despensaSlug: data.despensaSlug,
       password,
     };
   }
@@ -236,6 +310,7 @@ export const signUp = validatedAction(signUpSchema, async (data, formData) => {
     return {
       error: t('createUserFailed'),
       email: rawEmail,
+      despensaSlug: data.despensaSlug,
       password,
     };
   }
@@ -271,7 +346,12 @@ export const signUp = validatedAction(signUpSchema, async (data, formData) => {
 
       [createdTeam] = await db.select().from(teams).where(eq(teams.id, teamId)).limit(1);
     } else {
-      return { error: t('invalidInvitation'), email: rawEmail, password };
+      return {
+        error: t('invalidInvitation'),
+        email: rawEmail,
+        despensaSlug: data.despensaSlug,
+        password,
+      };
     }
   } else {
     // Create a new team if there's no invitation. A generic, friendly
@@ -293,12 +373,17 @@ export const signUp = validatedAction(signUpSchema, async (data, formData) => {
       return {
         error: t('createTeamFailed'),
         email: rawEmail,
+        despensaSlug: data.despensaSlug,
         password,
       };
     }
 
     teamId = createdTeam.id;
     userRole = 'owner';
+
+    if (slugToPersist) {
+      await createTeamSlug(teamId, slugToPersist);
+    }
 
     await logActivity(teamId, createdUser.id, ActivityType.CREATE_TEAM);
   }
@@ -510,21 +595,36 @@ export const deleteAccount = validatedActionWithUser(deleteAccountSchema, async 
 
 const updateAccountSchema = z.object({
   name: z.string().min(1, 'Name is required').max(100),
-  email: usernameOrEmail,
+  email: usernameOrEmailRaw,
 });
 
-export const updateAccount = validatedActionWithUser(updateAccountSchema, async (data, _, user) => {
-  const { name, email } = data;
-  const t = await getTranslations('errors');
-  const userWithTeam = await getUserWithTeam(user.id);
+// Changing your own username stays inside your own despensa — reuse its
+// existing slug rather than asking for one again.
+export const updateAccount = validatedActionWithUser(
+  updateAccountSchema,
+  async (data, formData, user) => {
+    const { name } = data;
+    const rawEmail = String(formData.get('email') ?? '').trim();
+    const t = await getTranslations('errors');
+    const userWithTeam = await getUserWithTeam(user.id);
 
-  await Promise.all([
-    db.update(users).set({ name, email }).where(eq(users.id, user.id)),
-    logActivity(userWithTeam?.teamId, user.id, ActivityType.UPDATE_ACCOUNT),
-  ]);
+    let email: string;
+    if (rawEmail.includes('@')) {
+      email = rawEmail;
+    } else {
+      const slug = userWithTeam?.teamId ? await getTeamSlug(userWithTeam.teamId) : null;
+      if (!slug) return { name, error: t('despensaRequired') };
+      email = `${rawEmail.toLowerCase()}@${slug}.fiado.local`;
+    }
 
-  return { name, success: t('accountUpdated') };
-});
+    await Promise.all([
+      db.update(users).set({ name, email }).where(eq(users.id, user.id)),
+      logActivity(userWithTeam?.teamId, user.id, ActivityType.UPDATE_ACCOUNT),
+    ]);
+
+    return { name, success: t('accountUpdated') };
+  },
+);
 
 // Server-side RBAC for team management — hiding buttons in the UI is cosmetic.
 async function hasTeamRole(user: User, teamId: number, min: TeamRole) {

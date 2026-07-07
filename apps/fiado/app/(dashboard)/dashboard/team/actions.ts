@@ -15,6 +15,7 @@ import { hashPassword } from '@/lib/auth/session';
 import { teamMembers, users } from '@koeti/db';
 import { db } from '@/lib/db/drizzle';
 import { withTeam } from '@/lib/auth/middleware';
+import { getTeamSlug } from '@/lib/db/queries';
 
 const schema = z.object({
   name: z.string().min(1, 'El nombre es requerido').max(100),
@@ -53,7 +54,11 @@ export const createEmployee = withTeam(async (formData, team) => {
   }
 
   const { name, usuario, password } = parsed.data;
-  const email = `${usuario}@fiado.local`;
+  // Same slug as the owner (see (login)/actions.ts) — "usuario" only has to
+  // be unique within this despensa, not across the whole app.
+  const slug = await getTeamSlug(team.id);
+  if (!slug) return { error: 'No se pudo determinar el código de tu despensa.' };
+  const email = `${usuario}@${slug}.fiado.local`;
 
   const [existing] = await db.select().from(users).where(eq(users.email, email)).limit(1);
   if (existing) return { error: `El usuario "${usuario}" ya existe` };

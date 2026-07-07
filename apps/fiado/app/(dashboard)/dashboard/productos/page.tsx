@@ -5,11 +5,10 @@ import { createLoader, parseAsStringEnum } from 'nuqs/server';
 import { Badge, ResourcePanel, cn, type ResourceField } from '@koeti/ui';
 import { getTranslations } from 'next-intl/server';
 import { requireRole } from '@/lib/auth/middleware';
-import { getProductos } from '@/lib/db/queries';
+import { getProductos, STOCK_BAJO } from '@/lib/db/queries';
 import { createProducto, deleteProducto, updateProducto } from './actions';
 
 const money = (n: number) => `₲${n.toLocaleString('es')}`;
-const STOCK_BAJO = 5;
 const loadSearchParams = createLoader({ estado: parseAsStringEnum(['agotados']) });
 
 export default async function ProductosPage({

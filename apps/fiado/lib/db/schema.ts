@@ -73,6 +73,19 @@ export const ventaItems = pgTable('venta_items', {
 });
 export type VentaItem = typeof ventaItems.$inferSelect;
 
+// Usernames aren't globally unique — two different despensas can each have
+// a "juan". The synthetic login email (see (login)/actions.ts) is scoped as
+// usuario@<slug>.fiado.local, so the slug is what actually disambiguates two
+// "juan"s at sign-in. One row per team, created once at signup.
+export const teamSlugs = pgTable('team_slugs', {
+  slug: varchar('slug', { length: 60 }).primaryKey(),
+  teamId: integer('team_id')
+    .notNull()
+    .unique()
+    .references(() => teams.id),
+});
+export type TeamSlug = typeof teamSlugs.$inferSelect;
+
 export const pagos = pgTable(
   'pagos',
   {

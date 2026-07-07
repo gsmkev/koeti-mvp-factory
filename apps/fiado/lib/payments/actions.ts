@@ -20,7 +20,16 @@ export const checkoutAction = withTeam(async (formData, team) => {
   // buyer's tax identity is captured at /checkout before the order is created.
   const plan = getPagoparPlans().find((p) => p.name === formData.get('plan'));
   redirect(plan ? `/dashboard/checkout?plan=${encodeURIComponent(plan.name)}` : '/pricing');
-});
+}, 'admin');
+
+// `<form action={...}>` needs a Promise<void> signature; checkoutAction's
+// 'admin' gate makes it Promise<void | {error}> instead. The pages that use
+// this (checkout, /pricing) already requireRole('admin') themselves, so the
+// {error} branch is unreachable through the UI — only a raw POST bypassing
+// the page would hit it, and discarding it there is fine (denied either way).
+export const checkoutFormAction = async (formData: FormData) => {
+  await checkoutAction(formData);
+};
 
 // Second step of the Pagopar flow: /dashboard/checkout posts the tax identity the
 // factura legally requires, we save it on the team (renewals prefill it),
@@ -54,9 +63,19 @@ export const pagoparCheckoutAction = withTeam(async (formData, team, user) => {
     })
     .where(eq(teams.id, team.id));
   redirect(url);
-});
+}, 'admin');
+
+// Same Promise<void> vs Promise<void | {error}> issue as checkoutFormAction above.
+export const pagoparCheckoutFormAction = async (formData: FormData) => {
+  await pagoparCheckoutAction(formData);
+};
 
 export const customerPortalAction = withTeam(async (_, team) => {
   const portalSession = await createCustomerPortalSession(team);
   redirect(portalSession.url);
-});
+}, 'admin');
+
+// Same Promise<void> vs Promise<void | {error}> issue as checkoutFormAction above.
+export const customerPortalFormAction = async (formData: FormData) => {
+  await customerPortalAction(formData);
+};

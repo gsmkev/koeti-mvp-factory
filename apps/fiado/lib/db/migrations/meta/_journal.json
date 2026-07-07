@@ -8,6 +8,13 @@
       "when": 1783427456161,
       "tag": "0000_colossal_maestro",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1783450212595,
+      "tag": "0001_lovely_drax",
+      "breakpoints": true
     }
   ]
 }

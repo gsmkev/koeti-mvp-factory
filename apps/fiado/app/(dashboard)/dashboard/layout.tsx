@@ -31,7 +31,10 @@ import { MobileBottomNav } from '@/components/mobile-bottom-nav';
 import { NotificationsBell } from '@/components/notifications-bell';
 import { User } from '@/lib/db/schema';
 import { APP_NAME } from '@/lib/site';
+import { useIsOwner } from '@/lib/use-is-owner';
 import useSWR, { mutate } from 'swr';
+
+const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 // Add one nav entry per domain entity to the first group (see .claude/rules/crud.md).
 //
@@ -51,9 +54,15 @@ import useSWR, { mutate } from 'swr';
 // subscription billing, not a despensa concern. The route stays reachable
 // (harmless, empty until a paid Pagopar order exists) but isn't worth a
 // permanent nav slot for this audience.
+//
+// A vendedor sees everything here except "Empleados" — that's the one
+// settings screen that's actually owner-exclusive (managing who has a login
+// and the subscription live there; see requireRole('admin') on that page).
+// General/Seguridad are each person's own account, not despensa-wide.
 function useNav(): AppShellNavGroup[] {
   const t = useTranslations('nav');
   const tf = useTranslations('fiado');
+  const isOwner = useIsOwner();
   return [
     {
       items: [
@@ -67,7 +76,7 @@ function useNav(): AppShellNavGroup[] {
     {
       label: t('settings'),
       items: [
-        { href: '/dashboard/team', label: t('team'), icon: <Users /> },
+        ...(isOwner ? [{ href: '/dashboard/team', label: t('team'), icon: <Users /> }] : []),
         { href: '/dashboard/general', label: t('general'), icon: <Settings /> },
         { href: '/dashboard/security', label: t('security'), icon: <Shield /> },
         { href: '/dashboard/activity', label: t('activity'), icon: <Activity /> },
@@ -76,12 +85,10 @@ function useNav(): AppShellNavGroup[] {
   ];
 }
 
-const fetcher = (url: string) => fetch(url).then((res) => res.json());
-
-// Falls back to the "usuario" part of a synthetic usuario@fiado.local
+// Falls back to the "usuario" part of a synthetic usuario@<slug>.fiado.local
 // address instead of ever showing that suffix — a real name is optional at
 // sign-up, so this is the only thing standing between "Juan Pérez" and a
-// raw "juanperez@fiado.local" leaking into the UI.
+// raw "juan@despensadejuan.fiado.local" leaking into the UI.
 function displayName(user: Pick<User, 'name' | 'email'>) {
   return user.name || user.email.split('@')[0];
 }
@@ -134,7 +141,7 @@ function SidebarUser() {
           <span className="block truncate text-sm font-medium text-sidebar-primary">
             {displayName(user)}
           </span>
-          {user.name && !user.email.endsWith('@fiado.local') && (
+          {user.name && !user.email.endsWith('.fiado.local') && (
             <span className="block truncate text-xs text-sidebar-foreground/60">{user.email}</span>
           )}
         </span>

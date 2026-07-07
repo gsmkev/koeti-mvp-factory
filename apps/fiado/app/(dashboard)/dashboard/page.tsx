@@ -16,10 +16,10 @@ import {
   StatCard,
 } from '@koeti/ui';
 import { getTranslations } from 'next-intl/server';
+import { requireRole } from '@/lib/auth/middleware';
 import {
   getClientes,
   getDeudaTotal,
-  getTeamForUser,
   getVentasStats,
   getVentasUltimaSemana,
 } from '@/lib/db/queries';
@@ -27,8 +27,7 @@ import {
 const money = (n: number) => `₲${n.toLocaleString('es')}`;
 
 export default async function DashboardPage() {
-  const team = await getTeamForUser();
-  if (!team) throw new Error('Team not found');
+  const { team } = await requireRole('viewer');
   const [deudaTotal, ventasStats, ventasSemana, clientes, t] = await Promise.all([
     getDeudaTotal(team.id),
     getVentasStats(team.id),

@@ -28,10 +28,14 @@
     "basicFeatures": [
       "Productos, clientes y ventas ilimitadas",
       "Fiado con límite de crédito por cliente",
-      "Avisos de stock bajo y clientes con saldo vencido",
       "Hasta 3 empleados con su propio usuario"
     ],
-    "premiumFeatures": ["Todo lo de Básico, y:", "Empleados ilimitados", "Soporte prioritario"]
+    "premiumFeatures": [
+      "Todo lo de Básico, y:",
+      "Avisos de stock bajo y de clientes que superaron su límite",
+      "Empleados ilimitados",
+      "Soporte prioritario"
+    ]
   },
   "overview": {
     "title": "Resumen",
@@ -50,7 +54,8 @@
     "emptyDeudaDesc": "Las ventas al fiado van a aparecer acá con el saldo de cada cliente."
   },
   "insightMessages": {
-    "activitySpike": "Actividad inusual en la cuenta el {day}: {count} eventos frente a un promedio diario de {avg}."
+    "lowStock": "{producto}: quedan {stock} unidades.",
+    "overCreditLimit": "{cliente} superó su límite de crédito: debe {balance} (límite {limit})."
   },
   "checkout": {
     "title": "Finalizar compra",
@@ -209,11 +214,19 @@
   "auth": {
     "signUpSubtitle": "Empezá con un usuario y una contraseña.",
     "email": "Usuario",
-    "emailPlaceholder": "tu_usuario",
+    "emailPlaceholder": "juanperez",
     "name": "Nombre",
     "namePlaceholder": "Ej: Juan Pérez",
+    "despensaSlug": "Despensa",
+    "despensaSlugPlaceholder": "despensadejuan",
+    "despensaSlugHelpSignUp": "Nombre corto de tu despensa, sin espacios. Lo vas a usar junto con tu usuario para entrar.",
+    "despensaSlugHelpSignIn": "El nombre corto que elegiste al crear la cuenta.",
     "brandQuote": "Dejá el cuaderno hoy: cada venta al fiado queda registrada, con el saldo de cada cliente siempre a mano.",
     "brandFooter": "{app} — la libreta de fiado de tu despensa"
+  },
+  "errors": {
+    "despensaRequired": "Ingresá el nombre de tu despensa (letras, números y guiones, sin espacios).",
+    "despensaTaken": "Ese nombre de despensa ya está en uso. Probá con otro."
   },
   "team": {
     "title": "Empleados",

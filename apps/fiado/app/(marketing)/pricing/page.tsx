@@ -1,5 +1,5 @@
 // Page — route /pricing.
-import { checkoutAction } from '@/lib/payments/actions';
+import { checkoutFormAction } from '@/lib/payments/actions';
 import { ArrowRight, Check } from 'lucide-react';
 import { getTranslations } from 'next-intl/server';
 import {
@@ -110,7 +110,7 @@ function PricingCard({
         </ul>
       </CardContent>
       <CardFooter>
-        <form action={checkoutAction} className="w-full">
+        <form action={checkoutFormAction} className="w-full">
           <input type="hidden" name="plan" value={name} />
           <SubmitButton
             variant="outline"

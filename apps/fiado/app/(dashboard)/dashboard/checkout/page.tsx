@@ -17,18 +17,20 @@ import {
   PageHeader,
   SubmitButton,
 } from '@koeti/ui';
-import { pagoparCheckoutAction } from '@/lib/payments/actions';
-import { getTeamForUser } from '@/lib/db/queries';
+import { pagoparCheckoutFormAction } from '@/lib/payments/actions';
+import { requireRole } from '@/lib/auth/middleware';
 import { loadSearchParams } from './search-params';
 
+// Buying/renewing the subscription is admin+ (in practice, owner-only) —
+// a vendedor shouldn't be able to change what the despensa pays for this.
 export default async function CheckoutPage({
   searchParams,
 }: {
   searchParams: Promise<SearchParams>;
 }) {
-  const [{ plan: planName, error }, team, t] = await Promise.all([
+  const [{ plan: planName, error }, { team }, t] = await Promise.all([
     loadSearchParams(searchParams),
-    getTeamForUser(),
+    requireRole('admin'),
     getTranslations('checkout'),
   ]);
   const plan = getPagoparPlans().find((p) => p.name === planName);
@@ -55,7 +57,7 @@ export default async function CheckoutPage({
           <p className="text-sm text-muted-foreground">{t('invoiceNote')}</p>
         </CardHeader>
         <CardContent>
-          <form action={pagoparCheckoutAction} className="space-y-4">
+          <form action={pagoparCheckoutFormAction} className="space-y-4">
             <input type="hidden" name="plan" value={plan.name} />
             <div>
               <Label htmlFor="taxDocumentType" className="mb-2">

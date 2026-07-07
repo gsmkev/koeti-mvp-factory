@@ -93,6 +93,22 @@ export function Login({
             )}
 
             <div className="space-y-2">
+              <Label htmlFor="despensaSlug">{t('despensaSlug')}</Label>
+              <Input
+                id="despensaSlug"
+                name="despensaSlug"
+                type="text"
+                autoComplete="organization"
+                defaultValue={state.despensaSlug}
+                maxLength={50}
+                placeholder={t('despensaSlugPlaceholder')}
+              />
+              <p className="text-xs text-muted-foreground">
+                {mode === 'signin' ? t('despensaSlugHelpSignIn') : t('despensaSlugHelpSignUp')}
+              </p>
+            </div>
+
+            <div className="space-y-2">
               <Label htmlFor="email">{t('email')}</Label>
               <Input
                 id="email"

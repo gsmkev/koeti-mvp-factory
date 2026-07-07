@@ -28,10 +28,14 @@
     "basicFeatures": [
       "Produtos, clientes e vendas ilimitados",
       "Fiado com limite de crédito por cliente",
-      "Avisos de estoque baixo e saldo vencido",
       "Até 3 funcionários com usuário próprio"
     ],
-    "premiumFeatures": ["Tudo do Básico, e:", "Funcionários ilimitados", "Suporte prioritário"]
+    "premiumFeatures": [
+      "Tudo do Básico, e:",
+      "Avisos de estoque baixo e de clientes que ultrapassaram o limite",
+      "Funcionários ilimitados",
+      "Suporte prioritário"
+    ]
   },
   "overview": {
     "title": "Visão geral",
@@ -50,7 +54,8 @@
     "emptyDeudaDesc": "As vendas fiado vão aparecer aqui com o saldo de cada cliente."
   },
   "insightMessages": {
-    "activitySpike": "Atividade incomum na conta em {day}: {count} eventos contra uma média diária de {avg}."
+    "lowStock": "{producto}: restam {stock} unidades.",
+    "overCreditLimit": "{cliente} ultrapassou o limite de crédito: deve {balance} (limite {limit})."
   },
   "checkout": {
     "title": "Finalizar compra",
@@ -209,11 +214,19 @@
   "auth": {
     "signUpSubtitle": "Comece com um usuário e uma senha.",
     "email": "Usuário",
-    "emailPlaceholder": "seu_usuario",
+    "emailPlaceholder": "joaosilva",
     "name": "Nome",
     "namePlaceholder": "Ex: João Silva",
+    "despensaSlug": "Loja",
+    "despensaSlugPlaceholder": "lojadojoao",
+    "despensaSlugHelpSignUp": "Nome curto da sua loja, sem espaços. Você vai usar junto com seu usuário para entrar.",
+    "despensaSlugHelpSignIn": "O nome curto que você escolheu ao criar a conta.",
     "brandQuote": "Largue o caderno hoje: cada venda fiado fica registrada, com o saldo de cada cliente sempre à mão.",
     "brandFooter": "{app} — o caderno de fiado da sua loja"
+  },
+  "errors": {
+    "despensaRequired": "Digite o nome da sua loja (letras, números e hífens, sem espaços).",
+    "despensaTaken": "Esse nome de loja já está em uso. Tente outro."
   },
   "team": {
     "title": "Funcionários",

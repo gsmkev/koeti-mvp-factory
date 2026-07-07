@@ -6,6 +6,7 @@
 import { and, eq, inArray, sql } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
+import { isSubscribed } from '@koeti/billing';
 import { db } from '@/lib/db/drizzle';
 import { clientes, productos, ventaItems, ventas } from '@/lib/db/schema';
 import { withTeam } from '@/lib/auth/middleware';
@@ -93,7 +94,10 @@ export const registrarVenta = withTeam(async (formData, team) => {
 
   if (paymentType === 'fiado' && clienteId) {
     const [cliente] = await db.select().from(clientes).where(eq(clientes.id, clienteId)).limit(1);
+    // Aviso de "superó su límite" es Premium (ver /pricing) — Básico no lo recibe.
+    const isPremium = isSubscribed(team) && team.planName?.toLowerCase() === 'premium';
     if (
+      isPremium &&
       cliente &&
       Number(cliente.creditLimit) > 0 &&
       Number(cliente.balance) > Number(cliente.creditLimit)

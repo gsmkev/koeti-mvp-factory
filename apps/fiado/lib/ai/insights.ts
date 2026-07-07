@@ -1,35 +1,43 @@
-// What the daily insights cron computes per team. Deliberately statistical,
-// not AI — deterministic, free, explainable. The template ships one generic
-// detector (activity volume anomaly) as the worked example; MVPs replace or
-// extend this with business detectors (see apps/gastos/lib/ai/insights.ts).
-// messageKey is relative to the app's `insightMessages` i18n namespace.
-import { detectAnomalies } from '@koeti/ai';
-import { activityLogs, type NewInsight } from '@koeti/db';
-import { and, asc, eq, gte, sql } from 'drizzle-orm';
-import { db } from '@/lib/db/drizzle';
+// What the daily insights cron computes per team — Premium-only (see
+// /pricing and api/cron/insights/route.ts, which skips non-Premium teams
+// before ever calling this). Two real, business-specific detectors instead
+// of the template's generic activity-anomaly stub: low stock and clients
+// over their credit limit. Deterministic, no AI. messageKey is relative to
+// the app's `insightMessages` i18n namespace. dedupeKey is day-scoped so
+// the same product/client can re-alert once a day, not once ever.
+import { type NewInsight } from '@koeti/db';
+import { getLowStockProductos, getClientesOverLimit } from '@/lib/db/queries';
+
+const money = (n: number) => `₲${n.toLocaleString('es')}`;
 
 export async function generateInsights(teamId: number): Promise<NewInsight[]> {
-  const day = sql<string>`to_char(${activityLogs.timestamp}, 'YYYY-MM-DD')`;
-  const rows = await db
-    .select({ day, count: sql<number>`count(*)::int` })
-    .from(activityLogs)
-    .where(
-      and(
-        eq(activityLogs.teamId, teamId),
-        gte(activityLogs.timestamp, sql`now() - interval '30 days'`),
-      ),
-    )
-    .groupBy(day)
-    .orderBy(asc(day));
+  const today = new Date().toISOString().slice(0, 10);
+  const [lowStock, overLimit] = await Promise.all([
+    getLowStockProductos(teamId),
+    getClientesOverLimit(teamId),
+  ]);
 
-  return detectAnomalies(rows.map((r) => ({ label: r.day, value: r.count })))
-    .filter((a) => a.zScore > 0) // quiet days aren't worth an alert
-    .map((a) => ({
-      teamId,
-      kind: 'anomaly',
-      severity: 'warning',
-      messageKey: 'activitySpike',
-      params: JSON.stringify({ day: a.label, count: a.value, avg: Math.round(a.mean) }),
-      dedupeKey: `activitySpike:${a.label}`,
-    }));
+  const stockInsights: NewInsight[] = lowStock.map((p) => ({
+    teamId,
+    kind: 'suggestion',
+    severity: p.stock <= 0 ? 'warning' : 'info',
+    messageKey: 'lowStock',
+    params: JSON.stringify({ producto: p.name, stock: p.stock }),
+    dedupeKey: `lowStock:${p.id}:${today}`,
+  }));
+
+  const creditInsights: NewInsight[] = overLimit.map((c) => ({
+    teamId,
+    kind: 'anomaly',
+    severity: 'warning',
+    messageKey: 'overCreditLimit',
+    params: JSON.stringify({
+      cliente: c.name,
+      balance: money(Number(c.balance)),
+      limit: money(Number(c.creditLimit)),
+    }),
+    dedupeKey: `overCreditLimit:${c.id}:${today}`,
+  }));
+
+  return [...stockInsights, ...creditInsights];
 }
