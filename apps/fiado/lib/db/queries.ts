@@ -210,8 +210,17 @@ export const VENTAS_PAGE_SIZE = 50;
 
 // `page` pagina la vista (trae PAGE_SIZE + 1 filas: la extra señala hasMore);
 // sin `page` devuelve todo — el export CSV depende de eso. `tipo` filtra por
-// contado/fiado — así Ña Marta puede ver solo las ventas al fiado.
-export async function getVentas(teamId: number, page?: number, tipo?: 'contado' | 'fiado') {
+// contado/fiado y `clienteId` por cliente — así Ña Marta puede ver solo las
+// ventas al fiado, o todo lo que le vendió a un cliente puntual.
+export async function getVentas(
+  teamId: number,
+  page?: number,
+  filters?: { tipo?: 'contado' | 'fiado'; clienteId?: number },
+) {
+  const conditions = [eq(ventas.teamId, teamId)];
+  if (filters?.tipo) conditions.push(eq(ventas.paymentType, filters.tipo));
+  if (filters?.clienteId) conditions.push(eq(ventas.clienteId, filters.clienteId));
+
   const q = db
     .select({
       id: ventas.id,
@@ -223,11 +232,7 @@ export async function getVentas(teamId: number, page?: number, tipo?: 'contado' 
     })
     .from(ventas)
     .leftJoin(clientes, eq(ventas.clienteId, clientes.id))
-    .where(
-      tipo
-        ? and(eq(ventas.teamId, teamId), eq(ventas.paymentType, tipo))
-        : eq(ventas.teamId, teamId),
-    )
+    .where(and(...conditions))
     .orderBy(desc(ventas.createdAt));
   if (!page) return q;
   return q.limit(VENTAS_PAGE_SIZE + 1).offset((page - 1) * VENTAS_PAGE_SIZE);

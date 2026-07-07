@@ -181,7 +181,9 @@
     "emptyTitle": "No sales yet",
     "emptyDesc": "Register your first sale from \"New sale\".",
     "filterAria": "Filter sales",
-    "filterAll": "All"
+    "filterAll": "All",
+    "filterAllClients": "All customers",
+    "filterApply": "Filter"
   },
   "notifications": {
     "overLimit": "{cliente} is over their credit limit: owes {balance} (limit {limit})."

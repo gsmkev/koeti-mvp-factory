@@ -181,7 +181,9 @@
     "emptyTitle": "Sin ventas todavía",
     "emptyDesc": "Registrá tu primera venta desde \"Nueva venta\".",
     "filterAria": "Filtrar ventas",
-    "filterAll": "Todas"
+    "filterAll": "Todas",
+    "filterAllClients": "Todos los clientes",
+    "filterApply": "Filtrar"
   },
   "notifications": {
     "overLimit": "{cliente} superó su límite de crédito: debe {balance} (límite {limit})."
