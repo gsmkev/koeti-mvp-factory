@@ -8,13 +8,13 @@ import { useActionState } from 'react';
 import { useTranslations } from 'next-intl';
 import { TeamDataWithMembers, User } from '@/lib/db/schema';
 import { removeTeamMember } from '@/app/(login)/actions';
-import { createEmployee } from './actions';
+import { createEmployee, updateEmployee } from './actions';
 import useSWR, { mutate } from 'swr';
-import { Suspense } from 'react';
-import { Input } from '@koeti/ui';
-import { RadioGroup, RadioGroupItem } from '@koeti/ui';
+import { Suspense, useState } from 'react';
+import { Button, Input } from '@koeti/ui';
 import { Label, PageHeader, SubmitButton } from '@koeti/ui';
-import { PlusCircle } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@koeti/ui';
+import { PlusCircle, Pencil } from 'lucide-react';
 
 type ActionState = {
   error?: string;
@@ -105,6 +105,56 @@ function TeamMembersSkeleton() {
   );
 }
 
+// Resetear la contraseña de un empleado ya creado — no hay recovery por
+// correo, así que esta es la única vía. No hay rol para elegir: todo
+// empleado que no es el dueño es Vendedor.
+function EditEmployeeDialog({ member }: { member: TeamDataWithMembers['teamMembers'][number] }) {
+  const t = useTranslations('team');
+  const [open, setOpen] = useState(false);
+  const [state, action] = useActionState<ActionState, FormData>(async (_prev, formData) => {
+    const result = (await updateEmployee(formData)) ?? {};
+    if (!result.error) {
+      mutate('/api/team');
+      setOpen(false);
+    }
+    return result;
+  }, {});
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button type="button" variant="outline" size="sm">
+          <Pencil className="mr-1 h-3 w-3" />
+          {t('edit')}
+        </Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>{t('editMember')}</DialogTitle>
+        </DialogHeader>
+        <form action={action} className="space-y-4">
+          <input type="hidden" name="memberId" value={member.id} />
+          <div>
+            <Label htmlFor={`password-${member.id}`} className="mb-2">
+              {t('employeePassword')}
+            </Label>
+            <Input
+              id={`password-${member.id}`}
+              name="password"
+              type="password"
+              minLength={8}
+              placeholder={t('employeePasswordPlaceholder')}
+              required
+            />
+          </div>
+          {state?.error && <p className="text-destructive text-sm">{state.error}</p>}
+          <SubmitButton pendingText={t('saving')}>{t('saveChanges')}</SubmitButton>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 function TeamMembers() {
   const t = useTranslations('team');
   const { data: teamData } = useSWR<TeamDataWithMembers>('/api/team', fetcher);
@@ -136,11 +186,11 @@ function TeamMembers() {
       </CardHeader>
       <CardContent>
         <ul className="space-y-4">
-          {teamData.teamMembers.map((member, index) => (
-            <li key={member.id} className="flex items-center justify-between">
+          {teamData.teamMembers.map((member) => (
+            <li key={member.id} className="flex items-center justify-between gap-2">
               <div className="flex items-center space-x-4">
                 <Avatar>
-                  {/* 
+                  {/*
                     This app doesn't save profile images, but here
                     is how you'd show them:
 
@@ -163,13 +213,16 @@ function TeamMembers() {
                   </p>
                 </div>
               </div>
-              {index > 1 ? (
-                <form action={removeAction}>
-                  <input type="hidden" name="memberId" value={member.id} />
-                  <SubmitButton variant="outline" size="sm" pendingText={t('removing')}>
-                    {t('remove')}
-                  </SubmitButton>
-                </form>
+              {member.role !== 'owner' ? (
+                <div className="flex items-center gap-2">
+                  <EditEmployeeDialog member={member} />
+                  <form action={removeAction}>
+                    <input type="hidden" name="memberId" value={member.id} />
+                    <SubmitButton variant="outline" size="sm" pendingText={t('removing')}>
+                      {t('remove')}
+                    </SubmitButton>
+                  </form>
+                </div>
               ) : null}
             </li>
           ))}
@@ -193,8 +246,9 @@ function CreateEmployeeSkeleton() {
 
 // Reemplaza la invitación por email: el dueño crea la cuenta del empleado
 // ahí mismo (usuario + contraseña que le da en persona) — nadie necesita
-// correo ni aceptar un enlace. RBAC reducido a dos roles reales para una
-// despensa: quién vende y quién administra (viewer/owner no se ofrecen).
+// correo ni aceptar un enlace. No hay rol para elegir: no existe
+// "Administrador" en una despensa, el dueño es quien administra, así que
+// todo empleado nuevo es Vendedor.
 function CreateEmployee() {
   const t = useTranslations('team');
   const { data: user } = useSWR<User>('/api/user', fetcher);
@@ -202,10 +256,10 @@ function CreateEmployee() {
   // superadmin) — the caller's role in THIS team lives on teamMembers.role,
   // so it has to come from /api/team instead (pre-existing bug in the
   // template's cosmetic gate: it always read the wrong field, so this form
-  // stayed disabled for every real owner/admin).
+  // stayed disabled for every real owner).
   const { data: team } = useSWR<TeamDataWithMembers>('/api/team', fetcher);
   const teamRole = team?.teamMembers?.find((m) => m.user.id === user?.id)?.role;
-  const canManage = teamRole === 'owner' || teamRole === 'admin' || user?.role === 'superadmin';
+  const canManage = teamRole === 'owner' || user?.role === 'superadmin';
   const [state, action] = useActionState<ActionState, FormData>(async (_prev, formData) => {
     const result = (await createEmployee(formData)) ?? {};
     if (!result.error) mutate('/api/team');
@@ -256,24 +310,6 @@ function CreateEmployee() {
               required
               disabled={!canManage}
             />
-          </div>
-          <div>
-            <Label>{t('role')}</Label>
-            <RadioGroup
-              defaultValue="member"
-              name="role"
-              className="flex flex-wrap gap-x-4"
-              disabled={!canManage}
-            >
-              <div className="flex items-center space-x-2 mt-2">
-                <RadioGroupItem value="member" id="member" />
-                <Label htmlFor="member">{t('roleMember')}</Label>
-              </div>
-              <div className="flex items-center space-x-2 mt-2">
-                <RadioGroupItem value="admin" id="admin" />
-                <Label htmlFor="admin">{t('roleAdmin')}</Label>
-              </div>
-            </RadioGroup>
           </div>
           {state?.error && <p className="text-destructive">{state.error}</p>}
           {state?.success && <p className="text-success">{state.success}</p>}

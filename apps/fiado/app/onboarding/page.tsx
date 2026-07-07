@@ -1,9 +1,9 @@
 // Page — route /onboarding: first-run tenant wizard (workspace → locale →
-// team → plan). Step lives in the URL (?step=…) so every step is
-// deep-linkable and the whole wizard is server-rendered — each form posts a
-// server action that saves and redirects to the next step. Idempotent: it
-// always renders, and re-submitting just re-saves; the (dashboard) layout is
-// what routes un-onboarded owners here.
+// plan). Step lives in the URL (?step=…) so every step is deep-linkable and
+// the whole wizard is server-rendered — each form posts a server action that
+// saves and redirects to the next step. Idempotent: it always renders, and
+// re-submitting just re-saves; the (dashboard) layout is what routes
+// un-onboarded owners here.
 import Link from 'next/link';
 import type { SearchParams } from 'nuqs/server';
 import { getLocale, getTranslations } from 'next-intl/server';
@@ -13,7 +13,7 @@ import { locales, localeNames } from '@koeti/i18n';
 import { requireRole } from '@/lib/auth/middleware';
 import { getStripePrices, getStripeProducts } from '@/lib/payments/stripe';
 import { APP_NAME } from '@/lib/site';
-import { completeOnboarding, saveInvites, saveLocale, saveWorkspace } from './actions';
+import { completeOnboarding, saveLocale, saveWorkspace } from './actions';
 import { STEPS, loadSearchParams, type Step } from './config';
 
 const selectClass =
@@ -35,7 +35,6 @@ export default async function OnboardingPage({
   const stepLabels: Record<Step, string> = {
     workspace: t('stepWorkspace'),
     locale: t('stepLocale'),
-    team: t('stepTeam'),
     plan: t('stepPlan'),
   };
 
@@ -83,7 +82,6 @@ export default async function OnboardingPage({
         <div className="mt-8">
           {step === 'workspace' && <WorkspaceStep t={t} defaultName={team.name} />}
           {step === 'locale' && <LocaleStep t={t} locale={locale} />}
-          {step === 'team' && <TeamStep t={t} />}
           {step === 'plan' && <PlanStep t={t} locale={locale} />}
         </div>
       </div>
@@ -168,32 +166,6 @@ function LocaleStep({ t, locale }: { t: T; locale: string }) {
   );
 }
 
-function TeamStep({ t }: { t: T }) {
-  return (
-    <>
-      <StepHeader t={t} title={t('teamTitle')} subtitle={t('teamSubtitle')} back="locale" />
-      <form className="mt-6 space-y-5" action={saveInvites}>
-        <div>
-          <Label htmlFor="invites" className="mb-2">
-            {t('invites')}
-          </Label>
-          <Input id="invites" name="invites" placeholder={t('invitesPlaceholder')} />
-          <p className="mt-2 text-xs text-muted-foreground">{t('invitesHelp')}</p>
-        </div>
-        <SubmitButton className="w-full">{t('next')}</SubmitButton>
-        <p className="text-center">
-          <Link
-            href="/onboarding?step=plan"
-            className="text-sm text-muted-foreground hover:text-foreground"
-          >
-            {t('skip')}
-          </Link>
-        </p>
-      </form>
-    </>
-  );
-}
-
 async function PlanStep({ t, locale }: { t: T; locale: string }) {
   // Empty catalog without a Stripe key (dev/CI) → only the free option renders.
   const [prices, products] = await Promise.all([getStripePrices(), getStripeProducts()]);
@@ -210,7 +182,7 @@ async function PlanStep({ t, locale }: { t: T; locale: string }) {
 
   return (
     <>
-      <StepHeader t={t} title={t('planTitle')} subtitle={t('planSubtitle')} back="team" />
+      <StepHeader t={t} title={t('planTitle')} subtitle={t('planSubtitle')} back="locale" />
       <form className="mt-6 space-y-5" action={completeOnboarding}>
         <div className="space-y-3">
           <label className={radioRow}>

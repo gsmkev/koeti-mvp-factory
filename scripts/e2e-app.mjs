@@ -112,13 +112,20 @@ try {
   await page.fill('input[name="email"]', `e2e-${stamp}@test.com`);
   await page.fill('input[name="password"]', 'e2e-password-123');
   await page.click('button[type="submit"]');
-  // New teams land on the /onboarding wizard — walk its four steps
-  // (workspace → locale → team → plan; defaults + the free plan are fine).
+  // New teams land on the /onboarding wizard (workspace → ... → plan;
+  // defaults + the free plan are fine). Step count/order is per-app
+  // (onboarding.md — some apps skip steps that don't apply, e.g. an
+  // "invite by email" step an app has replaced), so don't hardcode
+  // intermediate step names: just submit repeatedly until /dashboard.
   await page.waitForURL('**/onboarding**', { timeout: 30_000 });
   await page.fill('input[name="name"]', `E2E Team ${stamp}`);
-  for (const next of ['step=locale', 'step=team', 'step=plan', '/dashboard']) {
+  for (let i = 0; i < 6 && !page.url().includes('/dashboard'); i++) {
+    const before = page.url();
     await page.locator('button[type="submit"]').first().click();
-    await page.waitForURL((u) => u.href.includes(next), { timeout: 30_000 });
+    await page.waitForURL((u) => u.href !== before, { timeout: 30_000 });
+  }
+  if (!page.url().includes('/dashboard')) {
+    throw new Error(`Onboarding wizard never reached /dashboard, stuck at ${page.url()}`);
   }
   console.log(`  ✅ signed up e2e-${stamp}@test.com → onboarding wizard → /dashboard`);
 

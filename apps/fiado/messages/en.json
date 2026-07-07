@@ -20,17 +20,21 @@
   "pricing": {
     "eyebrow": "Plans",
     "title": "One simple plan for your store.",
-    "subtitle": "Catalog, sales, and unlimited customer tabs. Plus adds priority support for when your store grows.",
-    "freeTrial": "{days}-day free trial",
-    "perUser": "per user / {interval}",
+    "subtitle": "Everything you need to sell and track tabs. The difference is how many employees you can add.",
+    "perMonth": "/month",
     "recommended": "Recommended",
     "getStarted": "Get Started",
     "loading": "Loading…",
-    "baseFeatures": ["Unlimited usage", "Unlimited workspace members", "Email support"],
-    "plusFeatures": [
-      "Everything in Base, and:",
-      "Early access to new features",
-      "24/7 support + Slack access"
+    "basicFeatures": [
+      "Unlimited products, customers and sales",
+      "Fiado with a per-customer credit limit",
+      "Low-stock and overdue-balance alerts",
+      "Up to 3 employee logins"
+    ],
+    "premiumFeatures": [
+      "Everything in Basic, and:",
+      "Unlimited employee logins",
+      "Priority support"
     ]
   },
   "overview": {
@@ -229,7 +233,11 @@
     "employeePasswordPlaceholder": "At least 8 characters",
     "inviteMember": "Create login",
     "inviting": "Creating…",
-    "adminOnlyInvite": "You need to be an administrator to create new logins."
+    "adminOnlyInvite": "You need to be an administrator to create new logins.",
+    "edit": "Edit",
+    "editMember": "Change password",
+    "saveChanges": "Save changes",
+    "saving": "Saving…"
   },
   "account": {
     "title": "My account",

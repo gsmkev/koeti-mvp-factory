@@ -20,18 +20,18 @@
   "pricing": {
     "eyebrow": "Planes",
     "title": "Un plan simple para tu despensa.",
-    "subtitle": "Catálogo, ventas y fiado sin límite de clientes. Plus suma soporte prioritario para cuando tu despensa crezca.",
-    "freeTrial": "{days} días de prueba gratis",
-    "perUser": "por usuario / {interval}",
+    "subtitle": "Todo lo esencial para vender y controlar el fiado. La diferencia es cuántos empleados podés sumar.",
+    "perMonth": "/mes",
     "recommended": "Recomendado",
     "getStarted": "Empezar",
     "loading": "Cargando…",
-    "baseFeatures": ["Uso ilimitado", "Miembros del espacio ilimitados", "Soporte por email"],
-    "plusFeatures": [
-      "Todo lo de Base, y:",
-      "Acceso anticipado a nuevas funciones",
-      "Soporte 24/7 + acceso a Slack"
-    ]
+    "basicFeatures": [
+      "Productos, clientes y ventas ilimitadas",
+      "Fiado con límite de crédito por cliente",
+      "Avisos de stock bajo y clientes con saldo vencido",
+      "Hasta 3 empleados con su propio usuario"
+    ],
+    "premiumFeatures": ["Todo lo de Básico, y:", "Empleados ilimitados", "Soporte prioritario"]
   },
   "overview": {
     "title": "Resumen",
@@ -229,7 +229,11 @@
     "employeePasswordPlaceholder": "Al menos 8 caracteres",
     "inviteMember": "Crear usuario",
     "inviting": "Creando…",
-    "adminOnlyInvite": "Tenés que ser administrador para crear usuarios nuevos."
+    "adminOnlyInvite": "Tenés que ser administrador para crear usuarios nuevos.",
+    "edit": "Editar",
+    "editMember": "Cambiar contraseña",
+    "saveChanges": "Guardar cambios",
+    "saving": "Guardando…"
   },
   "account": {
     "title": "Mi cuenta",

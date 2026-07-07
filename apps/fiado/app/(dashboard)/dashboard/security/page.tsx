@@ -4,10 +4,10 @@
 import { Input } from '@koeti/ui';
 import { Card, CardContent, CardHeader, CardTitle } from '@koeti/ui';
 import { Label, PageHeader, SubmitButton } from '@koeti/ui';
-import { Lock, Trash2 } from 'lucide-react';
+import { Lock } from 'lucide-react';
 import { useActionState } from 'react';
 import { useTranslations } from 'next-intl';
-import { updatePassword, deleteAccount } from '@/app/(login)/actions';
+import { updatePassword } from '@/app/(login)/actions';
 
 type PasswordState = {
   currentPassword?: string;
@@ -17,20 +17,18 @@ type PasswordState = {
   success?: string;
 };
 
-type DeleteState = {
-  password?: string;
-  error?: string;
-  success?: string;
-};
-
+// ponytail: no self-service "eliminar cuenta" card — any team member
+// (including an employee account the owner created) could delete their own
+// login without the owner knowing, which is a worse failure mode here than
+// the GDPR-style self-delete this pattern usually serves. An owner removes
+// an employee from /dashboard/team instead; the deleteAccount action stays
+// wired for a future admin-facing flow if that's ever needed.
 export default function SecurityPage() {
   const t = useTranslations('security');
   const [passwordState, passwordAction] = useActionState<PasswordState, FormData>(
     updatePassword,
     {},
   );
-
-  const [deleteState, deleteAction] = useActionState<DeleteState, FormData>(deleteAccount, {});
 
   return (
     <section className="flex-1 space-y-6 p-4 lg:p-8">
@@ -94,40 +92,6 @@ export default function SecurityPage() {
             <SubmitButton pendingText={t('updating')}>
               <Lock className="mr-2 h-4 w-4" />
               {t('updatePassword')}
-            </SubmitButton>
-          </form>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>{t('deleteCard')}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-sm text-muted-foreground mb-4">{t('deleteWarning')}</p>
-          <form action={deleteAction} className="space-y-4">
-            <div>
-              <Label htmlFor="delete-password" className="mb-2">
-                {t('confirmPassword')}
-              </Label>
-              <Input
-                id="delete-password"
-                name="password"
-                type="password"
-                required
-                minLength={8}
-                maxLength={100}
-                defaultValue={deleteState.password}
-              />
-            </div>
-            {deleteState.error && <p className="text-destructive text-sm">{deleteState.error}</p>}
-            <SubmitButton
-              variant="destructive"
-              className="bg-destructive hover:bg-destructive/90"
-              pendingText={t('deleting')}
-            >
-              <Trash2 className="mr-2 h-4 w-4" />
-              {t('deleteAccount')}
             </SubmitButton>
           </form>
         </CardContent>

@@ -10,7 +10,6 @@ import { eq } from 'drizzle-orm';
 import { teams, type TeamDataWithMembers, type User } from '@koeti/db';
 import { roleAtLeast } from '@koeti/auth';
 import { isLocale, LOCALE_COOKIE } from '@koeti/i18n';
-import { inviteTeamMember } from '@/app/(login)/actions';
 import { teamRoleFor, withTeam } from '@/lib/auth/middleware';
 import { db } from '@/lib/db/drizzle';
 import { getUser } from '@/lib/db/queries';
@@ -43,24 +42,6 @@ export const saveLocale = withTeam(async (formData, team, user) => {
     });
   }
 
-  redirect('/onboarding?step=team');
-});
-
-export const saveInvites = withTeam(async (formData, team, user) => {
-  ownerOnly(user, team);
-  // ponytail: reuse inviteTeamMember per address — dup checks, email send and
-  // activity log for free. A bad address returns an error we deliberately
-  // ignore so one typo never blocks getting into the product.
-  const emails = String(formData.get('invites') ?? '')
-    .split(/[\s,;]+/)
-    .filter((e) => e.includes('@'))
-    .slice(0, 20);
-  for (const email of emails) {
-    const fd = new FormData();
-    fd.set('email', email);
-    fd.set('role', 'member');
-    await inviteTeamMember({}, fd);
-  }
   redirect('/onboarding?step=plan');
 });
 

@@ -20,18 +20,18 @@
   "pricing": {
     "eyebrow": "Planos",
     "title": "Um plano simples para sua loja.",
-    "subtitle": "Catálogo, vendas e fiado sem limite de clientes. O Plus soma suporte prioritário para quando sua loja crescer.",
-    "freeTrial": "{days} dias de teste grátis",
-    "perUser": "por usuário / {interval}",
+    "subtitle": "Tudo o que você precisa para vender e controlar o fiado. A diferença é quantos funcionários você pode ter.",
+    "perMonth": "/mês",
     "recommended": "Recomendado",
     "getStarted": "Começar",
     "loading": "Carregando…",
-    "baseFeatures": ["Uso ilimitado", "Membros do espaço ilimitados", "Suporte por e-mail"],
-    "plusFeatures": [
-      "Tudo do Base, e:",
-      "Acesso antecipado a novos recursos",
-      "Suporte 24/7 + acesso ao Slack"
-    ]
+    "basicFeatures": [
+      "Produtos, clientes e vendas ilimitados",
+      "Fiado com limite de crédito por cliente",
+      "Avisos de estoque baixo e saldo vencido",
+      "Até 3 funcionários com usuário próprio"
+    ],
+    "premiumFeatures": ["Tudo do Básico, e:", "Funcionários ilimitados", "Suporte prioritário"]
   },
   "overview": {
     "title": "Visão geral",
@@ -229,7 +229,11 @@
     "employeePasswordPlaceholder": "Pelo menos 8 caracteres",
     "inviteMember": "Criar usuário",
     "inviting": "Criando…",
-    "adminOnlyInvite": "Você precisa ser administrador para criar novos usuários."
+    "adminOnlyInvite": "Você precisa ser administrador para criar novos usuários.",
+    "edit": "Editar",
+    "editMember": "Alterar senha",
+    "saveChanges": "Salvar alterações",
+    "saving": "Salvando…"
   },
   "account": {
     "title": "Minha conta",
