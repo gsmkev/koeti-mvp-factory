@@ -174,5 +174,20 @@
   },
   "nav": {
     "footerTagline": "{app} — your despensa's tab notebook."
+  },
+  "onboarding": {
+    "stepWorkspace": "Store",
+    "stepLocale": "Language",
+    "stepTeam": "Staff",
+    "workspaceTitle": "What's your store called?",
+    "workspaceSubtitle": "This is how it'll show up in the app. You can change it anytime.",
+    "teamName": "Store name",
+    "teamNamePlaceholder": "Jane's Corner Store",
+    "localeTitle": "Language",
+    "localeSubtitle": "Pick the language you want to use the app in.",
+    "teamTitle": "Invite an employee",
+    "teamSubtitle": "If someone helps you sell, invite them here. You can do this later.",
+    "invites": "Employee's email",
+    "invitesPlaceholder": "employee@gmail.com"
   }
 }

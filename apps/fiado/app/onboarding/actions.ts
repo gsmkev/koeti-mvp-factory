@@ -15,7 +15,6 @@ import { teamRoleFor, withTeam } from '@/lib/auth/middleware';
 import { db } from '@/lib/db/drizzle';
 import { getUser } from '@/lib/db/queries';
 import { createCheckoutSession } from '@/lib/payments/stripe';
-import { CURRENCIES, MEASUREMENT_SYSTEMS } from './config';
 
 function ownerOnly(user: User, team: TeamDataWithMembers) {
   if (!roleAtLeast(teamRoleFor(user, team), 'owner')) redirect('/dashboard');
@@ -43,19 +42,6 @@ export const saveLocale = withTeam(async (formData, team, user) => {
       sameSite: 'lax',
     });
   }
-
-  const currency = String(formData.get('currency') ?? '');
-  const units = String(formData.get('units') ?? '');
-  await db
-    .update(teams)
-    .set({
-      currency: (CURRENCIES as readonly string[]).includes(currency) ? currency : team.currency,
-      measurementSystem: (MEASUREMENT_SYSTEMS as readonly string[]).includes(units)
-        ? units
-        : team.measurementSystem,
-      updatedAt: new Date(),
-    })
-    .where(eq(teams.id, team.id));
 
   redirect('/onboarding?step=team');
 });

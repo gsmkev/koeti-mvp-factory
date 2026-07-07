@@ -253,9 +253,17 @@ export const signUp = validatedAction(signUpSchema, async (data, formData) => {
       return { error: t('invalidInvitation'), email, password };
     }
   } else {
-    // Create a new team if there's no invitation
+    // Create a new team if there's no invitation. A generic, friendly
+    // default — the owner renames it to their actual store on the
+    // onboarding wizard's first step, which is where the real prompting
+    // happens (see teamNamePlaceholder).
+    const defaultTeamNames: Record<string, string> = {
+      es: 'Mi despensa',
+      pt: 'Minha loja',
+      en: 'My Store',
+    };
     const newTeam: NewTeam = {
-      name: `${email}'s Team`,
+      name: defaultTeamNames[await getLocale()] ?? defaultTeamNames.en,
     };
 
     [createdTeam] = await db.insert(teams).values(newTeam).returning();

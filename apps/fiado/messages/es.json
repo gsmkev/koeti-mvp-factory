@@ -174,5 +174,20 @@
   },
   "nav": {
     "footerTagline": "{app} — la libreta de fiado de tu despensa."
+  },
+  "onboarding": {
+    "stepWorkspace": "Local",
+    "stepLocale": "Idioma",
+    "stepTeam": "Empleados",
+    "workspaceTitle": "¿Cómo se llama tu despensa?",
+    "workspaceSubtitle": "Así va a aparecer en la app. Podés cambiarlo cuando quieras.",
+    "teamName": "Nombre del local",
+    "teamNamePlaceholder": "Despensa de Juan Pérez",
+    "localeTitle": "Idioma",
+    "localeSubtitle": "Elegí el idioma en el que querés usar la app.",
+    "teamTitle": "Invitá a un empleado",
+    "teamSubtitle": "Si alguien te ayuda a vender, invitalo acá. Podés hacerlo después.",
+    "invites": "Correo del empleado",
+    "invitesPlaceholder": "juan@gmail.com"
   }
 }

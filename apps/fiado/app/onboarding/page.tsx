@@ -14,7 +14,7 @@ import { requireRole } from '@/lib/auth/middleware';
 import { getStripePrices, getStripeProducts } from '@/lib/payments/stripe';
 import { APP_NAME } from '@/lib/site';
 import { completeOnboarding, saveInvites, saveLocale, saveWorkspace } from './actions';
-import { CURRENCIES, MEASUREMENT_SYSTEMS, STEPS, loadSearchParams, type Step } from './config';
+import { STEPS, loadSearchParams, type Step } from './config';
 
 const selectClass =
   'h-9 w-full rounded-md border border-border bg-background px-2 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring';
@@ -82,7 +82,7 @@ export default async function OnboardingPage({
 
         <div className="mt-8">
           {step === 'workspace' && <WorkspaceStep t={t} defaultName={team.name} />}
-          {step === 'locale' && <LocaleStep t={t} team={team} locale={locale} />}
+          {step === 'locale' && <LocaleStep t={t} locale={locale} />}
           {step === 'team' && <TeamStep t={t} />}
           {step === 'plan' && <PlanStep t={t} locale={locale} />}
         </div>
@@ -145,15 +145,7 @@ function WorkspaceStep({ t, defaultName }: { t: T; defaultName: string }) {
   );
 }
 
-function LocaleStep({
-  t,
-  team,
-  locale,
-}: {
-  t: T;
-  team: { currency: string; measurementSystem: string };
-  locale: string;
-}) {
+function LocaleStep({ t, locale }: { t: T; locale: string }) {
   return (
     <>
       <StepHeader t={t} title={t('localeTitle')} subtitle={t('localeSubtitle')} back="workspace" />
@@ -166,40 +158,6 @@ function LocaleStep({
             {locales.map((l) => (
               <option key={l} value={l}>
                 {localeNames[l]}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div>
-          <Label htmlFor="currency" className="mb-2">
-            {t('currency')}
-          </Label>
-          <select
-            id="currency"
-            name="currency"
-            defaultValue={team.currency}
-            className={selectClass}
-          >
-            {CURRENCIES.map((c) => (
-              <option key={c} value={c}>
-                {c}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div>
-          <Label htmlFor="units" className="mb-2">
-            {t('units')}
-          </Label>
-          <select
-            id="units"
-            name="units"
-            defaultValue={team.measurementSystem}
-            className={selectClass}
-          >
-            {MEASUREMENT_SYSTEMS.map((m) => (
-              <option key={m} value={m}>
-                {m === 'metric' ? t('metric') : t('imperial')}
               </option>
             ))}
           </select>

@@ -174,5 +174,20 @@
   },
   "nav": {
     "footerTagline": "{app} — o caderno de fiado da sua loja."
+  },
+  "onboarding": {
+    "stepWorkspace": "Loja",
+    "stepLocale": "Idioma",
+    "stepTeam": "Funcionários",
+    "workspaceTitle": "Qual o nome da sua loja?",
+    "workspaceSubtitle": "É assim que vai aparecer no app. Você pode mudar quando quiser.",
+    "teamName": "Nome da loja",
+    "teamNamePlaceholder": "Mercadinho do Zé",
+    "localeTitle": "Idioma",
+    "localeSubtitle": "Escolha o idioma para usar o app.",
+    "teamTitle": "Convide um funcionário",
+    "teamSubtitle": "Se alguém te ajuda a vender, convide aqui. Pode fazer isso depois.",
+    "invites": "E-mail do funcionário",
+    "invitesPlaceholder": "funcionario@gmail.com"
   }
 }
