@@ -9,7 +9,9 @@ import {
   LayoutDashboard,
   Lightbulb,
   LogOut,
+  Package,
   ReceiptText,
+  ShoppingCart,
   Settings,
   Shield,
   Users,
@@ -36,10 +38,15 @@ import useSWR, { mutate } from 'swr';
 // Add one nav entry per domain entity to the first group (see .claude/rules/crud.md).
 function useNav(): AppShellNavGroup[] {
   const t = useTranslations('nav');
+  const tf = useTranslations('fiado');
   return [
     {
       items: [
         { href: '/dashboard', label: t('overview'), icon: <LayoutDashboard /> },
+        { href: '/dashboard/pos', label: tf('navPos'), icon: <ShoppingCart /> },
+        { href: '/dashboard/productos', label: tf('navProductos'), icon: <Package /> },
+        { href: '/dashboard/clientes', label: tf('navClientes'), icon: <Users /> },
+        { href: '/dashboard/ventas', label: tf('navVentas'), icon: <ReceiptText /> },
         { href: '/dashboard/insights', label: t('insights'), icon: <Lightbulb /> },
       ],
     },

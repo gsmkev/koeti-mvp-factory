@@ -1,71 +1,114 @@
-// Dashboard home = the product overview. Replace the placeholder stats below
-// with your app's domain metrics (see apps/gastos for a worked example).
-// Team/subscription management lives at /dashboard/team — leave it there.
+// Page — route /dashboard. Resumen del negocio.
+import Link from 'next/link';
+import { ArrowRight, Users } from 'lucide-react';
 import {
   BarChart,
+  Button,
   Card,
   CardContent,
-  DonutChart,
-  LineChart,
+  CardHeader,
+  CardTitle,
+  DataTable,
+  EmptyState,
+  groupSum,
   PageHeader,
   PrintButton,
   StatCard,
 } from '@koeti/ui';
 import { getTranslations } from 'next-intl/server';
-import { getTeamForUser } from '@/lib/db/queries';
+import {
+  getClientes,
+  getDeudaTotal,
+  getTeamForUser,
+  getVentasStats,
+  getVentasUltimaSemana,
+} from '@/lib/db/queries';
 
-// Placeholder chart data — replace with real queries scoped by team.id.
-// Charts are zero-dependency SVG (render in server components, no client JS).
-const trendValues = [12, 18, 15, 27, 32, 24, 38];
-const breakdownValues = [42, 31, 18, 9];
+const money = (n: number) => `₲${n.toLocaleString('es')}`;
 
-export default async function OverviewPage() {
+export default async function DashboardPage() {
   const team = await getTeamForUser();
   if (!team) throw new Error('Team not found');
+  const [deudaTotal, ventasStats, ventasSemana, clientes, t] = await Promise.all([
+    getDeudaTotal(team.id),
+    getVentasStats(team.id),
+    getVentasUltimaSemana(team.id),
+    getClientes(team.id),
+    getTranslations('overview'),
+  ]);
 
-  const t = await getTranslations('overview');
-  const tc = await getTranslations('common');
-  const days = t.raw('days') as string[];
-  const trend = trendValues.map((value, i) => ({ label: days[i], value }));
-  const breakdown = [
-    { label: t('sourceDirect'), value: breakdownValues[0] },
-    { label: t('sourceSearch'), value: breakdownValues[1] },
-    { label: t('sourceSocial'), value: breakdownValues[2] },
-    { label: t('sourceEmail'), value: breakdownValues[3] },
-  ];
+  const clientesConSaldo = clientes.filter((c) => Number(c.balance) > 0);
+  const topClientes = [...clientesConSaldo]
+    .sort((a, b) => Number(b.balance) - Number(a.balance))
+    .slice(0, 5);
+
+  const byDay = groupSum(
+    ventasSemana,
+    (v) => v.createdAt.toISOString().slice(0, 10),
+    (v) => Number(v.total),
+  )
+    .sort((a, b) => a.label.localeCompare(b.label))
+    .map((d) => ({ ...d, label: d.label.slice(5) })); // MM-DD
 
   return (
     <section className="flex-1 space-y-6 p-4 lg:p-8">
-      <PageHeader title={t('title')} description={t('description')} actions={<PrintButton />} />
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        <StatCard label={t('statTeamMembers')} value={team.teamMembers.length} />
-        <StatCard label={t('statPlan')} value={team.planName ?? tc('free')} />
-        <StatCard
-          label={t('statActivityWeek')}
-          value={trendValues.reduce((s, v) => s + v, 0)}
-          delta={18}
-          hint={t('hintVsLastWeek')}
-          trend={trendValues}
-        />
+      <PageHeader
+        title={t('title')}
+        description={t('description')}
+        actions={
+          <>
+            <PrintButton>{t('downloadPdf')}</PrintButton>
+            <Button asChild>
+              <Link href="/dashboard/pos">
+                {t('newSale')}
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Link>
+            </Button>
+          </>
+        }
+      />
+
+      <div className="grid gap-4 sm:grid-cols-4">
+        <StatCard label={t('statDeudaTotal')} value={money(deudaTotal)} />
+        <StatCard label={t('statVentasHoy')} value={money(ventasStats.hoy)} />
+        <StatCard label={t('statVentasMes')} value={money(ventasStats.mes)} />
+        <StatCard label={t('statClientesConSaldo')} value={clientesConSaldo.length} />
       </div>
+
       <div className="grid gap-4 lg:grid-cols-3">
         <Card className="lg:col-span-2">
-          <CardContent className="pt-6">
-            <LineChart title={t('chartActivityWeek')} data={trend} />
+          <CardHeader>
+            <CardTitle>{t('chartVentasSemana')}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <BarChart data={byDay} valueFormat={money} />
           </CardContent>
         </Card>
         <Card>
-          <CardContent className="pt-6">
-            <DonutChart
-              title={t('chartBySource')}
-              data={breakdown}
-              centerLabel={t('centerVisits')}
+          <CardHeader>
+            <CardTitle>{t('rankingClientes')}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <DataTable
+              rows={topClientes}
+              rowKey={(c) => c.id}
+              columns={[
+                { header: t('colName'), cell: (c) => c.name },
+                {
+                  header: t('colBalance'),
+                  className: 'text-right',
+                  cell: (c) => money(Number(c.balance)),
+                },
+              ]}
+              empty={
+                <EmptyState
+                  icon={Users}
+                  title={t('emptyDeudaTitle')}
+                  description={t('emptyDeudaDesc')}
+                  className="border-none"
+                />
+              }
             />
-          </CardContent>
-        </Card>
-        <Card className="lg:col-span-3">
-          <CardContent className="pt-6">
-            <BarChart title={t('chartDailyActivity')} data={trend} />
           </CardContent>
         </Card>
       </div>
