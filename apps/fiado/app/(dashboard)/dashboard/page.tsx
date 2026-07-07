@@ -55,21 +55,26 @@ export default async function DashboardPage() {
       <PageHeader
         title={t('title')}
         description={t('description')}
-        actions={
-          <>
-            <PrintButton>{t('downloadPdf')}</PrintButton>
-            <Button asChild>
-              <Link href="/dashboard/pos">
-                {t('newSale')}
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Link>
-            </Button>
-          </>
-        }
+        actions={<PrintButton>{t('downloadPdf')}</PrintButton>}
       />
 
-      <div className="grid gap-4 sm:grid-cols-4">
-        <StatCard label={t('statDeudaTotal')} value={money(deudaTotal)} />
+      <Button asChild size="lg" className="h-14 w-full text-lg sm:w-auto">
+        <Link href="/dashboard/pos">
+          {t('newSale')}
+          <ArrowRight className="ml-2 h-5 w-5" />
+        </Link>
+      </Button>
+
+      <Card className="bg-primary text-primary-foreground">
+        <CardContent className="px-6 py-5">
+          <p className="text-sm font-medium uppercase tracking-wide opacity-80">
+            {t('statDeudaTotal')}
+          </p>
+          <p className="mt-1 text-4xl font-bold tabular-nums">{money(deudaTotal)}</p>
+        </CardContent>
+      </Card>
+
+      <div className="grid gap-4 sm:grid-cols-3">
         <StatCard label={t('statVentasHoy')} value={money(ventasStats.hoy)} />
         <StatCard label={t('statVentasMes')} value={money(ventasStats.mes)} />
         <StatCard label={t('statClientesConSaldo')} value={clientesConSaldo.length} />

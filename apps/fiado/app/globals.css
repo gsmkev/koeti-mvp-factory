@@ -132,6 +132,15 @@
 }
 
 @layer base {
+  /* ponytail: this app's primary users are despensa owners who are often
+     older adults or have very little tech literacy — bump the root size so
+     every rem-based Tailwind size (button/input height, text, icons, gaps)
+     scales up together, crossing the 44px touch-target minimum without
+     touching @koeti/ui (shared by gastos/saas-template, which don't need
+     this). Revisit if a future app needs a different scale per-audience. */
+  html {
+    font-size: 125%;
+  }
   * {
     @apply border-border outline-ring/50;
   }

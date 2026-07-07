@@ -1,19 +1,18 @@
 'use client';
-// Carrito de venta — agrega productos, elige contado/fiado y cliente,
-// y postea al server action registrarVenta con el carrito serializado.
+// Punto de venta: tocá un producto para agregarlo (como una caja registradora
+// simple), elegí contado o fiado, y cobrá. Sin selects para elegir producto —
+// pensado para uso con el pulgar, en el mostrador, por alguien que puede no
+// estar cómodo con formularios.
 import { useActionState, useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { Trash2 } from 'lucide-react';
+import { Minus, Plus } from 'lucide-react';
 import {
   Button,
   Card,
   CardContent,
   CardHeader,
   CardTitle,
-  DataTable,
-  EmptyState,
-  Input,
-  Label,
+  cn,
   Select,
   SelectContent,
   SelectItem,
@@ -26,12 +25,9 @@ import { registrarVenta } from '@/app/(dashboard)/dashboard/pos/actions';
 
 const money = (n: number) => `₲${n.toLocaleString('es')}`;
 
-type CartLine = { productoId: number; name: string; price: number; qty: number };
-
 export function PosCart({ productos, clientes }: { productos: Producto[]; clientes: Cliente[] }) {
   const t = useTranslations('pos');
-  const [cart, setCart] = useState<CartLine[]>([]);
-  const [productoId, setProductoId] = useState('');
+  const [qtyById, setQtyById] = useState<Record<number, number>>({});
   const [clienteId, setClienteId] = useState('');
   const [paymentType, setPaymentType] = useState<'contado' | 'fiado'>('contado');
   const [state, formAction, isPending] = useActionState<{ error?: string } | undefined, FormData>(
@@ -41,166 +37,153 @@ export function PosCart({ productos, clientes }: { productos: Producto[]; client
 
   useEffect(() => {
     if (state && !state.error) {
-      setCart([]);
+      setQtyById({});
       setClienteId('');
       setPaymentType('contado');
     }
   }, [state]);
 
-  const disponibles = productos.filter((p) => p.stock > 0);
-  const total = cart.reduce((sum, l) => sum + l.price * l.qty, 0);
+  const cart = productos
+    .map((p) => ({ producto: p, qty: qtyById[p.id] ?? 0 }))
+    .filter((l) => l.qty > 0);
+  const total = cart.reduce((sum, l) => sum + Number(l.producto.price) * l.qty, 0);
 
-  function addToCart() {
-    const p = productos.find((p) => p.id === Number(productoId));
-    if (!p) return;
-    setCart((prev) => {
-      const existing = prev.find((l) => l.productoId === p.id);
-      const nextQty = (existing?.qty ?? 0) + 1;
-      if (nextQty > p.stock) return prev;
-      if (existing) {
-        return prev.map((l) => (l.productoId === p.id ? { ...l, qty: nextQty } : l));
+  function setQty(productoId: number, stock: number, next: number) {
+    const capped = Math.max(0, Math.min(next, stock));
+    setQtyById((prev) => {
+      if (capped === 0) {
+        const { [productoId]: _drop, ...rest } = prev;
+        return rest;
       }
-      return [...prev, { productoId: p.id, name: p.name, price: Number(p.price), qty: 1 }];
+      return { ...prev, [productoId]: capped };
     });
-    setProductoId('');
-  }
-
-  function setQty(productoId: number, qty: number) {
-    const p = productos.find((p) => p.id === productoId);
-    const capped = Math.max(1, Math.min(qty, p?.stock ?? qty));
-    setCart((prev) => prev.map((l) => (l.productoId === productoId ? { ...l, qty: capped } : l)));
-  }
-
-  function removeFromCart(productoId: number) {
-    setCart((prev) => prev.filter((l) => l.productoId !== productoId));
   }
 
   return (
-    <div className="grid gap-4 lg:grid-cols-3">
-      <Card className="lg:col-span-2">
-        <CardHeader>
-          <CardTitle>{t('cartTitle')}</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex flex-wrap items-end gap-3">
-            <div className="grid min-w-52 flex-1 gap-1.5">
-              <Label>{t('addProduct')}</Label>
-              <Select value={productoId} onValueChange={setProductoId}>
-                <SelectTrigger>
-                  <SelectValue placeholder={t('selectProduct')} />
-                </SelectTrigger>
-                <SelectContent>
-                  {disponibles.map((p) => (
-                    <SelectItem key={p.id} value={String(p.id)}>
-                      {p.name} — {money(Number(p.price))} ({t('stockLabel', { count: p.stock })})
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <Button type="button" onClick={addToCart} disabled={!productoId}>
-              {t('add')}
-            </Button>
-          </div>
-
-          <DataTable
-            rows={cart}
-            rowKey={(l) => l.productoId}
-            columns={[
-              { header: t('colProduct'), cell: (l) => l.name },
-              {
-                header: t('colQty'),
-                className: 'w-24',
-                cell: (l) => (
-                  <Input
-                    type="number"
-                    min={1}
-                    value={l.qty}
-                    onChange={(e) => setQty(l.productoId, Number(e.target.value))}
-                    className="h-8 w-20"
-                  />
-                ),
-              },
-              {
-                header: t('colSubtotal'),
-                className: 'text-right',
-                cell: (l) => money(l.price * l.qty),
-              },
-              {
-                header: '',
-                className: 'w-10',
-                cell: (l) => (
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    aria-label={t('remove')}
-                    onClick={() => removeFromCart(l.productoId)}
-                  >
-                    <Trash2 className="size-4 text-muted-foreground" />
-                  </Button>
-                ),
-              },
-            ]}
-            empty={<EmptyState title={t('emptyCart')} className="border-none" />}
-          />
-
-          <div className="flex items-center justify-between border-t pt-4 text-lg font-semibold">
-            <span>{t('total')}</span>
-            <span>{money(total)}</span>
-          </div>
-        </CardContent>
-      </Card>
+    <div className="space-y-6">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+        {productos.map((p) => {
+          const qty = qtyById[p.id] ?? 0;
+          const agotado = p.stock <= 0;
+          return (
+            <Card
+              key={p.id}
+              className={cn(
+                'gap-2 py-4 transition-colors',
+                qty > 0 && 'border-primary ring-1 ring-primary',
+                agotado && 'opacity-50',
+              )}
+            >
+              <CardContent className="flex flex-col gap-3 px-4">
+                <button
+                  type="button"
+                  disabled={agotado}
+                  onClick={() => setQty(p.id, p.stock, qty + 1)}
+                  className="text-left disabled:cursor-not-allowed"
+                >
+                  <p className="font-medium leading-snug">{p.name}</p>
+                  <p className="text-muted-foreground">
+                    {agotado ? t('outOfStock') : money(Number(p.price))}
+                  </p>
+                </button>
+                {qty > 0 && (
+                  <div className="flex items-center justify-between">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="icon"
+                      className="size-11"
+                      aria-label={t('decrease')}
+                      onClick={() => setQty(p.id, p.stock, qty - 1)}
+                    >
+                      <Minus />
+                    </Button>
+                    <span className="text-xl font-semibold tabular-nums">{qty}</span>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="icon"
+                      className="size-11"
+                      aria-label={t('increase')}
+                      disabled={qty >= p.stock}
+                      onClick={() => setQty(p.id, p.stock, qty + 1)}
+                    >
+                      <Plus />
+                    </Button>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          );
+        })}
+      </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>{t('checkoutTitle')}</CardTitle>
+          <CardTitle className="flex items-baseline justify-between">
+            <span>{t('total')}</span>
+            <span className="text-2xl">{money(total)}</span>
+          </CardTitle>
         </CardHeader>
         <CardContent>
-          <form action={formAction} className="space-y-4">
+          <form action={formAction} className="space-y-5">
             <input
               type="hidden"
               name="items"
-              value={JSON.stringify(cart.map(({ productoId, qty }) => ({ productoId, qty })))}
+              value={JSON.stringify(cart.map((l) => ({ productoId: l.producto.id, qty: l.qty })))}
             />
-            <div>
-              <Label className="mb-2">{t('paymentType')}</Label>
-              <Select
-                value={paymentType}
-                onValueChange={(v) => setPaymentType(v as 'contado' | 'fiado')}
+            <input type="hidden" name="paymentType" value={paymentType} />
+            <input
+              type="hidden"
+              name="clienteId"
+              value={paymentType === 'fiado' ? clienteId : ''}
+            />
+
+            <p className="font-medium">{t('paymentType')}</p>
+            <div className="grid grid-cols-2 gap-3">
+              <Button
+                type="button"
+                size="lg"
+                variant={paymentType === 'contado' ? 'default' : 'outline'}
+                onClick={() => setPaymentType('contado')}
               >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="contado">{t('contado')}</SelectItem>
-                  <SelectItem value="fiado">{t('fiado')}</SelectItem>
-                </SelectContent>
-              </Select>
-              <input type="hidden" name="paymentType" value={paymentType} />
+                {t('contado')}
+              </Button>
+              <Button
+                type="button"
+                size="lg"
+                variant={paymentType === 'fiado' ? 'default' : 'outline'}
+                onClick={() => setPaymentType('fiado')}
+              >
+                {t('fiado')}
+              </Button>
             </div>
-            <div>
-              <Label className="mb-2">{t('client')}</Label>
-              <Select value={clienteId} onValueChange={setClienteId}>
-                <SelectTrigger>
-                  <SelectValue placeholder={t('selectClient')} />
-                </SelectTrigger>
-                <SelectContent>
-                  {clientes.map((c) => (
-                    <SelectItem key={c.id} value={String(c.id)}>
-                      {c.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <input type="hidden" name="clienteId" value={clienteId} />
-              {paymentType === 'fiado' && !clienteId && (
-                <p className="mt-1 text-sm text-muted-foreground">{t('clientRequiredHint')}</p>
-              )}
-            </div>
-            {state?.error && <p className="text-sm text-destructive">{state.error}</p>}
+
+            {paymentType === 'fiado' && (
+              <div>
+                <Select value={clienteId} onValueChange={setClienteId}>
+                  <SelectTrigger className="h-auto w-full py-3 text-base">
+                    <SelectValue placeholder={t('selectClient')} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {clientes.map((c) => (
+                      <SelectItem key={c.id} value={String(c.id)}>
+                        {c.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {!clienteId && (
+                  <p className="mt-2 text-muted-foreground">{t('clientRequiredHint')}</p>
+                )}
+              </div>
+            )}
+
+            {state?.error && <p className="text-destructive">{state.error}</p>}
+
             <SubmitButton
-              className="w-full"
+              size="lg"
+              className="h-14 w-full text-lg"
               disabled={cart.length === 0 || (paymentType === 'fiado' && !clienteId) || isPending}
               pendingText={t('registering')}
             >

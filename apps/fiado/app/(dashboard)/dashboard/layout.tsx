@@ -29,6 +29,7 @@ import {
 import { LocaleSwitcher } from '@koeti/i18n';
 import { useTranslations } from 'next-intl';
 import { signOut } from '@/app/(login)/actions';
+import { MobileBottomNav } from '@/components/mobile-bottom-nav';
 import { NotificationsBell } from '@/components/notifications-bell';
 import { VerifyEmailBanner } from '@/components/verify-email-banner';
 import { User } from '@/lib/db/schema';
@@ -141,7 +142,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       }
     >
       <VerifyEmailBanner />
-      {children}
+      <div className="pb-20 lg:pb-0">{children}</div>
+      <MobileBottomNav />
     </AppShell>
   );
 }
