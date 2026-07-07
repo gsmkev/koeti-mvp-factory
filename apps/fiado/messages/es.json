@@ -1,27 +1,26 @@
 {
   "marketing": {
-    "eyebrow": "Punto de venta // fiado",
+    "eyebrow": "Para despensas y almacenes",
     "titleLine1": "La libreta de fiado,",
     "titleLine2": "ahora en el celular.",
     "subtitle": "Vendé al contado o al fiado, llevá el saldo de cada cliente y sabé quién te debe sin abrir un cuaderno.",
     "getStarted": "Empezar",
     "viewPricing": "Ver precios",
-    "yourApp": "tu despensa",
-    "moduleAuthTitle": "Cada despensa, su cuenta",
-    "moduleAuthDesc": "Email y contraseña, sesiones y cierre de sesión listos desde el día uno.",
-    "moduleBillingTitle": "Suscripción resuelta",
-    "moduleBillingDesc": "Checkout y cambios de plan conectados a Pagopar — sin código de cobros que escribir.",
-    "moduleTeamsTitle": "Pensado para tu equipo",
-    "moduleTeamsDesc": "Vos y tus empleados, cada uno con su rol: quién cobra, quién administra.",
+    "stepVenderTitle": "Cargá tus productos",
+    "stepVenderDesc": "Nombre, precio y stock. Lo hacés una sola vez.",
+    "stepFiadoTitle": "Vendé al toque",
+    "stepFiadoDesc": "Tocás el producto y elegís contado o fiado.",
+    "stepClientesTitle": "Sabé quién te debe",
+    "stepClientesDesc": "El saldo de cada cliente, siempre a mano.",
     "ctaTitle": "Dejá el cuaderno hoy.",
     "ctaSubtitle": "Cada venta al fiado queda registrada, con el saldo de cada cliente siempre a mano.",
     "createAccount": "Creá tu cuenta",
     "alreadySignIn": "¿Ya la usás? Iniciá sesión"
   },
   "pricing": {
-    "eyebrow": "Scaffold // 02",
-    "title": "Una sola base. Elegí tu plan.",
-    "subtitle": "Todos los planes incluyen el scaffold completo — auth, cobros y cuentas de equipo. Plus suma soporte prioritario y acceso anticipado a medida que crece tu equipo.",
+    "eyebrow": "Planes",
+    "title": "Un plan simple para tu despensa.",
+    "subtitle": "Catálogo, ventas y fiado sin límite de clientes. Plus suma soporte prioritario para cuando tu despensa crezca.",
     "freeTrial": "{days} días de prueba gratis",
     "perUser": "por usuario / {interval}",
     "recommended": "Recomendado",
@@ -172,5 +171,8 @@
   },
   "notifications": {
     "overLimit": "{cliente} superó su límite de crédito: debe {balance} (límite {limit})."
+  },
+  "nav": {
+    "footerTagline": "{app} — la libreta de fiado de tu despensa."
   }
 }

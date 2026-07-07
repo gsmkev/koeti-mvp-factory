@@ -1,27 +1,26 @@
 {
   "marketing": {
-    "eyebrow": "Ponto de venda // fiado",
+    "eyebrow": "Para lojinhas e mercadinhos",
     "titleLine1": "O caderno de fiado,",
     "titleLine2": "agora no celular.",
     "subtitle": "Venda à vista ou fiado, acompanhe o saldo de cada cliente e saiba quem te deve sem abrir um caderno.",
     "getStarted": "Começar",
     "viewPricing": "Ver preços",
-    "yourApp": "sua loja",
-    "moduleAuthTitle": "Cada loja, sua conta",
-    "moduleAuthDesc": "E-mail e senha, sessões e logout prontos desde o primeiro dia.",
-    "moduleBillingTitle": "Assinatura resolvida",
-    "moduleBillingDesc": "Checkout e mudanças de plano conectados direto ao Pagopar — sem escrever código de cobrança.",
-    "moduleTeamsTitle": "Feito para seu time",
-    "moduleTeamsDesc": "Você e seus funcionários, cada um com sua função: quem vende, quem administra.",
+    "stepVenderTitle": "Cadastre seus produtos",
+    "stepVenderDesc": "Nome, preço e estoque. Só uma vez.",
+    "stepFiadoTitle": "Venda num toque",
+    "stepFiadoDesc": "Toque no produto e escolha à vista ou fiado.",
+    "stepClientesTitle": "Saiba quem te deve",
+    "stepClientesDesc": "O saldo de cada cliente, sempre à mão.",
     "ctaTitle": "Largue o caderno hoje.",
     "ctaSubtitle": "Cada venda fiado fica registrada, com o saldo de cada cliente sempre à mão.",
     "createAccount": "Crie sua conta",
     "alreadySignIn": "Já usa? Entre"
   },
   "pricing": {
-    "eyebrow": "Scaffold // 02",
-    "title": "Uma base só. Escolha seu plano.",
-    "subtitle": "Todos os planos incluem o scaffold completo — auth, cobrança e contas de time. O Plus adiciona suporte prioritário e acesso antecipado conforme seu time cresce.",
+    "eyebrow": "Planos",
+    "title": "Um plano simples para sua loja.",
+    "subtitle": "Catálogo, vendas e fiado sem limite de clientes. O Plus soma suporte prioritário para quando sua loja crescer.",
     "freeTrial": "{days} dias de teste grátis",
     "perUser": "por usuário / {interval}",
     "recommended": "Recomendado",
@@ -172,5 +171,8 @@
   },
   "notifications": {
     "overLimit": "{cliente} ultrapassou o limite de crédito: deve {balance} (limite {limit})."
+  },
+  "nav": {
+    "footerTagline": "{app} — o caderno de fiado da sua loja."
   }
 }

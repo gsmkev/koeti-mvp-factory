@@ -1,27 +1,26 @@
 {
   "marketing": {
-    "eyebrow": "Point of sale // tabs",
+    "eyebrow": "For corner stores",
     "titleLine1": "The paper tab notebook,",
     "titleLine2": "now on your phone.",
     "subtitle": "Sell for cash or on a tab, track every customer's balance, and know who owes you without opening a notebook.",
     "getStarted": "Get started",
     "viewPricing": "View pricing",
-    "yourApp": "your store",
-    "moduleAuthTitle": "Every store, its own account",
-    "moduleAuthDesc": "Email and password, sessions, and sign-out are ready on day one.",
-    "moduleBillingTitle": "Subscription, handled",
-    "moduleBillingDesc": "Checkout and plan changes connect straight to Pagopar — no billing code to write.",
-    "moduleTeamsTitle": "Built for your team",
-    "moduleTeamsDesc": "You and your staff, each with a role: who can sell, who can manage.",
+    "stepVenderTitle": "Add your products",
+    "stepVenderDesc": "Name, price, and stock. Just once.",
+    "stepFiadoTitle": "Sell in a tap",
+    "stepFiadoDesc": "Tap the product, pick cash or credit.",
+    "stepClientesTitle": "Know who owes you",
+    "stepClientesDesc": "Every customer's balance, always on hand.",
     "ctaTitle": "Ditch the notebook today.",
     "ctaSubtitle": "Every sale on credit gets recorded, with each customer's balance always on hand.",
     "createAccount": "Create your account",
     "alreadySignIn": "Already using it? Sign in"
   },
   "pricing": {
-    "eyebrow": "Scaffold // 02",
-    "title": "One foundation. Pick your plan.",
-    "subtitle": "Every plan ships with the full scaffold — auth, billing, and team accounts included. Plus adds priority support and early access as your team grows.",
+    "eyebrow": "Plans",
+    "title": "One simple plan for your store.",
+    "subtitle": "Catalog, sales, and unlimited customer tabs. Plus adds priority support for when your store grows.",
     "freeTrial": "{days}-day free trial",
     "perUser": "per user / {interval}",
     "recommended": "Recommended",
@@ -172,5 +171,8 @@
   },
   "notifications": {
     "overLimit": "{cliente} is over their credit limit: owes {balance} (limit {limit})."
+  },
+  "nav": {
+    "footerTagline": "{app} — your despensa's tab notebook."
   }
 }

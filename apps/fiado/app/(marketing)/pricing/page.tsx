@@ -43,9 +43,7 @@ export default async function PricingPage() {
   return (
     <main className="mx-auto max-w-6xl px-6 py-16 sm:px-8 sm:py-20">
       <div className="max-w-2xl">
-        <p className="font-mono text-xs uppercase tracking-widest text-muted-foreground">
-          {t('eyebrow')}
-        </p>
+        <p className="text-sm font-semibold uppercase tracking-wide text-primary">{t('eyebrow')}</p>
         <h1 className="mt-4 text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl">
           {t('title')}
         </h1>
@@ -104,8 +102,7 @@ function PricingCard({
     <Card className={highlight ? 'border-foreground/30 shadow-md' : undefined}>
       <CardHeader>
         <div>
-          <span className="font-mono text-xs text-muted-foreground">[{name.toLowerCase()}]</span>
-          <CardTitle className="mt-1 text-2xl">{name}</CardTitle>
+          <CardTitle className="text-2xl">{name}</CardTitle>
           {trialDays > 0 && (
             <p className="mt-1 text-sm text-muted-foreground">
               {t('freeTrial', { days: trialDays })}
