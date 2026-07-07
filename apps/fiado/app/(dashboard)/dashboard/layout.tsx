@@ -5,9 +5,7 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import {
   Activity,
-  KeyRound,
   LayoutDashboard,
-  Lightbulb,
   LogOut,
   Package,
   ReceiptText,
@@ -31,12 +29,28 @@ import { useTranslations } from 'next-intl';
 import { signOut } from '@/app/(login)/actions';
 import { MobileBottomNav } from '@/components/mobile-bottom-nav';
 import { NotificationsBell } from '@/components/notifications-bell';
-import { VerifyEmailBanner } from '@/components/verify-email-banner';
 import { User } from '@/lib/db/schema';
 import { APP_NAME } from '@/lib/site';
 import useSWR, { mutate } from 'swr';
 
 // Add one nav entry per domain entity to the first group (see .claude/rules/crud.md).
+//
+// ponytail: no "Insights" entry — the template's generic detector counts raw
+// activity-log events ("15 eventos inusuales"), which means nothing to a
+// despensa owner and was never customized to fiado's actual data (unlike the
+// real signals now surfaced directly: the over-limit notification, and the
+// stock/debt filters on Productos/Clientes). Add it back once there's a
+// detector that says something a despensa owner actually cares about.
+//
+// No "Claves API" entry either — API keys are for scripting/integrations,
+// not something a despensa owner ever needs. The page itself is gated to
+// SUPERADMIN_EMAIL only, same as /dashboard/admin (also intentionally absent
+// from this nav).
+//
+// No "Facturas" entry — SIFEN e-invoicing is for the app's own Pagopar
+// subscription billing, not a despensa concern. The route stays reachable
+// (harmless, empty until a paid Pagopar order exists) but isn't worth a
+// permanent nav slot for this audience.
 function useNav(): AppShellNavGroup[] {
   const t = useTranslations('nav');
   const tf = useTranslations('fiado');
@@ -48,7 +62,6 @@ function useNav(): AppShellNavGroup[] {
         { href: '/dashboard/productos', label: tf('navProductos'), icon: <Package /> },
         { href: '/dashboard/clientes', label: tf('navClientes'), icon: <Users /> },
         { href: '/dashboard/ventas', label: tf('navVentas'), icon: <ReceiptText /> },
-        { href: '/dashboard/insights', label: t('insights'), icon: <Lightbulb /> },
       ],
     },
     {
@@ -57,8 +70,6 @@ function useNav(): AppShellNavGroup[] {
         { href: '/dashboard/team', label: t('team'), icon: <Users /> },
         { href: '/dashboard/general', label: t('general'), icon: <Settings /> },
         { href: '/dashboard/security', label: t('security'), icon: <Shield /> },
-        { href: '/dashboard/api-keys', label: t('apiKeys'), icon: <KeyRound /> },
-        { href: '/dashboard/invoices', label: t('invoices'), icon: <ReceiptText /> },
         { href: '/dashboard/activity', label: t('activity'), icon: <Activity /> },
       ],
     },
@@ -68,15 +79,26 @@ function useNav(): AppShellNavGroup[] {
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 function Brand() {
+  // Ña Marta cares about "Despensa María", not the product's own name — show
+  // her despensa's name as the headline, "Fiado" as a small caption.
+  const { data: team } = useSWR<{ name: string }>('/api/team', fetcher);
+  const name = team?.name ?? APP_NAME;
   return (
-    <Link href="/" className="flex items-center gap-2.5">
+    <Link href="/" className="flex min-w-0 items-center gap-2.5">
       <span
-        className="flex size-7 items-center justify-center rounded-md bg-sidebar-primary font-display text-sm font-bold text-sidebar-primary-foreground"
+        className="flex size-7 shrink-0 items-center justify-center rounded-md bg-sidebar-primary font-display text-sm font-bold text-sidebar-primary-foreground"
         aria-hidden
       >
-        {APP_NAME[0]}
+        {name[0]}
       </span>
-      <span className="font-display text-base font-semibold text-sidebar-primary">{APP_NAME}</span>
+      <span className="min-w-0">
+        <span className="block truncate font-display text-base font-semibold leading-tight text-sidebar-primary">
+          {name}
+        </span>
+        <span className="block text-[11px] leading-none text-sidebar-foreground/50">
+          {APP_NAME}
+        </span>
+      </span>
     </Link>
   );
 }
@@ -141,7 +163,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </div>
       }
     >
-      <VerifyEmailBanner />
       <div className="pb-20 lg:pb-0">{children}</div>
       <MobileBottomNav />
     </AppShell>

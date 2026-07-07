@@ -100,7 +100,14 @@
     "emptyDesc": "Add your first product with the form above.",
     "colName": "Name",
     "colPrice": "Price",
-    "colStock": "Stock"
+    "colStock": "Stock",
+    "filterAria": "Filter products",
+    "filterAll": "All",
+    "filterAgotados": "Out of stock ({count})",
+    "outOfStock": "Out of stock",
+    "lowStock": "{count} left",
+    "emptyAgotadosTitle": "Nothing out of stock",
+    "emptyAgotadosDesc": "When a product hits 0 stock, it'll show up here."
   },
   "clientes": {
     "panelTitle": "Customers",
@@ -118,7 +125,12 @@
     "colPhone": "Phone",
     "colBalance": "Balance",
     "colCreditLimit": "Limit",
-    "noLimit": "No limit"
+    "noLimit": "No limit",
+    "filterAria": "Filter customers",
+    "filterAll": "All",
+    "filterConSaldo": "With a balance ({count})",
+    "emptyConSaldoTitle": "Nobody owes you",
+    "emptyConSaldoDesc": "When a customer buys on credit, they'll show up here."
   },
   "clienteDetail": {
     "statBalance": "Current balance",
@@ -167,13 +179,16 @@
     "contado": "Cash",
     "fiado": "Credit",
     "emptyTitle": "No sales yet",
-    "emptyDesc": "Register your first sale from \"New sale\"."
+    "emptyDesc": "Register your first sale from \"New sale\".",
+    "filterAria": "Filter sales",
+    "filterAll": "All"
   },
   "notifications": {
     "overLimit": "{cliente} is over their credit limit: owes {balance} (limit {limit})."
   },
   "nav": {
-    "footerTagline": "{app} — your despensa's tab notebook."
+    "footerTagline": "{app} — your despensa's tab notebook.",
+    "team": "Staff"
   },
   "onboarding": {
     "stepWorkspace": "Store",

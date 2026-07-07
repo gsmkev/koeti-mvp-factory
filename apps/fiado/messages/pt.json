@@ -100,7 +100,14 @@
     "emptyDesc": "Adicione seu primeiro produto com o formulário acima.",
     "colName": "Nome",
     "colPrice": "Preço",
-    "colStock": "Estoque"
+    "colStock": "Estoque",
+    "filterAria": "Filtrar produtos",
+    "filterAll": "Todos",
+    "filterAgotados": "Esgotados ({count})",
+    "outOfStock": "Esgotado",
+    "lowStock": "Restam {count}",
+    "emptyAgotadosTitle": "Nenhum produto esgotado",
+    "emptyAgotadosDesc": "Quando um produto chegar a 0 no estoque, vai aparecer aqui."
   },
   "clientes": {
     "panelTitle": "Clientes",
@@ -118,7 +125,12 @@
     "colPhone": "Telefone",
     "colBalance": "Saldo",
     "colCreditLimit": "Limite",
-    "noLimit": "Sem limite"
+    "noLimit": "Sem limite",
+    "filterAria": "Filtrar clientes",
+    "filterAll": "Todos",
+    "filterConSaldo": "Com saldo ({count})",
+    "emptyConSaldoTitle": "Ninguém te deve",
+    "emptyConSaldoDesc": "Quando um cliente comprar fiado, vai aparecer aqui."
   },
   "clienteDetail": {
     "statBalance": "Saldo atual",
@@ -167,13 +179,16 @@
     "contado": "À vista",
     "fiado": "Fiado",
     "emptyTitle": "Nenhuma venda ainda",
-    "emptyDesc": "Registre sua primeira venda em \"Nova venda\"."
+    "emptyDesc": "Registre sua primeira venda em \"Nova venda\".",
+    "filterAria": "Filtrar vendas",
+    "filterAll": "Todas"
   },
   "notifications": {
     "overLimit": "{cliente} ultrapassou o limite de crédito: deve {balance} (limite {limit})."
   },
   "nav": {
-    "footerTagline": "{app} — o caderno de fiado da sua loja."
+    "footerTagline": "{app} — o caderno de fiado da sua loja.",
+    "team": "Funcionários"
   },
   "onboarding": {
     "stepWorkspace": "Loja",

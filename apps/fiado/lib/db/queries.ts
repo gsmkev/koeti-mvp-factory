@@ -209,8 +209,9 @@ export async function getDeudaTotal(teamId: number) {
 export const VENTAS_PAGE_SIZE = 50;
 
 // `page` pagina la vista (trae PAGE_SIZE + 1 filas: la extra señala hasMore);
-// sin `page` devuelve todo — el export CSV depende de eso.
-export async function getVentas(teamId: number, page?: number) {
+// sin `page` devuelve todo — el export CSV depende de eso. `tipo` filtra por
+// contado/fiado — así Ña Marta puede ver solo las ventas al fiado.
+export async function getVentas(teamId: number, page?: number, tipo?: 'contado' | 'fiado') {
   const q = db
     .select({
       id: ventas.id,
@@ -222,7 +223,11 @@ export async function getVentas(teamId: number, page?: number) {
     })
     .from(ventas)
     .leftJoin(clientes, eq(ventas.clienteId, clientes.id))
-    .where(eq(ventas.teamId, teamId))
+    .where(
+      tipo
+        ? and(eq(ventas.teamId, teamId), eq(ventas.paymentType, tipo))
+        : eq(ventas.teamId, teamId),
+    )
     .orderBy(desc(ventas.createdAt));
   if (!page) return q;
   return q.limit(VENTAS_PAGE_SIZE + 1).offset((page - 1) * VENTAS_PAGE_SIZE);

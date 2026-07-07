@@ -1,15 +1,19 @@
 // Page — route /dashboard/ventas. Historial de ventas (solo lectura + export CSV).
 import Link from 'next/link';
 import type { SearchParams } from 'nuqs/server';
-import { parseAsInteger, createLoader } from 'nuqs/server';
+import { parseAsInteger, parseAsStringEnum, createLoader } from 'nuqs/server';
 import { Download } from 'lucide-react';
-import { Badge, Button, DataTable, EmptyState, PageHeader, Pagination } from '@koeti/ui';
+import { Badge, Button, DataTable, EmptyState, PageHeader, Pagination, cn } from '@koeti/ui';
 import { getTranslations } from 'next-intl/server';
 import { requireRole } from '@/lib/auth/middleware';
 import { getVentas, VENTAS_PAGE_SIZE } from '@/lib/db/queries';
 
 const money = (n: number) => `₲${n.toLocaleString('es')}`;
-const loadSearchParams = createLoader({ pagina: parseAsInteger.withDefault(1) });
+const TIPOS = ['contado', 'fiado'] as const;
+const loadSearchParams = createLoader({
+  pagina: parseAsInteger.withDefault(1),
+  tipo: parseAsStringEnum([...TIPOS]),
+});
 
 export default async function VentasPage({
   searchParams,
@@ -17,14 +21,21 @@ export default async function VentasPage({
   searchParams: Promise<SearchParams>;
 }) {
   const { team } = await requireRole('viewer');
-  const { pagina } = await loadSearchParams(searchParams);
+  const { pagina, tipo } = await loadSearchParams(searchParams);
   const [fetched, t, tCommon] = await Promise.all([
-    getVentas(team.id, pagina),
+    getVentas(team.id, pagina, tipo ?? undefined),
     getTranslations('ventas'),
     getTranslations('common'),
   ]);
   const hasMore = fetched.length > VENTAS_PAGE_SIZE;
   const rows = fetched.slice(0, VENTAS_PAGE_SIZE);
+  const hrefFor = (p: number) => {
+    const params = new URLSearchParams();
+    if (tipo) params.set('tipo', tipo);
+    if (p > 1) params.set('pagina', String(p));
+    const qs = params.toString();
+    return `/dashboard/ventas${qs ? `?${qs}` : ''}`;
+  };
 
   return (
     <section className="flex-1 space-y-6 p-4 lg:p-8">
@@ -48,6 +59,20 @@ export default async function VentasPage({
           </>
         }
       />
+      <nav className="flex flex-wrap gap-2" aria-label={t('filterAria')}>
+        <Link href="/dashboard/ventas">
+          <Badge variant={tipo ? 'outline' : 'default'} className={cn('cursor-pointer')}>
+            {t('filterAll')}
+          </Badge>
+        </Link>
+        {TIPOS.map((tp) => (
+          <Link key={tp} href={`/dashboard/ventas?tipo=${tp}`}>
+            <Badge variant={tipo === tp ? 'default' : 'outline'} className="cursor-pointer">
+              {tp === 'fiado' ? t('fiado') : t('contado')}
+            </Badge>
+          </Link>
+        ))}
+      </nav>
       <DataTable
         rows={rows}
         rowKey={(v) => v.id}
@@ -69,7 +94,7 @@ export default async function VentasPage({
       <Pagination
         page={pagina}
         hasMore={hasMore}
-        hrefFor={(p) => (p > 1 ? `/dashboard/ventas?pagina=${p}` : '/dashboard/ventas')}
+        hrefFor={hrefFor}
         linkComponent={Link}
         prevLabel={tCommon('prevPage')}
         nextLabel={tCommon('nextPage')}

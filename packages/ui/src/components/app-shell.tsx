@@ -98,13 +98,27 @@ function AppShell({
   const Link = linkComponent ?? ((props) => <a {...props} />);
   const close = React.useCallback(() => setOpen(false), []);
 
-  const sidebarContent = (
+  // `showClose` renders the drawer's close button in-flow with the other
+  // header icons instead of layering a second, absolutely-positioned button
+  // on top of them (which used to overlap the theme toggle).
+  const renderSidebarContent = (showClose: boolean) => (
     <>
       <div className="flex h-16 shrink-0 items-center justify-between border-b border-sidebar-border px-5">
         {brand}
         <div className="flex items-center gap-1">
           {actions}
           <ThemeToggle />
+          {showClose && (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-foreground"
+              onClick={close}
+              aria-label="Close navigation"
+            >
+              <X className="size-5" />
+            </Button>
+          )}
         </div>
       </div>
       <NavList nav={nav} pathname={pathname} Link={Link} onNavigate={close} />
@@ -119,7 +133,7 @@ function AppShell({
     >
       {/* Desktop sidebar */}
       <aside className="sticky top-0 hidden h-dvh flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground lg:flex">
-        {sidebarContent}
+        {renderSidebarContent(false)}
       </aside>
 
       {/* Mobile top bar */}
@@ -144,16 +158,7 @@ function AppShell({
         <div className="fixed inset-0 z-50 lg:hidden">
           <div className="absolute inset-0 bg-black/50" aria-hidden onClick={close} />
           <div className="absolute inset-y-0 left-0 flex w-72 flex-col bg-sidebar text-sidebar-foreground shadow-xl">
-            {sidebarContent}
-            <Button
-              variant="ghost"
-              size="icon"
-              className="absolute right-3 top-3.5 text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-foreground"
-              onClick={close}
-              aria-label="Close navigation"
-            >
-              <X className="size-5" />
-            </Button>
+            {renderSidebarContent(true)}
           </div>
         </div>
       )}
