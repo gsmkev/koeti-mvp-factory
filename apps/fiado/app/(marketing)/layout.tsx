@@ -52,7 +52,7 @@ function UserMenu() {
       <>
         <Link
           href="/pricing"
-          className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+          className="hidden text-sm font-medium text-muted-foreground transition-colors hover:text-foreground sm:inline"
         >
           {t('pricing')}
         </Link>
@@ -107,14 +107,16 @@ export default function MarketingLayout({ children }: { children: React.ReactNod
   return (
     <section className="flex min-h-screen flex-col">
       <header className="sticky top-0 z-40 border-b border-border bg-background/85 backdrop-blur">
-        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6 sm:px-8">
+        <div className="mx-auto flex min-h-16 max-w-6xl flex-wrap items-center justify-between gap-2 px-4 py-2 sm:px-8">
           <Link href="/" className="flex items-center gap-2.5">
             <BrandMark />
             <span className="font-display text-lg font-semibold text-foreground">{APP_NAME}</span>
           </Link>
           <div className="flex items-center gap-3 sm:gap-5">
-            <LocaleSwitcher />
-            <ThemeToggle />
+            <div className="hidden items-center gap-3 sm:flex">
+              <LocaleSwitcher />
+              <ThemeToggle />
+            </div>
             <Suspense fallback={<div className="h-9" />}>
               <UserMenu />
             </Suspense>
