@@ -1,8 +1,10 @@
 // Page — route /.
 import Link from 'next/link';
+import { redirect } from 'next/navigation';
 import { Package, ShoppingCart, Users } from 'lucide-react';
 import { Button, Card, CardContent } from '@koeti/ui';
 import { getTranslations } from 'next-intl/server';
+import { getUser } from '@/lib/db/queries';
 
 const STEPS = [
   { icon: Package, key: 'Vender' },
@@ -11,6 +13,7 @@ const STEPS = [
 ] as const;
 
 export default async function HomePage() {
+  if (await getUser()) redirect('/dashboard');
   const t = await getTranslations('marketing');
   return (
     <main>
