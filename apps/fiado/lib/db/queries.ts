@@ -1,5 +1,5 @@
 // saas-template lib — queries.
-import { desc, and, eq, gte, isNull, sql } from 'drizzle-orm';
+import { desc, and, eq, gte, isNull, lt, sql } from 'drizzle-orm';
 import { db } from './drizzle';
 import { verifyToken, credentialFingerprint } from '@koeti/auth';
 import { cookies } from 'next/headers';
@@ -221,7 +221,7 @@ function ventasConditions(teamId: number, filters?: VentasFilters) {
   if (filters?.tipo) conditions.push(eq(ventas.paymentType, filters.tipo));
   if (filters?.clienteId) conditions.push(eq(ventas.clienteId, filters.clienteId));
   if (filters?.desde) conditions.push(gte(ventas.createdAt, filters.desde));
-  if (filters?.hasta) conditions.push(sql`${ventas.createdAt} < ${filters.hasta}`);
+  if (filters?.hasta) conditions.push(lt(ventas.createdAt, filters.hasta));
   return and(...conditions);
 }
 
