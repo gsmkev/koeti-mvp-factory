@@ -99,10 +99,6 @@ import { consumeAiQuota } from '@/lib/ai/quota'; // per app: AI rate limit (SaaS
 import { generateInsights } from '@/lib/ai/insights'; // per app: what the daily /api/cron/insights sweep computes
 ```
 
-## Knowledge graph
-
-If CRG MCP tools are available in your session, prefer them over grep for tracing call chains (see `docs/agent/knowledge-graph.md`). If they're not available, use normal search tools — don't go looking for them.
-
 ## Frontend
 
 Before implementing any UI (page, component, dashboard, landing), invoke the `ui-ux-pro-max` skill (primary design skill — pass the SaaS spec as context so it picks the right style, palette, and UX patterns). If it's not available in the session, fall back to `frontend-design`.
@@ -150,7 +146,28 @@ Fall back to Grep/Glob/Read **only** when the graph doesn't cover what you need.
 
 ### Workflow
 
-1. The graph auto-updates on file changes (via hooks).
+1. The graph auto-updates on file changes (`PostToolUse` hook runs `code-review-graph update`, non-blocking).
 2. Use `detect_changes` for code review.
 3. Use `get_affected_flows` to understand impact.
 4. Use `query_graph` pattern="tests_for" to check coverage.
+
+### graphify (supplementary, architecture overview only)
+
+`graphify-out/GRAPH_REPORT.md` — a community/module breakdown, useful for orienting in
+an unfamiliar area before a task. `graphify-out/graph.html` is the same data as an
+interactive D3 view (open in a browser, for human review — not for agent use).
+Both are gitignored and **regenerated manually** (`graphify update .` — there is no
+git hook wiring it up, unlike CRG). Treat `graphify-out/` as possibly stale; prefer
+CRG tools above for anything that needs to be current.
+
+If CRG MCP tools aren't available in a session, fall back to normal Grep/Glob/Read —
+don't go looking for the tools or try to install them mid-task.
+
+### Setup (new machine only — already done on this repo)
+
+```bash
+pip install graphifyy code-review-graph
+graphify update . && code-review-graph build
+code-review-graph install   # registers the PostToolUse/git hooks above
+export CRG_TOOLS=find_definition,find_callers,get_file_context,get_impact_radius,get_community_summary,search_graph,get_architecture_overview,traverse_graph
+```
