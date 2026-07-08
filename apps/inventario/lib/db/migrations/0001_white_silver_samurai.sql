@@ -1,0 +1,2 @@
+ALTER TABLE "purchase_orders" ADD COLUMN "warehouse_id" integer NOT NULL;--> statement-breakpoint
+ALTER TABLE "purchase_orders" ADD CONSTRAINT "purchase_orders_warehouse_id_warehouses_id_fk" FOREIGN KEY ("warehouse_id") REFERENCES "public"."warehouses"("id") ON DELETE no action ON UPDATE no action;

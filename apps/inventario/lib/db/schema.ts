@@ -172,6 +172,9 @@ export const purchaseOrders = pgTable(
     productId: integer('product_id')
       .notNull()
       .references(() => products.id),
+    warehouseId: integer('warehouse_id')
+      .notNull()
+      .references(() => warehouses.id),
     orderedQty: integer('ordered_qty').notNull(),
     receivedQty: integer('received_qty').notNull().default(0),
     unitCost: numeric('unit_cost', { precision: 12, scale: 2 }).notNull(),

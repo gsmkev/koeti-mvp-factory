@@ -5,14 +5,21 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import {
   Activity,
+  AlertTriangle,
+  Boxes,
+  CalendarClock,
   KeyRound,
   LayoutDashboard,
   Lightbulb,
   LogOut,
+  Package,
   ReceiptText,
   Settings,
   Shield,
+  ShoppingCart,
+  Truck,
   Users,
+  Warehouse,
 } from 'lucide-react';
 import {
   AppShell,
@@ -40,6 +47,13 @@ function useNav(): AppShellNavGroup[] {
     {
       items: [
         { href: '/dashboard', label: t('overview'), icon: <LayoutDashboard /> },
+        { href: '/dashboard/products', label: t('products'), icon: <Package /> },
+        { href: '/dashboard/warehouses', label: t('warehouses'), icon: <Warehouse /> },
+        { href: '/dashboard/suppliers', label: t('suppliers'), icon: <Truck /> },
+        { href: '/dashboard/stock-movements', label: t('movements'), icon: <Boxes /> },
+        { href: '/dashboard/purchase-orders', label: t('purchaseOrders'), icon: <ShoppingCart /> },
+        { href: '/dashboard/low-stock', label: t('lowStock'), icon: <AlertTriangle /> },
+        { href: '/dashboard/expiring-soon', label: t('expiringSoon'), icon: <CalendarClock /> },
         { href: '/dashboard/insights', label: t('insights'), icon: <Lightbulb /> },
       ],
     },
