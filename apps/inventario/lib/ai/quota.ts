@@ -8,13 +8,14 @@ import { aiUsage, type Team } from '@koeti/db';
 import { sql } from 'drizzle-orm';
 import { db } from '@/lib/db/drizzle';
 
-// Per-SaaS knob. Plan keys match teams.planName (Stripe product name), lowercased.
+// Per-SaaS knob. Plan keys match teams.planName (Stripe product name),
+// lowercased. AI is an Empresarial-only feature (see lib/plan.ts) — this only
+// throttles usage once a request is already gated in by isEnterprise().
 export const aiLimitConfig: AiLimitConfig = {
   perMinute: 5,
   perDay: 20, // no active subscription
   plans: {
-    base: { perMinute: 10, perDay: 200 },
-    plus: { perMinute: 20, perDay: 1000 },
+    empresarial: { perMinute: 20, perDay: 1000 },
   },
 };
 

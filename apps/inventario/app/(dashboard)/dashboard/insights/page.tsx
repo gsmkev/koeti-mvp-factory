@@ -1,15 +1,37 @@
-// Page — route /dashboard/insights. Cron-generated anomalies + suggestions.
-import { AlertTriangle, Lightbulb, Sparkles, X } from 'lucide-react';
-import { Badge, Card, CardContent, EmptyState, PageHeader } from '@koeti/ui';
+// Page — route /dashboard/insights. Cron-generated anomalies + suggestions —
+// AI suggestions are an Empresarial-only feature (spec Decision).
+import Link from 'next/link';
+import { AlertTriangle, Lightbulb, Lock, Sparkles, X } from 'lucide-react';
+import { Badge, Button, Card, CardContent, EmptyState, PageHeader } from '@koeti/ui';
 import { getLocale, getTranslations } from 'next-intl/server';
 import { requireRole } from '@/lib/auth/middleware';
 import { getInsights } from '@/lib/db/queries';
+import { isEnterprise } from '@/lib/plan';
 import { dismissInsight } from './actions';
 
 export default async function InsightsPage() {
   const { team } = await requireRole('viewer');
-  const rows = await getInsights(team.id);
   const t = await getTranslations('insights');
+  const tCommon = await getTranslations('common');
+
+  if (!isEnterprise(team)) {
+    return (
+      <section className="flex-1 space-y-6 p-4 lg:p-8">
+        <PageHeader title={t('title')} description={t('description')} />
+        <Card className="border-dashed">
+          <CardContent className="flex flex-col items-center gap-3 py-12 text-center">
+            <Lock className="size-8 text-muted-foreground" aria-hidden />
+            <p className="max-w-md text-sm text-muted-foreground">{t('enterpriseOnly')}</p>
+            <Button asChild>
+              <Link href="/pricing">{tCommon('upgradeCta')}</Link>
+            </Button>
+          </CardContent>
+        </Card>
+      </section>
+    );
+  }
+
+  const rows = await getInsights(team.id);
   const tMsg = await getTranslations('insightMessages');
   const locale = await getLocale();
 

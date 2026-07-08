@@ -1,11 +1,12 @@
 // Page — route /dashboard/low-stock. Report, viewer-readable.
 import Link from 'next/link';
 import type { SearchParams } from 'nuqs/server';
-import { Download } from 'lucide-react';
-import { Badge, Button, DataTable, EmptyState, PageHeader } from '@koeti/ui';
+import { Badge, DataTable, EmptyState, PageHeader } from '@koeti/ui';
 import { getTranslations } from 'next-intl/server';
 import { requireRole } from '@/lib/auth/middleware';
 import { getLowStockProducts, getProductCategories, getWarehouses } from '@/lib/db/queries';
+import { planLimitsFor } from '@/lib/plan';
+import { ExportCsvButton } from '@/components/export-csv-button';
 import { loadLowStockSearchParams } from './search-params';
 
 export default async function LowStockPage({
@@ -14,8 +15,9 @@ export default async function LowStockPage({
   searchParams: Promise<SearchParams>;
 }) {
   const { team } = await requireRole('viewer');
+  const { csvExport } = planLimitsFor(team);
   const { warehouseId, category } = await loadLowStockSearchParams(searchParams);
-  const [rows, warehouses, categories, t] = await Promise.all([
+  const [rows, warehouses, categories, t, tCommon] = await Promise.all([
     getLowStockProducts(team.id, {
       warehouseId: warehouseId ?? undefined,
       category: category ?? undefined,
@@ -23,6 +25,7 @@ export default async function LowStockPage({
     getWarehouses(team.id),
     getProductCategories(team.id),
     getTranslations('lowStock'),
+    getTranslations('common'),
   ]);
 
   const hrefWith = (params: Record<string, string | undefined>) => {
@@ -48,12 +51,12 @@ export default async function LowStockPage({
         title={t('title')}
         description={t('description')}
         actions={
-          <Button variant="outline" size="sm" asChild>
-            <a href={`/api/low-stock/export${exportQs ? `?${exportQs}` : ''}`} download>
-              <Download />
-              {t('exportCsv')}
-            </a>
-          </Button>
+          <ExportCsvButton
+            href={`/api/low-stock/export${exportQs ? `?${exportQs}` : ''}`}
+            allowed={csvExport}
+            label={t('exportCsv')}
+            lockedLabel={tCommon('exportCsvLocked')}
+          />
         }
       />
       <nav className="flex flex-wrap gap-2" aria-label={t('filterAria')}>

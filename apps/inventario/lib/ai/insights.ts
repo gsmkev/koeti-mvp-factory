@@ -1,35 +1,67 @@
-// What the daily insights cron computes per team. Deliberately statistical,
-// not AI — deterministic, free, explainable. The template ships one generic
-// detector (activity volume anomaly) as the worked example; MVPs replace or
-// extend this with business detectors (see apps/gastos/lib/ai/insights.ts).
-// messageKey is relative to the app's `insightMessages` i18n namespace.
-import { detectAnomalies } from '@koeti/ai';
-import { activityLogs, type NewInsight } from '@koeti/db';
-import { and, asc, eq, gte, sql } from 'drizzle-orm';
-import { db } from '@/lib/db/drizzle';
+// What the daily insights cron computes for a team — Empresarial-only
+// feature (see spec: AI/suggestions are gated to the top plan tier). The
+// cron route only calls this for Empresarial teams; keep it that way rather
+// than re-checking the plan here.
+// messageKey is relative to this app's `insightMessages` i18n namespace.
+import { aiJson, AiError } from '@koeti/ai';
+import type { NewInsight, Team } from '@koeti/db';
+import { getLowStockProducts } from '@/lib/db/queries';
+import { consumeAiQuota } from '@/lib/ai/quota';
 
-export async function generateInsights(teamId: number): Promise<NewInsight[]> {
-  const day = sql<string>`to_char(${activityLogs.timestamp}, 'YYYY-MM-DD')`;
-  const rows = await db
-    .select({ day, count: sql<number>`count(*)::int` })
-    .from(activityLogs)
-    .where(
-      and(
-        eq(activityLogs.teamId, teamId),
-        gte(activityLogs.timestamp, sql`now() - interval '30 days'`),
-      ),
-    )
-    .groupBy(day)
-    .orderBy(asc(day));
+export async function generateInsights(team: Team): Promise<NewInsight[]> {
+  const teamId = team.id;
+  const lowStock = await getLowStockProducts(teamId);
+  if (lowStock.length === 0) return [];
 
-  return detectAnomalies(rows.map((r) => ({ label: r.day, value: r.count })))
-    .filter((a) => a.zScore > 0) // quiet days aren't worth an alert
-    .map((a) => ({
+  const today = new Date().toISOString().slice(0, 10);
+  const out: NewInsight[] = [];
+
+  // Deterministic, free: one alert per product that crossed its threshold.
+  for (const p of lowStock.slice(0, 10)) {
+    out.push({
       teamId,
       kind: 'anomaly',
       severity: 'warning',
-      messageKey: 'activitySpike',
-      params: JSON.stringify({ day: a.label, count: a.value, avg: Math.round(a.mean) }),
-      dedupeKey: `activitySpike:${a.label}`,
-    }));
+      messageKey: 'lowStockAlert',
+      params: JSON.stringify({ name: p.name, sku: p.sku, stock: p.stock, minStock: p.minStock }),
+      dedupeKey: `lowStockAlert:${today}:${p.id}`,
+    });
+  }
+
+  // AI, one call per team per day: a prioritized restock suggestion in plain
+  // language. Skips quietly if the quota is spent or the model is unreachable
+  // — the deterministic alerts above still land either way.
+  const quota = await consumeAiQuota(team);
+  if (quota.ok) {
+    try {
+      const { summary } = await aiJson<{ summary: string }>({
+        tier: 'balanced',
+        system:
+          'You are an inventory assistant for a small Paraguayan retail business. ' +
+          'Given a JSON list of low-stock products (sku, name, stock, minStock), write ONE ' +
+          'short, actionable restock suggestion in Spanish (max 2 sentences), prioritizing ' +
+          'the most urgent items. Respond as JSON: {"summary": "..."}.',
+        prompt: JSON.stringify(
+          lowStock
+            .slice(0, 10)
+            .map((p) => ({ sku: p.sku, name: p.name, stock: p.stock, minStock: p.minStock })),
+        ),
+        maxTokens: 200,
+        json: true,
+      });
+      out.push({
+        teamId,
+        kind: 'suggestion',
+        severity: 'info',
+        messageKey: 'aiRestockSuggestion',
+        params: JSON.stringify({ summary }),
+        dedupeKey: `aiRestockSuggestion:${today}`,
+      });
+    } catch (err) {
+      if (!(err instanceof AiError)) throw err;
+      // No MISTRAL_API_KEY / model unreachable — deterministic alerts stand alone.
+    }
+  }
+
+  return out;
 }

@@ -17,8 +17,8 @@ export default function OpengraphImage() {
         flexDirection: 'column',
         justifyContent: 'center',
         padding: '96px',
-        backgroundColor: '#0f172a',
-        color: '#f8fafc',
+        backgroundColor: '#221711',
+        color: '#faf7f5',
         fontFamily: 'sans-serif',
       }}
     >
@@ -30,16 +30,29 @@ export default function OpengraphImage() {
           width: 88,
           height: 88,
           borderRadius: 20,
-          backgroundColor: '#f8fafc',
-          color: '#0f172a',
+          backgroundColor: '#cc4b14',
+          color: '#faf7f5',
           fontSize: 56,
           fontWeight: 700,
         }}
       >
-        {APP_NAME[0]}
+        <svg
+          viewBox="0 0 24 24"
+          width={54}
+          height={54}
+          fill="none"
+          stroke="#faf7f5"
+          strokeWidth={2.25}
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <path d="M3.5 9 12 4.5 20.5 9 12 13.5 3.5 9Z" />
+          <path d="M3.5 9v7l8.5 4.5M20.5 9v7L12 20.5v-7" />
+          <path d="M9 12.5 11 14.5 15.5 9.5" />
+        </svg>
       </div>
       <div style={{ marginTop: 48, fontSize: 84, fontWeight: 700 }}>{APP_NAME}</div>
-      <div style={{ marginTop: 24, fontSize: 36, color: '#94a3b8', maxWidth: 900 }}>
+      <div style={{ marginTop: 24, fontSize: 36, color: '#b0a196', maxWidth: 900 }}>
         {APP_TAGLINE}
       </div>
     </div>,

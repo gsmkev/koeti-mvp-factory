@@ -1,11 +1,12 @@
 // Page — route /dashboard/products.
 import Link from 'next/link';
 import type { SearchParams } from 'nuqs/server';
-import { Download } from 'lucide-react';
-import { Badge, Button, ResourcePanel, cn, type ResourceField } from '@koeti/ui';
+import { Badge, ResourcePanel, cn, type ResourceField } from '@koeti/ui';
 import { getTranslations } from 'next-intl/server';
 import { requireRole } from '@/lib/auth/middleware';
 import { getProductCategories, getProducts, getStockByProduct } from '@/lib/db/queries';
+import { planLimitsFor } from '@/lib/plan';
+import { ExportCsvButton } from '@/components/export-csv-button';
 import { createProduct, deleteProduct, updateProduct } from './actions';
 import { loadProductsSearchParams } from './search-params';
 
@@ -15,6 +16,7 @@ export default async function ProductsPage({
   searchParams: Promise<SearchParams>;
 }) {
   const { team } = await requireRole('viewer');
+  const { csvExport } = planLimitsFor(team);
   const { q, category, active, stockStatus } = await loadProductsSearchParams(searchParams);
   const [allProducts, stockMap, categories, t, tCommon] = await Promise.all([
     getProducts(team.id),
@@ -122,12 +124,14 @@ export default async function ProductsPage({
             </Badge>
           </Link>
         ))}
-        <Button variant="outline" size="sm" className="ml-auto" asChild>
-          <a href={exportHref} download>
-            <Download />
-            {t('exportCsv')}
-          </a>
-        </Button>
+        <div className="ml-auto">
+          <ExportCsvButton
+            href={exportHref}
+            allowed={csvExport}
+            label={t('exportCsv')}
+            lockedLabel={tCommon('exportCsvLocked')}
+          />
+        </div>
       </nav>
       <ResourcePanel
         title={t('panelTitle')}

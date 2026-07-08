@@ -6,41 +6,81 @@
     "movements": "Movements",
     "purchaseOrders": "Purchase Orders",
     "lowStock": "Low Stock",
-    "expiringSoon": "Expiring Soon"
+    "expiringSoon": "Expiring Soon",
+    "footerTagline": "{app} — made in Paraguay by Koeti Labs, for MSMEs."
+  },
+  "common": {
+    "exportCsvLocked": "Upgrade to export",
+    "purchaseOrdersLocked": "Purchase orders require the Premium or Empresarial plan.",
+    "upgradeCta": "Upgrade plan"
+  },
+  "auth": {
+    "brandQuote": "Real-time stock control for Paraguayan small businesses — no spreadsheets, no notebooks.",
+    "brandFooter": "{app} · by Koeti Labs"
   },
   "marketing": {
-    "eyebrow": "Inventory // 01",
+    "eyebrow": "Made in Paraguay by Koeti Labs",
     "titleLine1": "Know your stock",
     "titleLine2": "before it runs out.",
-    "subtitle": "Products, warehouses, purchase orders, and a full movement ledger — the inventory backbone your team needs, ready on day one.",
+    "subtitle": "Products, warehouses, purchase orders, and a full movement ledger — so you can stop tracking stock in notebooks or spreadsheets.",
     "getStarted": "Get started",
     "viewPricing": "View pricing",
-    "yourApp": "your app",
-    "moduleAuthTitle": "Sign-in that just works",
-    "moduleAuthDesc": "Email and password, sessions, and sign-out are ready on day one. Swap the copy, not the plumbing.",
-    "moduleBillingTitle": "Subscriptions, handled",
-    "moduleBillingDesc": "Checkout, plan changes, and webhooks connect straight to Stripe — no billing code to write.",
-    "moduleTeamsTitle": "Built for teams",
-    "moduleTeamsDesc": "Every account starts inside a team, with roles and invites ready before your first user signs up.",
+    "trustLine": "No credit card required. Cancel anytime.",
+    "previewWarehouse": "Depósito Central",
+    "previewValue": "Inventory value",
+    "previewProducts": "Products",
+    "previewAlertsTitle": "Needs attention",
+    "previewLow": "Low",
+    "previewExpiring": "Expiring",
+    "featuresTitle": "Everything your business needs, nothing it doesn't",
+    "featuresSubtitle": "Not a spreadsheet with extra steps — a real inventory system built for how a small business actually runs.",
+    "featureWarehousesTitle": "Multiple warehouses",
+    "featureWarehousesDesc": "Track stock per location and assign staff to the warehouse they're responsible for.",
+    "featureLedgerTitle": "Auditable movement ledger",
+    "featureLedgerDesc": "Every entrada, salida, and transfer is logged — who moved what, when, and why.",
+    "featureAlertsTitle": "Low-stock & expiry alerts",
+    "featureAlertsDesc": "Know what's running out and what's expiring before it becomes a problem.",
+    "featurePurchasingTitle": "Purchase orders",
+    "featurePurchasingDesc": "Order from suppliers and receive stock — partial or full — with an approval step.",
+    "featureReportsTitle": "Exportable reports",
+    "featureReportsDesc": "Valuation, top sellers, low stock, expiring soon — filtered, and one click to CSV.",
+    "featureRolesTitle": "Roles that match your team",
+    "featureRolesDesc": "Owners, managers who approve, warehouse staff scoped to their own location, and read-only viewers.",
     "ctaTitle": "Your inventory starts on page one.",
     "ctaSubtitle": "Products, stock movements, and purchase orders ship ready to use. What you build on top of it is yours.",
     "createAccount": "Create your account",
     "alreadySignIn": "Already using it? Sign in"
   },
   "pricing": {
-    "eyebrow": "Inventory // 02",
-    "title": "One foundation. Pick your plan.",
-    "subtitle": "Every plan ships with the full scaffold — auth, billing, and team accounts included. Plus adds priority support and early access as your team grows.",
+    "eyebrow": "Plans & pricing",
+    "title": "Priced for a real Paraguayan business.",
+    "subtitle": "Start free, no card required. Upgrade when you need more room to grow — cancel whenever you want.",
     "freeTrial": "{days}-day free trial",
-    "perUser": "per user / {interval}",
+    "perUser": "per team / {interval}",
+    "perMonth": "/ month",
     "recommended": "Recommended",
     "getStarted": "Get Started",
+    "startFree": "Start for free",
+    "freeName": "Free",
+    "freeNoSupport": "For trying it out — no support included.",
     "loading": "Loading…",
-    "baseFeatures": ["Unlimited usage", "Unlimited workspace members", "Email support"],
-    "plusFeatures": [
-      "Everything in Base, and:",
-      "Early access to new features",
-      "24/7 support + Slack access"
+    "freeFeatures": [
+      "Up to 2 warehouses, 20 products",
+      "Unlimited stock movements & audit log",
+      "Low-stock & expiring-soon reports (view only, no CSV export)",
+      "1 user — community docs, no support"
+    ],
+    "premiumFeatures": [
+      "Unlimited warehouses & products",
+      "Purchase orders with supplier receiving",
+      "CSV export on every report",
+      "Unlimited team members",
+      "Email support"
+    ],
+    "empresarialFeatures": [
+      "Everything in Premium, and:",
+      "AI-powered restock suggestions",
+      "Priority support"
     ]
   },
   "overview": {
@@ -250,8 +290,12 @@
     "emptyTitle": "Nothing expiring soon",
     "emptyDesc": "No batches are approaching their expiry date in this window."
   },
+  "insights": {
+    "enterpriseOnly": "AI-powered restock suggestions are an Empresarial feature. Upgrade to get a daily, prioritized restock suggestion plus low-stock alerts."
+  },
   "insightMessages": {
-    "activitySpike": "Unusual account activity on {day}: {count} events vs a daily average of {avg}."
+    "lowStockAlert": "{name} ({sku}) is low: {stock} in stock, minimum is {minStock}.",
+    "aiRestockSuggestion": "{summary}"
   },
   "checkout": {
     "title": "Checkout",

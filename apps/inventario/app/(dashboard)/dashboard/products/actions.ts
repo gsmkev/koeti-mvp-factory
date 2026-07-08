@@ -2,11 +2,13 @@
 // Server actions for /dashboard/products.
 
 import { revalidatePath } from 'next/cache';
+import { eq, sql } from 'drizzle-orm';
 import { z } from 'zod';
 import { crudActions } from '@/lib/crud';
 import { withTeam } from '@/lib/auth/middleware';
 import { db } from '@/lib/db/drizzle';
 import { products } from '@/lib/db/schema';
+import { planLimitsFor } from '@/lib/plan';
 
 const schema = z.object({
   sku: z.string().min(1, 'SKU is required').max(100),
@@ -28,6 +30,18 @@ const actions = crudActions(products, { path: '/dashboard/products', schema });
 export const createProduct = withTeam(async (formData, team) => {
   const parsed = schema.safeParse(Object.fromEntries(formData));
   if (!parsed.success) return { error: parsed.error.errors[0].message };
+
+  const { maxProducts } = planLimitsFor(team);
+  if (maxProducts !== null) {
+    const [{ count }] = await db
+      .select({ count: sql<number>`count(*)::int` })
+      .from(products)
+      .where(eq(products.teamId, team.id));
+    if (count >= maxProducts) {
+      return { error: `Free plan is capped at ${maxProducts} products — upgrade to add more.` };
+    }
+  }
+
   await db.insert(products).values({
     ...parsed.data,
     avgCost: parsed.data.cost,

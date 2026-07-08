@@ -1,4 +1,5 @@
 // Page — route /pricing.
+import Link from 'next/link';
 import { checkoutAction } from '@/lib/payments/actions';
 import { ArrowRight, Check } from 'lucide-react';
 import { getStripePrices, getStripeProducts } from '@/lib/payments/stripe';
@@ -6,6 +7,7 @@ import { getPagoparPlans } from '@koeti/billing';
 import { getTranslations } from 'next-intl/server';
 import {
   Badge,
+  Button,
   Card,
   CardAction,
   CardContent,
@@ -27,18 +29,17 @@ export default async function PricingPage() {
     getTranslations('pricing'),
   ]);
 
-  const basePlan = products.find((product) => product.name === 'Base');
-  const plusPlan = products.find((product) => product.name === 'Plus');
-
-  const basePrice = prices.find((price) => price.productId === basePlan?.id);
-  const plusPrice = prices.find((price) => price.productId === plusPlan?.id);
+  const premiumPlan = products.find((product) => product.name === 'Premium');
+  const empresarialPlan = products.find((product) => product.name === 'Empresarial');
+  const premiumPrice = prices.find((price) => price.productId === premiumPlan?.id);
+  const empresarialPrice = prices.find((price) => price.productId === empresarialPlan?.id);
 
   // Pagopar (Stripe alternative, Paraguay) drives the catalog when Stripe has
   // no key. Prices are whole guaraníes — format with the native Intl API.
   const pagoparPlans = process.env.STRIPE_SECRET_KEY ? [] : getPagoparPlans();
   const pyg = new Intl.NumberFormat('es-PY', { style: 'currency', currency: 'PYG' });
-  const basePagopar = pagoparPlans.find((p) => p.name === 'Base');
-  const plusPagopar = pagoparPlans.find((p) => p.name === 'Plus');
+  const premiumPagopar = pagoparPlans.find((p) => p.name === 'Premium');
+  const empresarialPagopar = pagoparPlans.find((p) => p.name === 'Empresarial');
 
   return (
     <main className="mx-auto max-w-6xl px-6 py-16 sm:px-8 sm:py-20">
@@ -52,27 +53,60 @@ export default async function PricingPage() {
         <p className="mt-4 max-w-lg text-lg text-muted-foreground">{t('subtitle')}</p>
       </div>
 
-      <div className="mt-12 grid gap-6 md:grid-cols-2">
+      <div className="mt-12 grid gap-6 md:grid-cols-3">
+        <Card>
+          <CardHeader>
+            <div>
+              <CardTitle className="text-2xl">{t('freeName')}</CardTitle>
+              <p className="mt-1 text-sm text-muted-foreground">{t('freeNoSupport')}</p>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <p className="text-4xl font-bold text-foreground">
+              {pyg.format(0)}
+              <span className="ml-2 text-base font-normal text-muted-foreground">
+                {t('perMonth')}
+              </span>
+            </p>
+            <ul className="mt-8 space-y-4 border-t border-border pt-8">
+              {(t.raw('freeFeatures') as string[]).map((feature, index) => (
+                <li key={index} className="flex items-start">
+                  <Check className="mr-2 mt-0.5 h-5 w-5 flex-shrink-0 text-foreground" />
+                  <span className="text-sm text-muted-foreground">{feature}</span>
+                </li>
+              ))}
+            </ul>
+          </CardContent>
+          <CardFooter>
+            <Button variant="outline" className="w-full rounded-full" asChild>
+              <Link href="/sign-up">
+                {t('startFree')}
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Link>
+            </Button>
+          </CardFooter>
+        </Card>
+
         <PricingCard
           t={t}
-          name={basePlan?.name || 'Base'}
-          price={basePrice?.unitAmount || 800}
-          priceLabel={basePagopar ? pyg.format(basePagopar.amount) : undefined}
-          interval={basePrice?.interval || 'month'}
-          trialDays={basePagopar ? 0 : basePrice?.trialPeriodDays || 7}
-          features={t.raw('baseFeatures') as string[]}
-          priceId={basePrice?.id}
+          name={premiumPlan?.name || 'Premium'}
+          price={premiumPrice?.unitAmount || 1500}
+          priceLabel={premiumPagopar ? pyg.format(premiumPagopar.amount) : undefined}
+          interval={premiumPrice?.interval || 'month'}
+          trialDays={premiumPagopar ? 0 : premiumPrice?.trialPeriodDays || 7}
+          features={t.raw('premiumFeatures') as string[]}
+          priceId={premiumPrice?.id}
+          highlight
         />
         <PricingCard
           t={t}
-          name={plusPlan?.name || 'Plus'}
-          price={plusPrice?.unitAmount || 1200}
-          priceLabel={plusPagopar ? pyg.format(plusPagopar.amount) : undefined}
-          interval={plusPrice?.interval || 'month'}
-          trialDays={plusPagopar ? 0 : plusPrice?.trialPeriodDays || 7}
-          features={t.raw('plusFeatures') as string[]}
-          priceId={plusPrice?.id}
-          highlight
+          name={empresarialPlan?.name || 'Empresarial'}
+          price={empresarialPrice?.unitAmount || 4500}
+          priceLabel={empresarialPagopar ? pyg.format(empresarialPagopar.amount) : undefined}
+          interval={empresarialPrice?.interval || 'month'}
+          trialDays={empresarialPagopar ? 0 : empresarialPrice?.trialPeriodDays || 7}
+          features={t.raw('empresarialFeatures') as string[]}
+          priceId={empresarialPrice?.id}
         />
       </div>
     </main>
@@ -104,8 +138,7 @@ function PricingCard({
     <Card className={highlight ? 'border-foreground/30 shadow-md' : undefined}>
       <CardHeader>
         <div>
-          <span className="font-mono text-xs text-muted-foreground">[{name.toLowerCase()}]</span>
-          <CardTitle className="mt-1 text-2xl">{name}</CardTitle>
+          <CardTitle className="text-2xl">{name}</CardTitle>
           {trialDays > 0 && (
             <p className="mt-1 text-sm text-muted-foreground">
               {t('freeTrial', { days: trialDays })}

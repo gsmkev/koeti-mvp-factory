@@ -6,41 +6,81 @@
     "movements": "Movimentações",
     "purchaseOrders": "Ordens de Compra",
     "lowStock": "Estoque Baixo",
-    "expiringSoon": "A Vencer"
+    "expiringSoon": "A Vencer",
+    "footerTagline": "{app} — feito no Paraguai pela Koeti Labs, para as micro e pequenas empresas."
+  },
+  "common": {
+    "exportCsvLocked": "Assine para exportar",
+    "purchaseOrdersLocked": "Ordens de compra exigem o plano Premium ou Empresarial.",
+    "upgradeCta": "Melhorar plano"
+  },
+  "auth": {
+    "brandQuote": "Controle de estoque em tempo real para pequenos negócios paraguaios — sem planilha, sem caderno.",
+    "brandFooter": "{app} · pela Koeti Labs"
   },
   "marketing": {
-    "eyebrow": "Estoque // 01",
+    "eyebrow": "Feito no Paraguai pela Koeti Labs",
     "titleLine1": "Conheça seu estoque",
     "titleLine2": "antes que acabe.",
-    "subtitle": "Produtos, depósitos, ordens de compra e um histórico completo de movimentações — a base de estoque que seu time precisa, pronta desde o primeiro dia.",
+    "subtitle": "Produtos, depósitos, ordens de compra e um histórico completo de movimentações — pra parar de controlar estoque em caderno ou planilha.",
     "getStarted": "Começar",
     "viewPricing": "Ver preços",
-    "yourApp": "seu app",
-    "moduleAuthTitle": "Login que simplesmente funciona",
-    "moduleAuthDesc": "E-mail e senha, sessões e logout prontos desde o primeiro dia. Troque o texto, não o encanamento.",
-    "moduleBillingTitle": "Assinaturas resolvidas",
-    "moduleBillingDesc": "Checkout, mudanças de plano e webhooks conectados direto ao Stripe — sem escrever código de cobrança.",
-    "moduleTeamsTitle": "Feito para times",
-    "moduleTeamsDesc": "Toda conta começa dentro de um time, com funções e convites prontos antes do seu primeiro usuário.",
+    "trustLine": "Sem cartão de crédito. Cancele quando quiser.",
+    "previewWarehouse": "Depósito Central",
+    "previewValue": "Valor do estoque",
+    "previewProducts": "Produtos",
+    "previewAlertsTitle": "Precisa de atenção",
+    "previewLow": "Baixo",
+    "previewExpiring": "A vencer",
+    "featuresTitle": "Tudo que seu negócio precisa, nada além disso",
+    "featuresSubtitle": "Não é uma planilha com passos extras — é um sistema de estoque de verdade, feito para como um pequeno negócio funciona de verdade.",
+    "featureWarehousesTitle": "Múltiplos depósitos",
+    "featureWarehousesDesc": "Controle o estoque por local e atribua à equipe o depósito pelo qual é responsável.",
+    "featureLedgerTitle": "Histórico de movimentações auditável",
+    "featureLedgerDesc": "Cada entrada, saída e transferência fica registrada — quem moveu o quê, quando e por quê.",
+    "featureAlertsTitle": "Alertas de estoque baixo e vencimento",
+    "featureAlertsDesc": "Saiba o que está acabando e o que está vencendo antes que vire um problema.",
+    "featurePurchasingTitle": "Ordens de compra",
+    "featurePurchasingDesc": "Peça aos seus fornecedores e receba estoque — parcial ou total — com uma etapa de aprovação.",
+    "featureReportsTitle": "Relatórios exportáveis",
+    "featureReportsDesc": "Valorização, mais vendidos, estoque baixo, a vencer — filtrados, e a um clique do CSV.",
+    "featureRolesTitle": "Funções sob medida para seu time",
+    "featureRolesDesc": "Donos, gerentes que aprovam, equipe de depósito restrita ao seu próprio local e leitores somente de consulta.",
     "ctaTitle": "Seu estoque começa na página um.",
     "ctaSubtitle": "Produtos, movimentações de estoque e ordens de compra prontos para usar. O que você construir por cima é seu.",
     "createAccount": "Crie sua conta",
     "alreadySignIn": "Já usa? Entre"
   },
   "pricing": {
-    "eyebrow": "Estoque // 02",
-    "title": "Uma base só. Escolha seu plano.",
-    "subtitle": "Todos os planos incluem o scaffold completo — auth, cobrança e contas de time. O Plus adiciona suporte prioritário e acesso antecipado conforme seu time cresce.",
+    "eyebrow": "Planos e preços",
+    "title": "Preços pensados para um negócio paraguaio real.",
+    "subtitle": "Comece grátis, sem cartão. Faça upgrade quando precisar de mais espaço para crescer — cancele quando quiser.",
     "freeTrial": "{days} dias de teste grátis",
-    "perUser": "por usuário / {interval}",
+    "perUser": "por time / {interval}",
+    "perMonth": "/ mês",
     "recommended": "Recomendado",
     "getStarted": "Começar",
+    "startFree": "Começar grátis",
+    "freeName": "Grátis",
+    "freeNoSupport": "Para testar — sem suporte incluído.",
     "loading": "Carregando…",
-    "baseFeatures": ["Uso ilimitado", "Membros do espaço ilimitados", "Suporte por e-mail"],
-    "plusFeatures": [
-      "Tudo do Base, e:",
-      "Acesso antecipado a novos recursos",
-      "Suporte 24/7 + acesso ao Slack"
+    "freeFeatures": [
+      "Até 2 depósitos, 20 produtos",
+      "Movimentações de estoque e histórico ilimitados",
+      "Relatórios de estoque baixo e a vencer (somente consulta, sem exportar CSV)",
+      "1 usuário — documentação, sem suporte"
+    ],
+    "premiumFeatures": [
+      "Depósitos e produtos ilimitados",
+      "Ordens de compra com recebimento de fornecedores",
+      "Exportação CSV em todos os relatórios",
+      "Membros de time ilimitados",
+      "Suporte por e-mail"
+    ],
+    "empresarialFeatures": [
+      "Tudo do Premium, e:",
+      "Sugestões de reposição com IA",
+      "Suporte prioritário"
     ]
   },
   "overview": {
@@ -250,8 +290,12 @@
     "emptyTitle": "Nada a vencer",
     "emptyDesc": "Nenhum lote está se aproximando da data de vencimento nesta janela."
   },
+  "insights": {
+    "enterpriseOnly": "Sugestões de reposição com IA são um recurso Empresarial. Faça upgrade para receber uma sugestão diária priorizada além de alertas de estoque baixo."
+  },
   "insightMessages": {
-    "activitySpike": "Atividade incomum na conta em {day}: {count} eventos contra uma média diária de {avg}."
+    "lowStockAlert": "{name} ({sku}) está baixo: {stock} em estoque, o mínimo é {minStock}.",
+    "aiRestockSuggestion": "{summary}"
   },
   "checkout": {
     "title": "Finalizar compra",

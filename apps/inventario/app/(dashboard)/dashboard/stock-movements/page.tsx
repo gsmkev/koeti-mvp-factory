@@ -3,8 +3,7 @@
 // plus the filterable, exportable audit log below it.
 import Link from 'next/link';
 import type { SearchParams } from 'nuqs/server';
-import { Download } from 'lucide-react';
-import { Badge, Button, Pagination, ResourcePanel, type ResourceField } from '@koeti/ui';
+import { Badge, Pagination, ResourcePanel, type ResourceField } from '@koeti/ui';
 import { getTranslations } from 'next-intl/server';
 import { requireRole } from '@/lib/auth/middleware';
 import { MOVEMENT_TYPES } from '@/lib/db/schema';
@@ -14,6 +13,8 @@ import {
   getStockMovements,
   getWarehouses,
 } from '@/lib/db/queries';
+import { planLimitsFor } from '@/lib/plan';
+import { ExportCsvButton } from '@/components/export-csv-button';
 import { createStockMovement } from './actions';
 import { loadMovementsSearchParams } from './search-params';
 
@@ -23,6 +24,7 @@ export default async function StockMovementsPage({
   searchParams: Promise<SearchParams>;
 }) {
   const { team } = await requireRole('viewer');
+  const { csvExport } = planLimitsFor(team);
   const { productId, warehouseId, type, from, to, page } =
     await loadMovementsSearchParams(searchParams);
   const [products, warehouses, fetched, t, tType, tCommon] = await Promise.all([
@@ -151,12 +153,14 @@ export default async function StockMovementsPage({
             </Link>
           ))}
         </nav>
-        <Button variant="outline" size="sm" className="ml-auto" asChild>
-          <a href={`/api/stock-movements/export${exportQs ? `?${exportQs}` : ''}`} download>
-            <Download />
-            {t('exportCsv')}
-          </a>
-        </Button>
+        <div className="ml-auto">
+          <ExportCsvButton
+            href={`/api/stock-movements/export${exportQs ? `?${exportQs}` : ''}`}
+            allowed={csvExport}
+            label={t('exportCsv')}
+            lockedLabel={tCommon('exportCsvLocked')}
+          />
+        </div>
       </div>
       <Pagination
         page={page}
