@@ -135,7 +135,7 @@ export default async function PurchaseOrdersPage({
                 ))}
               </select>
             </div>
-            <div className="grid w-28 gap-1.5">
+            <div className="grid w-full gap-1.5 sm:w-28">
               <Label htmlFor="po-orderedQty">{t('fieldOrderedQty')}</Label>
               <input
                 id="po-orderedQty"
@@ -143,10 +143,10 @@ export default async function PurchaseOrdersPage({
                 type="number"
                 min={1}
                 required
-                className="border-input h-9 rounded-md border bg-transparent px-3 text-sm shadow-xs outline-none"
+                className="border-input h-9 w-full rounded-md border bg-transparent px-3 text-sm shadow-xs outline-none"
               />
             </div>
-            <div className="grid w-32 gap-1.5">
+            <div className="grid w-full gap-1.5 sm:w-32">
               <Label htmlFor="po-unitCost">{t('fieldUnitCost')}</Label>
               <input
                 id="po-unitCost"
@@ -155,16 +155,16 @@ export default async function PurchaseOrdersPage({
                 step="0.01"
                 min={0}
                 required
-                className="border-input h-9 rounded-md border bg-transparent px-3 text-sm shadow-xs outline-none"
+                className="border-input h-9 w-full rounded-md border bg-transparent px-3 text-sm shadow-xs outline-none"
               />
             </div>
-            <div className="grid w-40 gap-1.5">
+            <div className="grid w-full gap-1.5 sm:w-40">
               <Label htmlFor="po-expectedDate">{t('fieldExpectedDate')}</Label>
               <input
                 id="po-expectedDate"
                 name="expectedDate"
                 type="date"
-                className="border-input h-9 rounded-md border bg-transparent px-3 text-sm shadow-xs outline-none"
+                className="border-input h-9 w-full rounded-md border bg-transparent px-3 text-sm shadow-xs outline-none"
               />
             </div>
             <SubmitButton>{t('createLabel')}</SubmitButton>
