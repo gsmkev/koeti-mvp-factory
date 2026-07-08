@@ -33,6 +33,7 @@ import type { Locale } from '@koeti/i18n/config';
 import { createCheckoutSession } from '@/lib/payments/stripe';
 import { getUser, getUserWithTeam } from '@/lib/db/queries';
 import { validatedAction, validatedActionWithUser } from '@/lib/auth/middleware';
+import { products, suppliers, warehouses } from '@/lib/db/schema';
 import {
   sendEmail,
   WelcomeEmail,
@@ -272,6 +273,25 @@ export const signUp = validatedAction(signUpSchema, async (data, formData) => {
     userRole = 'owner';
 
     await logActivity(teamId, createdUser.id, ActivityType.CREATE_TEAM);
+
+    // Starter data — a brand-new team can't post a stock movement or a
+    // purchase order without at least one warehouse/product/supplier to
+    // pick from. Renameable/deletable like anything else.
+    await Promise.all([
+      db.insert(warehouses).values({ teamId, name: 'Main Warehouse' }),
+      db.insert(suppliers).values({ teamId, name: 'Sample Supplier' }),
+      db.insert(products).values({
+        teamId,
+        sku: 'SAMPLE-001',
+        name: 'Sample Product',
+        category: 'General',
+        unit: 'unit',
+        cost: '10.00',
+        avgCost: '10.00',
+        price: '15.00',
+        minStock: 5,
+      }),
+    ]);
   }
 
   const newTeamMember: NewTeamMember = {
