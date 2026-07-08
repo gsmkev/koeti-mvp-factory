@@ -14,3 +14,7 @@ CREATE DATABASE gastos OWNER gastos;
 -- fiado
 CREATE USER fiado WITH PASSWORD 'localdev';
 CREATE DATABASE fiado OWNER fiado;
+
+-- inventario
+CREATE USER inventario WITH PASSWORD 'localdev';
+CREATE DATABASE inventario OWNER inventario;
