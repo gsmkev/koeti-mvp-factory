@@ -1,11 +1,12 @@
 // Page — route /dashboard/expiring-soon. Report, viewer-readable.
 import Link from 'next/link';
 import type { SearchParams } from 'nuqs/server';
-import { Download } from 'lucide-react';
-import { Badge, Button, DataTable, EmptyState, PageHeader } from '@koeti/ui';
+import { Badge, DataTable, EmptyState, PageHeader } from '@koeti/ui';
 import { getTranslations } from 'next-intl/server';
 import { requireRole } from '@/lib/auth/middleware';
 import { getExpiringSoon, getWarehouses } from '@/lib/db/queries';
+import { planLimitsFor } from '@/lib/plan';
+import { ExportCsvButton } from '@/components/export-csv-button';
 import { loadExpiringSoonSearchParams } from './search-params';
 
 const DAY_OPTIONS = [7, 15, 30, 60, 90];
@@ -16,11 +17,13 @@ export default async function ExpiringSoonPage({
   searchParams: Promise<SearchParams>;
 }) {
   const { team } = await requireRole('viewer');
+  const { csvExport } = planLimitsFor(team);
   const { warehouseId, days } = await loadExpiringSoonSearchParams(searchParams);
-  const [rows, warehouses, t] = await Promise.all([
+  const [rows, warehouses, t, tCommon] = await Promise.all([
     getExpiringSoon(team.id, days, { warehouseId: warehouseId ?? undefined }),
     getWarehouses(team.id),
     getTranslations('expiringSoon'),
+    getTranslations('common'),
   ]);
 
   const hrefWith = (params: Record<string, string | undefined>) => {
@@ -45,12 +48,12 @@ export default async function ExpiringSoonPage({
         title={t('title')}
         description={t('description')}
         actions={
-          <Button variant="outline" size="sm" asChild>
-            <a href={`/api/expiring-soon/export?${exportQs}`} download>
-              <Download />
-              {t('exportCsv')}
-            </a>
-          </Button>
+          <ExportCsvButton
+            href={`/api/expiring-soon/export?${exportQs}`}
+            allowed={csvExport}
+            label={t('exportCsv')}
+            lockedLabel={tCommon('exportCsvLocked')}
+          />
         }
       />
       <nav className="flex flex-wrap gap-2" aria-label={t('filterAria')}>

@@ -11,19 +11,35 @@ import { crudActions } from '@/lib/crud';
 import { withTeam } from '@/lib/auth/middleware';
 import { db } from '@/lib/db/drizzle';
 import { products, purchaseOrders, stockMovements } from '@/lib/db/schema';
+import { planLimitsFor } from '@/lib/plan';
+
+const purchaseOrderSchema = z.object({
+  supplierId: z.coerce.number().int(),
+  productId: z.coerce.number().int(),
+  warehouseId: z.coerce.number().int(),
+  orderedQty: z.coerce.number().int().positive('Ordered quantity must be greater than 0'),
+  unitCost: z.coerce.number().min(0, 'Unit cost must be 0 or more'),
+  expectedDate: z.string().optional().or(z.literal('')),
+});
 
 const actions = crudActions(purchaseOrders, {
   path: '/dashboard/purchase-orders',
-  schema: z.object({
-    supplierId: z.coerce.number().int(),
-    productId: z.coerce.number().int(),
-    warehouseId: z.coerce.number().int(),
-    orderedQty: z.coerce.number().int().positive('Ordered quantity must be greater than 0'),
-    unitCost: z.coerce.number().min(0, 'Unit cost must be 0 or more'),
-    expectedDate: z.string().optional().or(z.literal('')),
-  }),
+  schema: purchaseOrderSchema,
 });
-export const createPurchaseOrder = actions.create;
+
+// Purchase orders are a Premium+ feature — the Free plan is for trying out
+// the catalog/movements/reports workflow, not for supplier procurement.
+export const createPurchaseOrder = withTeam(async (formData, team) => {
+  if (!planLimitsFor(team).purchaseOrders) {
+    return { error: 'Purchase orders require the Premium or Empresarial plan.' };
+  }
+  const parsed = purchaseOrderSchema.safeParse(Object.fromEntries(formData));
+  if (!parsed.success) return { error: parsed.error.errors[0].message };
+  await db
+    .insert(purchaseOrders)
+    .values({ ...parsed.data, teamId: team.id } as unknown as typeof purchaseOrders.$inferInsert);
+  revalidatePath('/dashboard/purchase-orders');
+});
 export const deletePurchaseOrder = actions.remove;
 
 export const approvePurchaseOrder = withTeam(async (formData, team) => {

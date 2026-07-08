@@ -2,21 +2,41 @@
 // Server actions for /dashboard/warehouses.
 
 import { revalidatePath } from 'next/cache';
-import { and, eq } from 'drizzle-orm';
+import { and, eq, sql } from 'drizzle-orm';
 import { z } from 'zod';
 import { crudActions } from '@/lib/crud';
 import { withTeam } from '@/lib/auth/middleware';
 import { db } from '@/lib/db/drizzle';
 import { warehouses, warehouseAssignments } from '@/lib/db/schema';
+import { planLimitsFor } from '@/lib/plan';
 
-const actions = crudActions(warehouses, {
-  path: '/dashboard/warehouses',
-  schema: z.object({
-    name: z.string().min(1, 'Name is required').max(255),
-    location: z.string().max(255).optional().or(z.literal('')),
-  }),
+const warehouseSchema = z.object({
+  name: z.string().min(1, 'Name is required').max(255),
+  location: z.string().max(255).optional().or(z.literal('')),
 });
-export const createWarehouse = actions.create;
+
+const actions = crudActions(warehouses, { path: '/dashboard/warehouses', schema: warehouseSchema });
+
+// Free plan is capped at a couple of warehouses — hand-written so create can
+// check the count before the generic factory's insert.
+export const createWarehouse = withTeam(async (formData, team) => {
+  const parsed = warehouseSchema.safeParse(Object.fromEntries(formData));
+  if (!parsed.success) return { error: parsed.error.errors[0].message };
+
+  const { maxWarehouses } = planLimitsFor(team);
+  if (maxWarehouses !== null) {
+    const [{ count }] = await db
+      .select({ count: sql<number>`count(*)::int` })
+      .from(warehouses)
+      .where(eq(warehouses.teamId, team.id));
+    if (count >= maxWarehouses) {
+      return { error: `Free plan is capped at ${maxWarehouses} warehouses — upgrade to add more.` };
+    }
+  }
+
+  await db.insert(warehouses).values({ ...parsed.data, teamId: team.id });
+  revalidatePath('/dashboard/warehouses');
+});
 export const updateWarehouse = actions.update;
 export const deleteWarehouse = actions.remove;
 

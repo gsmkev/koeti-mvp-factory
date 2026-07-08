@@ -2,4 +2,4 @@
 // scaffold; every layout/page imports from here instead of hardcoding it.
 export const APP_NAME = 'Inventario';
 export const APP_TAGLINE =
-  'Stock levels, movements, and purchase orders — under control, in real time.';
+  'El control de stock hecho para las mipymes de Paraguay, por Koeti Labs.';

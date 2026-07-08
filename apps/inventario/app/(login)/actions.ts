@@ -257,6 +257,7 @@ export const signUp = validatedAction(signUpSchema, async (data, formData) => {
     // Create a new team if there's no invitation
     const newTeam: NewTeam = {
       name: `${email}'s Team`,
+      currency: 'PYG', // Paraguay-first app — the onboarding locale step lets them change it
     };
 
     [createdTeam] = await db.insert(teams).values(newTeam).returning();

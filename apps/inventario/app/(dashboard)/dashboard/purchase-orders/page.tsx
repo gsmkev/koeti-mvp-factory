@@ -3,7 +3,7 @@
 // state transitions, not a generic edit dialog.
 import Link from 'next/link';
 import type { SearchParams } from 'nuqs/server';
-import { Download } from 'lucide-react';
+import { Lock } from 'lucide-react';
 import {
   Badge,
   Button,
@@ -20,6 +20,8 @@ import { getTranslations } from 'next-intl/server';
 import { requireRole } from '@/lib/auth/middleware';
 import { PURCHASE_ORDER_STATUSES } from '@/lib/db/schema';
 import { getProducts, getPurchaseOrders, getSuppliers, getWarehouses } from '@/lib/db/queries';
+import { planLimitsFor } from '@/lib/plan';
+import { ExportCsvButton } from '@/components/export-csv-button';
 import {
   approvePurchaseOrder,
   cancelPurchaseOrder,
@@ -34,8 +36,9 @@ export default async function PurchaseOrdersPage({
   searchParams: Promise<SearchParams>;
 }) {
   const { team, role } = await requireRole('viewer');
+  const { csvExport, purchaseOrders: purchaseOrdersAllowed } = planLimitsFor(team);
   const { supplierId, status, from, to } = await loadPurchaseOrdersSearchParams(searchParams);
-  const [suppliers, products, warehouses, orders, t, tStatus] = await Promise.all([
+  const [suppliers, products, warehouses, orders, t, tCommon, tStatus] = await Promise.all([
     getSuppliers(team.id),
     getProducts(team.id),
     getWarehouses(team.id),
@@ -46,6 +49,7 @@ export default async function PurchaseOrdersPage({
       to: to ?? undefined,
     }),
     getTranslations('purchaseOrders'),
+    getTranslations('common'),
     getTranslations('purchaseOrderStatuses'),
   ]);
   const isAdmin = roleAtLeast(role, 'admin');
@@ -75,102 +79,118 @@ export default async function PurchaseOrdersPage({
         title={t('title')}
         description={t('description')}
         actions={
-          <Button variant="outline" size="sm" asChild>
-            <a href={`/api/purchase-orders/export${exportQs ? `?${exportQs}` : ''}`} download>
-              <Download />
-              {t('exportCsv')}
-            </a>
-          </Button>
+          <ExportCsvButton
+            href={`/api/purchase-orders/export${exportQs ? `?${exportQs}` : ''}`}
+            allowed={csvExport}
+            label={t('exportCsv')}
+            lockedLabel={tCommon('exportCsvLocked')}
+          />
         }
       />
 
-      <Card>
-        <CardContent>
-          <form
-            action={createPurchaseOrder as (formData: FormData) => void}
-            className="flex flex-wrap items-end gap-3"
-          >
-            <div className="grid min-w-40 flex-1 gap-1.5">
-              <Label htmlFor="po-supplierId">{t('fieldSupplier')}</Label>
-              <select
-                id="po-supplierId"
-                name="supplierId"
-                required
-                className="border-input h-9 w-full rounded-md border bg-transparent px-3 text-sm shadow-xs outline-none"
-              >
-                {suppliers.map((s) => (
-                  <option key={s.id} value={s.id}>
-                    {s.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div className="grid min-w-40 flex-1 gap-1.5">
-              <Label htmlFor="po-productId">{t('fieldProduct')}</Label>
-              <select
-                id="po-productId"
-                name="productId"
-                required
-                className="border-input h-9 w-full rounded-md border bg-transparent px-3 text-sm shadow-xs outline-none"
-              >
-                {products.map((p) => (
-                  <option key={p.id} value={p.id}>
-                    {p.sku} — {p.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div className="grid min-w-40 flex-1 gap-1.5">
-              <Label htmlFor="po-warehouseId">{t('fieldWarehouse')}</Label>
-              <select
-                id="po-warehouseId"
-                name="warehouseId"
-                required
-                className="border-input h-9 w-full rounded-md border bg-transparent px-3 text-sm shadow-xs outline-none"
-              >
-                {warehouses.map((w) => (
-                  <option key={w.id} value={w.id}>
-                    {w.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div className="grid w-full gap-1.5 sm:w-28">
-              <Label htmlFor="po-orderedQty">{t('fieldOrderedQty')}</Label>
-              <input
-                id="po-orderedQty"
-                name="orderedQty"
-                type="number"
-                min={1}
-                required
-                className="border-input h-9 w-full rounded-md border bg-transparent px-3 text-sm shadow-xs outline-none"
-              />
-            </div>
-            <div className="grid w-full gap-1.5 sm:w-32">
-              <Label htmlFor="po-unitCost">{t('fieldUnitCost')}</Label>
-              <input
-                id="po-unitCost"
-                name="unitCost"
-                type="number"
-                step="0.01"
-                min={0}
-                required
-                className="border-input h-9 w-full rounded-md border bg-transparent px-3 text-sm shadow-xs outline-none"
-              />
-            </div>
-            <div className="grid w-full gap-1.5 sm:w-40">
-              <Label htmlFor="po-expectedDate">{t('fieldExpectedDate')}</Label>
-              <input
-                id="po-expectedDate"
-                name="expectedDate"
-                type="date"
-                className="border-input h-9 w-full rounded-md border bg-transparent px-3 text-sm shadow-xs outline-none"
-              />
-            </div>
-            <SubmitButton>{t('createLabel')}</SubmitButton>
-          </form>
-        </CardContent>
-      </Card>
+      {!purchaseOrdersAllowed && (
+        <Card className="border-dashed">
+          <CardContent className="flex items-center gap-3 py-6">
+            <Lock className="size-5 shrink-0 text-muted-foreground" aria-hidden />
+            <p className="flex-1 text-sm text-muted-foreground">
+              {tCommon('purchaseOrdersLocked')}
+            </p>
+            <Button size="sm" asChild>
+              <Link href="/pricing">{tCommon('upgradeCta')}</Link>
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+
+      {purchaseOrdersAllowed && (
+        <Card>
+          <CardContent>
+            <form
+              action={createPurchaseOrder as (formData: FormData) => void}
+              className="flex flex-wrap items-end gap-3"
+            >
+              <div className="grid min-w-40 flex-1 gap-1.5">
+                <Label htmlFor="po-supplierId">{t('fieldSupplier')}</Label>
+                <select
+                  id="po-supplierId"
+                  name="supplierId"
+                  required
+                  className="border-input h-9 w-full rounded-md border bg-transparent px-3 text-sm shadow-xs outline-none"
+                >
+                  {suppliers.map((s) => (
+                    <option key={s.id} value={s.id}>
+                      {s.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="grid min-w-40 flex-1 gap-1.5">
+                <Label htmlFor="po-productId">{t('fieldProduct')}</Label>
+                <select
+                  id="po-productId"
+                  name="productId"
+                  required
+                  className="border-input h-9 w-full rounded-md border bg-transparent px-3 text-sm shadow-xs outline-none"
+                >
+                  {products.map((p) => (
+                    <option key={p.id} value={p.id}>
+                      {p.sku} — {p.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="grid min-w-40 flex-1 gap-1.5">
+                <Label htmlFor="po-warehouseId">{t('fieldWarehouse')}</Label>
+                <select
+                  id="po-warehouseId"
+                  name="warehouseId"
+                  required
+                  className="border-input h-9 w-full rounded-md border bg-transparent px-3 text-sm shadow-xs outline-none"
+                >
+                  {warehouses.map((w) => (
+                    <option key={w.id} value={w.id}>
+                      {w.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="grid w-full gap-1.5 sm:w-28">
+                <Label htmlFor="po-orderedQty">{t('fieldOrderedQty')}</Label>
+                <input
+                  id="po-orderedQty"
+                  name="orderedQty"
+                  type="number"
+                  min={1}
+                  required
+                  className="border-input h-9 w-full rounded-md border bg-transparent px-3 text-sm shadow-xs outline-none"
+                />
+              </div>
+              <div className="grid w-full gap-1.5 sm:w-32">
+                <Label htmlFor="po-unitCost">{t('fieldUnitCost')}</Label>
+                <input
+                  id="po-unitCost"
+                  name="unitCost"
+                  type="number"
+                  step="0.01"
+                  min={0}
+                  required
+                  className="border-input h-9 w-full rounded-md border bg-transparent px-3 text-sm shadow-xs outline-none"
+                />
+              </div>
+              <div className="grid w-full gap-1.5 sm:w-40">
+                <Label htmlFor="po-expectedDate">{t('fieldExpectedDate')}</Label>
+                <input
+                  id="po-expectedDate"
+                  name="expectedDate"
+                  type="date"
+                  className="border-input h-9 w-full rounded-md border bg-transparent px-3 text-sm shadow-xs outline-none"
+                />
+              </div>
+              <SubmitButton>{t('createLabel')}</SubmitButton>
+            </form>
+          </CardContent>
+        </Card>
+      )}
 
       <nav className="flex flex-wrap gap-2" aria-label={t('filterAria')}>
         <Link href="/dashboard/purchase-orders">

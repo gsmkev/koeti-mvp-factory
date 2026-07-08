@@ -125,6 +125,7 @@ export default async function HomePage() {
                 <Link href="/pricing">{t('viewPricing')}</Link>
               </Button>
             </div>
+            <p className="mt-3 text-sm text-muted-foreground">{t('trustLine')}</p>
           </div>
 
           <div className="flex justify-center lg:justify-end">

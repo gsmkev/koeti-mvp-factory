@@ -23,8 +23,8 @@ async function createStripeProducts() {
 
   console.log('Creating Stripe products and prices...');
   for (const [name, unitAmount] of [
-    ['Base', 800],
-    ['Plus', 1200],
+    ['Premium', 1500],
+    ['Empresarial', 4500],
   ] as const) {
     const product = await stripe.products.create({
       name,

@@ -6,24 +6,34 @@
     "movements": "Movimientos",
     "purchaseOrders": "Órdenes de Compra",
     "lowStock": "Stock Bajo",
-    "expiringSoon": "Por Vencer"
+    "expiringSoon": "Por Vencer",
+    "footerTagline": "{app} — hecho en Paraguay por Koeti Labs, para las mipymes de siempre."
+  },
+  "common": {
+    "exportCsvLocked": "Mejorá tu plan para exportar",
+    "purchaseOrdersLocked": "Las órdenes de compra requieren el plan Premium o Empresarial.",
+    "upgradeCta": "Mejorar plan"
+  },
+  "auth": {
+    "brandQuote": "Control de stock en tiempo real para negocios paraguayos — sin planillas, sin cuadernos.",
+    "brandFooter": "{app} · por Koeti Labs"
   },
   "marketing": {
-    "eyebrow": "Inventario // 01",
+    "eyebrow": "Hecho en Paraguay por Koeti Labs",
     "titleLine1": "Conocé tu stock",
     "titleLine2": "antes de que se acabe.",
-    "subtitle": "Productos, almacenes, órdenes de compra y un historial completo de movimientos — la base de inventario que tu equipo necesita, lista desde el día uno.",
+    "subtitle": "Productos, almacenes, órdenes de compra y un historial completo de movimientos — para no perderle más el rastro al stock con cuadernos o planillas de Excel.",
     "getStarted": "Empezar",
     "viewPricing": "Ver precios",
-    "yourApp": "tu app",
+    "trustLine": "Sin tarjeta de crédito. Cancelá cuando quieras.",
     "previewWarehouse": "Depósito Central",
     "previewValue": "Valor del inventario",
     "previewProducts": "Productos",
     "previewAlertsTitle": "Necesita atención",
     "previewLow": "Bajo",
     "previewExpiring": "Por vencer",
-    "featuresTitle": "Todo lo que necesita un equipo de operaciones",
-    "featuresSubtitle": "No es una planilla de cálculo con pasos extra — es un sistema de inventario real, hecho para cómo trabaja tu equipo.",
+    "featuresTitle": "Todo lo que necesita tu negocio, nada que no",
+    "featuresSubtitle": "No es una planilla con pasos extra — es un sistema de inventario real, hecho para cómo trabaja un negocio paraguayo de verdad.",
     "featureWarehousesTitle": "Múltiples almacenes",
     "featureWarehousesDesc": "Controlá el stock por ubicación y asigná al personal el almacén del que es responsable.",
     "featureLedgerTitle": "Historial de movimientos auditable",
@@ -42,19 +52,35 @@
     "alreadySignIn": "¿Ya lo usás? Iniciá sesión"
   },
   "pricing": {
-    "eyebrow": "Inventario // 02",
-    "title": "Una sola base. Elegí tu plan.",
-    "subtitle": "Todos los planes incluyen el scaffold completo — auth, cobros y cuentas de equipo. Plus suma soporte prioritario y acceso anticipado a medida que crece tu equipo.",
+    "eyebrow": "Planes y precios",
+    "title": "Precios pensados para un negocio paraguayo real.",
+    "subtitle": "Empezá gratis, sin tarjeta. Subí de plan cuando necesites más lugar para crecer — cancelá cuando quieras.",
     "freeTrial": "{days} días de prueba gratis",
-    "perUser": "por usuario / {interval}",
+    "perUser": "por equipo / {interval}",
+    "perMonth": "/ mes",
     "recommended": "Recomendado",
     "getStarted": "Empezar",
+    "startFree": "Empezar gratis",
+    "freeName": "Gratis",
+    "freeNoSupport": "Para probarlo — no incluye soporte.",
     "loading": "Cargando…",
-    "baseFeatures": ["Uso ilimitado", "Miembros del espacio ilimitados", "Soporte por email"],
-    "plusFeatures": [
-      "Todo lo de Base, y:",
-      "Acceso anticipado a nuevas funciones",
-      "Soporte 24/7 + acceso a Slack"
+    "freeFeatures": [
+      "Hasta 2 almacenes, 20 productos",
+      "Movimientos de stock e historial ilimitados",
+      "Reportes de stock bajo y por vencer (solo consulta, sin exportar CSV)",
+      "1 usuario — documentación, sin soporte"
+    ],
+    "premiumFeatures": [
+      "Almacenes y productos ilimitados",
+      "Órdenes de compra con recepción de proveedores",
+      "Exportación CSV en todos los reportes",
+      "Miembros de equipo ilimitados",
+      "Soporte por email"
+    ],
+    "empresarialFeatures": [
+      "Todo lo de Premium, y:",
+      "Sugerencias de reposición con IA",
+      "Soporte prioritario"
     ]
   },
   "overview": {
@@ -264,8 +290,12 @@
     "emptyTitle": "Nada por vencer",
     "emptyDesc": "Ningún lote se acerca a su fecha de vencimiento en esta ventana."
   },
+  "insights": {
+    "enterpriseOnly": "Las sugerencias de reposición con IA son una función Empresarial. Mejorá tu plan para recibir una sugerencia diaria priorizada más alertas de stock bajo."
+  },
   "insightMessages": {
-    "activitySpike": "Actividad inusual en la cuenta el {day}: {count} eventos frente a un promedio diario de {avg}."
+    "lowStockAlert": "{name} ({sku}) está bajo: {stock} en stock, el mínimo es {minStock}.",
+    "aiRestockSuggestion": "{summary}"
   },
   "checkout": {
     "title": "Finalizar compra",
