@@ -10,6 +10,8 @@ import {
   UserMinus,
   Mail,
   CheckCircle,
+  ShoppingCart,
+  Banknote,
   type LucideIcon,
 } from 'lucide-react';
 import { getTranslations } from 'next-intl/server';
@@ -30,6 +32,20 @@ const iconMap: Record<ActivityType, LucideIcon> = {
   [ActivityType.REMOVE_TEAM_MEMBER]: UserMinus,
   [ActivityType.INVITE_TEAM_MEMBER]: Mail,
   [ActivityType.ACCEPT_INVITATION]: CheckCircle,
+};
+
+// Fiado-only business events (not worth adding to the shared ActivityType
+// enum — logActivity calls in pos/actions.ts, clientes/[id]/actions.ts and
+// team/actions.ts write these action strings directly).
+const fiadoIconMap: Record<string, LucideIcon> = {
+  FIADO_SALE: ShoppingCart,
+  FIADO_PAYMENT: Banknote,
+  FIADO_EMPLOYEE_CREATED: UserPlus,
+};
+const fiadoActionKey: Record<string, string> = {
+  FIADO_SALE: 'actionSale',
+  FIADO_PAYMENT: 'actionPayment',
+  FIADO_EMPLOYEE_CREATED: 'actionCreateEmployee',
 };
 
 function getRelativeTime(t: T, date: Date) {
@@ -57,6 +73,7 @@ const actionKey: Record<ActivityType, string> = {
 };
 
 function formatAction(t: T, action: string): string {
+  if (action in fiadoActionKey) return t(fiadoActionKey[action]);
   // Business audit entries written by crudActions: ENTITY_<verb>:<table>
   const m = action.match(/^ENTITY_(CREATED|UPDATED|DELETED):(.+)$/);
   if (m) {
@@ -88,7 +105,8 @@ export default async function ActivityPage() {
           {logs.length > 0 ? (
             <ul className="space-y-4">
               {logs.map((log) => {
-                const Icon = iconMap[log.action as ActivityType] || Settings;
+                const Icon =
+                  fiadoIconMap[log.action] || iconMap[log.action as ActivityType] || Settings;
                 const formattedAction = formatAction(t, log.action);
 
                 return (

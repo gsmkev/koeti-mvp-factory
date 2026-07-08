@@ -19,7 +19,7 @@ import { requireRole } from '@/lib/auth/middleware';
 import { getCliente, getPagosForCliente, getVentasForCliente } from '@/lib/db/queries';
 import { registrarPago } from './actions';
 
-const money = (n: number) => `₲${n.toLocaleString('es')}`;
+const money = (n: number) => `₲${n.toLocaleString('es-PY')}`;
 
 export default async function ClienteDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { team } = await requireRole('viewer');

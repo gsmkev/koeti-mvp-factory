@@ -4,6 +4,7 @@
 import { and, eq, sql } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
+import { activityLogs } from '@koeti/db';
 import { db } from '@/lib/db/drizzle';
 import { clientes, pagos } from '@/lib/db/schema';
 import { withTeam } from '@/lib/auth/middleware';
@@ -14,7 +15,7 @@ const schema = z.object({
   note: z.string().max(255).optional(),
 });
 
-export const registrarPago = withTeam(async (formData, team) => {
+export const registrarPago = withTeam(async (formData, team, user) => {
   const parsed = schema.safeParse(Object.fromEntries(formData));
   if (!parsed.success) return { error: parsed.error.errors[0].message };
   const { clienteId, amount, note } = parsed.data;
@@ -29,6 +30,10 @@ export const registrarPago = withTeam(async (formData, team) => {
       })
       .where(and(eq(clientes.id, clienteId), eq(clientes.teamId, team.id)));
   });
+
+  await db
+    .insert(activityLogs)
+    .values({ teamId: team.id, userId: user.id, action: 'FIADO_PAYMENT' });
 
   revalidatePath(`/dashboard/clientes/${clienteId}`);
   revalidatePath('/dashboard/clientes');

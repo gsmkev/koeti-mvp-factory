@@ -18,8 +18,15 @@ export const checkoutAction = withTeam(async (formData, team) => {
   }
   // Pagopar (Stripe alternative, Paraguay): invoicing is mandatory, so the
   // buyer's tax identity is captured at /checkout before the order is created.
+  // getPagoparPlans() returns [] without PAGOPAR_PUBLIC_TOKEN/PRIVATE_TOKEN
+  // configured (graceful degradation, see billing.md) — surface that instead
+  // of silently landing back on /pricing with no explanation.
   const plan = getPagoparPlans().find((p) => p.name === formData.get('plan'));
-  redirect(plan ? `/dashboard/checkout?plan=${encodeURIComponent(plan.name)}` : '/pricing');
+  redirect(
+    plan
+      ? `/dashboard/checkout?plan=${encodeURIComponent(plan.name)}`
+      : '/pricing?error=unavailable',
+  );
 }, 'admin');
 
 // `<form action={...}>` needs a Promise<void> signature; checkoutAction's

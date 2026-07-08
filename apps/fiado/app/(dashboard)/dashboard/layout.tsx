@@ -12,6 +12,7 @@ import {
   ShoppingCart,
   Settings,
   Shield,
+  Sparkles,
   Users,
 } from 'lucide-react';
 import {
@@ -31,19 +32,16 @@ import { MobileBottomNav } from '@/components/mobile-bottom-nav';
 import { NotificationsBell } from '@/components/notifications-bell';
 import { User } from '@/lib/db/schema';
 import { APP_NAME } from '@/lib/site';
-import { useIsOwner } from '@/lib/use-is-owner';
+import { useIsOwner, useIsPremium } from '@/lib/use-is-owner';
 import useSWR, { mutate } from 'swr';
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 // Add one nav entry per domain entity to the first group (see .claude/rules/crud.md).
 //
-// ponytail: no "Insights" entry — the template's generic detector counts raw
-// activity-log events ("15 eventos inusuales"), which means nothing to a
-// despensa owner and was never customized to fiado's actual data (unlike the
-// real signals now surfaced directly: the over-limit notification, and the
-// stock/debt filters on Productos/Clientes). Add it back once there's a
-// detector that says something a despensa owner actually cares about.
+// "Insights" only shows for Premium teams — the daily cron only ever
+// generates rows (low stock, over credit limit) for Premium (see
+// /api/cron/insights), so a Básico team would only ever see an empty page.
 //
 // No "Claves API" entry either — API keys are for scripting/integrations,
 // not something a despensa owner ever needs. The page itself is gated to
@@ -63,6 +61,7 @@ function useNav(): AppShellNavGroup[] {
   const t = useTranslations('nav');
   const tf = useTranslations('fiado');
   const isOwner = useIsOwner();
+  const isPremium = useIsPremium();
   return [
     {
       items: [
@@ -71,6 +70,9 @@ function useNav(): AppShellNavGroup[] {
         { href: '/dashboard/productos', label: tf('navProductos'), icon: <Package /> },
         { href: '/dashboard/clientes', label: tf('navClientes'), icon: <Users /> },
         { href: '/dashboard/ventas', label: tf('navVentas'), icon: <ReceiptText /> },
+        ...(isPremium
+          ? [{ href: '/dashboard/insights', label: t('insights'), icon: <Sparkles /> }]
+          : []),
       ],
     },
     {

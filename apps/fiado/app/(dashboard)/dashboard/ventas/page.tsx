@@ -7,7 +7,7 @@ import { getLocale, getTranslations } from 'next-intl/server';
 import { requireRole } from '@/lib/auth/middleware';
 import { getClientes, getVentas, getVentasTotal, VENTAS_PAGE_SIZE } from '@/lib/db/queries';
 
-const money = (n: number) => `₲${n.toLocaleString('es')}`;
+const money = (n: number) => `₲${n.toLocaleString('es-PY')}`;
 const TIPOS = ['contado', 'fiado'] as const;
 const now = () => new Date();
 const loadSearchParams = createLoader({

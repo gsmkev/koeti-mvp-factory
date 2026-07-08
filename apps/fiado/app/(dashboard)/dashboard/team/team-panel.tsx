@@ -129,7 +129,7 @@ function EditEmployeeDialog({ member }: { member: TeamDataWithMembers['teamMembe
           {t('edit')}
         </Button>
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent closeLabel={t('close')}>
         <DialogHeader>
           <DialogTitle>{t('editMember')}</DialogTitle>
         </DialogHeader>

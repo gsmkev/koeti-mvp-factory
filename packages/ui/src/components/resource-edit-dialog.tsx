@@ -17,6 +17,8 @@ export function ResourceEditDialog({
   id,
   title = 'Edit',
   saveLabel = 'Save',
+  savingLabel = 'Saving…',
+  closeLabel = 'Close',
   fields,
   values,
   onUpdate,
@@ -24,6 +26,8 @@ export function ResourceEditDialog({
   id: string | number;
   title?: string;
   saveLabel?: string;
+  savingLabel?: string;
+  closeLabel?: string;
   fields: ResourceField[];
   /** current row values keyed by field name, pre-stringified by the caller */
   values: Record<string, string>;
@@ -38,7 +42,7 @@ export function ResourceEditDialog({
           <Pencil className="size-4 text-muted-foreground" />
         </Button>
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent closeLabel={closeLabel}>
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
         </DialogHeader>
@@ -57,7 +61,7 @@ export function ResourceEditDialog({
               <FieldControl field={field} idPrefix="edit" defaultValue={values[field.name]} />
             </div>
           ))}
-          <SubmitButton pendingText="Saving…">{saveLabel}</SubmitButton>
+          <SubmitButton pendingText={savingLabel}>{saveLabel}</SubmitButton>
         </form>
       </DialogContent>
     </Dialog>

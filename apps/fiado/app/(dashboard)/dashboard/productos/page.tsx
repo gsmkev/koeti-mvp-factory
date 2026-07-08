@@ -8,7 +8,7 @@ import { requireRole } from '@/lib/auth/middleware';
 import { getProductos, STOCK_BAJO } from '@/lib/db/queries';
 import { createProducto, deleteProducto, updateProducto } from './actions';
 
-const money = (n: number) => `₲${n.toLocaleString('es')}`;
+const money = (n: number) => `₲${n.toLocaleString('es-PY')}`;
 const loadSearchParams = createLoader({ estado: parseAsStringEnum(['agotados']) });
 
 export default async function ProductosPage({
@@ -79,7 +79,11 @@ export default async function ProductosPage({
         rowKey={(p) => p.id}
         onUpdate={updateProducto}
         editLabel={t('editLabel')}
+        saveLabel={t('saveLabel')}
+        savingLabel={t('saving')}
+        closeLabel={t('closeLabel')}
         onDelete={deleteProducto}
+        deleteLabel={t('deleteLabel')}
         emptyTitle={estado === 'agotados' ? t('emptyAgotadosTitle') : t('emptyTitle')}
         emptyDescription={estado === 'agotados' ? t('emptyAgotadosDesc') : t('emptyDesc')}
       />

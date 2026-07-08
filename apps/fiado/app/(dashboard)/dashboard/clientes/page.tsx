@@ -8,7 +8,7 @@ import { requireRole } from '@/lib/auth/middleware';
 import { getClientes } from '@/lib/db/queries';
 import { createCliente, deleteCliente, updateCliente } from './actions';
 
-const money = (n: number) => `₲${n.toLocaleString('es')}`;
+const money = (n: number) => `₲${n.toLocaleString('es-PY')}`;
 const loadSearchParams = createLoader({ saldo: parseAsStringEnum(['con']) });
 
 export default async function ClientesPage({
@@ -96,7 +96,11 @@ export default async function ClientesPage({
         rowKey={(c) => c.id}
         onUpdate={updateCliente}
         editLabel={t('editLabel')}
+        saveLabel={t('saveLabel')}
+        savingLabel={t('saving')}
+        closeLabel={t('closeLabel')}
         onDelete={deleteCliente}
+        deleteLabel={t('deleteLabel')}
         emptyTitle={saldo === 'con' ? t('emptyConSaldoTitle') : t('emptyTitle')}
         emptyDescription={saldo === 'con' ? t('emptyConSaldoDesc') : t('emptyDesc')}
       />

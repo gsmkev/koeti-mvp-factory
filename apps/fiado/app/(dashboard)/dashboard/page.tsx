@@ -24,7 +24,7 @@ import {
   getVentasUltimaSemana,
 } from '@/lib/db/queries';
 
-const money = (n: number) => `₲${n.toLocaleString('es')}`;
+const money = (n: number) => `₲${n.toLocaleString('es-PY')}`;
 
 export default async function DashboardPage() {
   const { team } = await requireRole('viewer');

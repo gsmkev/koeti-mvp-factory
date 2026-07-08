@@ -8,7 +8,7 @@
 import { type NewInsight } from '@koeti/db';
 import { getLowStockProductos, getClientesOverLimit } from '@/lib/db/queries';
 
-const money = (n: number) => `₲${n.toLocaleString('es')}`;
+const money = (n: number) => `₲${n.toLocaleString('es-PY')}`;
 
 export async function generateInsights(teamId: number): Promise<NewInsight[]> {
   const today = new Date().toISOString().slice(0, 10);

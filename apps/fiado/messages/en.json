@@ -35,7 +35,8 @@
       "Low-stock and over-credit-limit alerts",
       "Unlimited employee logins",
       "Priority support"
-    ]
+    ],
+    "checkoutUnavailable": "We couldn't start checkout. Please try again in a few minutes."
   },
   "overview": {
     "title": "Overview",
@@ -112,7 +113,11 @@
     "outOfStock": "Out of stock",
     "lowStock": "{count} left",
     "emptyAgotadosTitle": "Nothing out of stock",
-    "emptyAgotadosDesc": "When a product hits 0 stock, it'll show up here."
+    "emptyAgotadosDesc": "When a product hits 0 stock, it'll show up here.",
+    "deleteLabel": "Delete",
+    "saveLabel": "Save",
+    "saving": "Saving…",
+    "closeLabel": "Close"
   },
   "clientes": {
     "panelTitle": "Customers",
@@ -135,7 +140,11 @@
     "filterAll": "All",
     "filterConSaldo": "With a balance ({count})",
     "emptyConSaldoTitle": "Nobody owes you",
-    "emptyConSaldoDesc": "When a customer buys on credit, they'll show up here."
+    "emptyConSaldoDesc": "When a customer buys on credit, they'll show up here.",
+    "deleteLabel": "Delete",
+    "saveLabel": "Save",
+    "saving": "Saving…",
+    "closeLabel": "Close"
   },
   "clienteDetail": {
     "statBalance": "Current balance",
@@ -246,11 +255,17 @@
     "edit": "Edit",
     "editMember": "Change password",
     "saveChanges": "Save changes",
-    "saving": "Saving…"
+    "saving": "Saving…",
+    "close": "Close"
   },
   "account": {
     "title": "My account",
     "email": "Username",
     "emailPlaceholder": "your_username"
+  },
+  "activity": {
+    "actionSale": "Recorded a sale",
+    "actionPayment": "Recorded a payment",
+    "actionCreateEmployee": "Created a login for an employee"
   }
 }

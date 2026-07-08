@@ -35,7 +35,8 @@
       "Avisos de stock bajo y de clientes que superaron su límite",
       "Empleados ilimitados",
       "Soporte prioritario"
-    ]
+    ],
+    "checkoutUnavailable": "No pudimos iniciar el pago. Probá de nuevo en unos minutos."
   },
   "overview": {
     "title": "Resumen",
@@ -112,7 +113,11 @@
     "outOfStock": "Agotado",
     "lowStock": "Quedan {count}",
     "emptyAgotadosTitle": "Ningún producto agotado",
-    "emptyAgotadosDesc": "Cuando un producto llegue a stock 0 vas a verlo acá."
+    "emptyAgotadosDesc": "Cuando un producto llegue a stock 0 vas a verlo acá.",
+    "deleteLabel": "Eliminar",
+    "saveLabel": "Guardar",
+    "saving": "Guardando…",
+    "closeLabel": "Cerrar"
   },
   "clientes": {
     "panelTitle": "Clientes",
@@ -135,7 +140,11 @@
     "filterAll": "Todos",
     "filterConSaldo": "Con saldo ({count})",
     "emptyConSaldoTitle": "Nadie te debe",
-    "emptyConSaldoDesc": "Cuando un cliente compre al fiado, va a aparecer acá."
+    "emptyConSaldoDesc": "Cuando un cliente compre al fiado, va a aparecer acá.",
+    "deleteLabel": "Eliminar",
+    "saveLabel": "Guardar",
+    "saving": "Guardando…",
+    "closeLabel": "Cerrar"
   },
   "clienteDetail": {
     "statBalance": "Saldo actual",
@@ -246,11 +255,17 @@
     "edit": "Editar",
     "editMember": "Cambiar contraseña",
     "saveChanges": "Guardar cambios",
-    "saving": "Guardando…"
+    "saving": "Guardando…",
+    "close": "Cerrar"
   },
   "account": {
     "title": "Mi cuenta",
     "email": "Usuario",
     "emailPlaceholder": "tu_usuario"
+  },
+  "activity": {
+    "actionSale": "Registró una venta",
+    "actionPayment": "Registró un pago",
+    "actionCreateEmployee": "Creó un usuario para un empleado"
   }
 }

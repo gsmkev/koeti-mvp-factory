@@ -29,7 +29,11 @@ function ResourcePanel<T>({
   rowKey,
   onUpdate,
   editLabel = 'Edit',
+  saveLabel = 'Save',
   onDelete,
+  deleteLabel = 'Delete',
+  savingLabel = 'Saving…',
+  closeLabel = 'Close',
   emptyTitle = 'Nothing here yet',
   emptyDescription,
   className,
@@ -46,8 +50,16 @@ function ResourcePanel<T>({
   /** server action (crudActions.update) receiving a hidden `id`; adds a per-row edit dialog prefilled from the row via `fields` */
   onUpdate?: (formData: FormData) => void | Promise<unknown>;
   editLabel?: string;
+  /** edit dialog's submit button label */
+  saveLabel?: string;
   /** server action receiving a hidden `id` field; adds a delete button per row */
   onDelete?: (formData: FormData) => void | Promise<unknown>;
+  /** delete button's accessible label (icon-only, no visible text) */
+  deleteLabel?: string;
+  /** pending-state text for the create form and edit dialog's submit buttons */
+  savingLabel?: string;
+  /** edit dialog's screen-reader-only close button label */
+  closeLabel?: string;
   emptyTitle?: string;
   emptyDescription?: string;
   className?: string;
@@ -61,6 +73,9 @@ function ResourcePanel<T>({
         <ResourceEditDialog
           id={rowKey(row)}
           title={editLabel}
+          saveLabel={saveLabel}
+          savingLabel={savingLabel}
+          closeLabel={closeLabel}
           fields={fields}
           values={Object.fromEntries(
             fields.map((f) => {
@@ -82,7 +97,7 @@ function ResourcePanel<T>({
       cell: (row) => (
         <form data-slot="resource-delete-form" action={onDelete as (formData: FormData) => void}>
           <input type="hidden" name="id" value={String(rowKey(row))} />
-          <SubmitButton variant="ghost" size="icon" aria-label="Delete">
+          <SubmitButton variant="ghost" size="icon" aria-label={deleteLabel}>
             <Trash2 className="size-4 text-muted-foreground" />
           </SubmitButton>
         </form>
@@ -108,7 +123,7 @@ function ResourcePanel<T>({
                   <FieldControl field={field} />
                 </div>
               ))}
-              <SubmitButton pendingText="Saving…">{createLabel}</SubmitButton>
+              <SubmitButton pendingText={savingLabel}>{createLabel}</SubmitButton>
             </form>
           </CardContent>
         </Card>

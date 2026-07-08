@@ -12,7 +12,7 @@ import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 import { isSubscribed } from '@koeti/billing';
 import { hashPassword } from '@/lib/auth/session';
-import { teamMembers, users } from '@koeti/db';
+import { activityLogs, teamMembers, users } from '@koeti/db';
 import { db } from '@/lib/db/drizzle';
 import { withTeam } from '@/lib/auth/middleware';
 import { getTeamSlug } from '@/lib/db/queries';
@@ -41,7 +41,7 @@ function employeeLimit(team: { planName: string | null; subscriptionStatus: stri
 }
 
 // Dueño únicamente ('admin' como mínimo, pero nadie más llega a tener ese rol).
-export const createEmployee = withTeam(async (formData, team) => {
+export const createEmployee = withTeam(async (formData, team, user) => {
   const parsed = schema.safeParse(Object.fromEntries(formData));
   if (!parsed.success) return { error: parsed.error.errors[0].message };
 
@@ -66,6 +66,9 @@ export const createEmployee = withTeam(async (formData, team) => {
   const passwordHash = await hashPassword(password);
   const [newUser] = await db.insert(users).values({ email, passwordHash, name }).returning();
   await db.insert(teamMembers).values({ userId: newUser.id, teamId: team.id, role: 'member' });
+  await db
+    .insert(activityLogs)
+    .values({ teamId: team.id, userId: user.id, action: 'FIADO_EMPLOYEE_CREATED' });
 
   revalidatePath('/dashboard/team');
   return { success: `Usuario "${usuario}" creado.` };

@@ -34,7 +34,12 @@ function getPlans(): { name: string; amount: number }[] {
     .filter((p) => p.name && Number.isFinite(p.amount) && p.amount > 0);
 }
 
-export default async function PricingPage() {
+export default async function PricingPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ error?: string }>;
+}) {
+  const { error } = await searchParams;
   const t = await getTranslations('pricing');
   const [basicPlan, premiumPlan] = getPlans();
   const pyg = new Intl.NumberFormat('es-PY', {
@@ -51,6 +56,11 @@ export default async function PricingPage() {
           {t('title')}
         </h1>
         <p className="mt-4 max-w-lg text-lg text-muted-foreground">{t('subtitle')}</p>
+        {error === 'unavailable' && (
+          <p role="alert" className="mt-4 text-sm text-destructive">
+            {t('checkoutUnavailable')}
+          </p>
+        )}
       </div>
 
       <div className="mt-12 grid gap-6 md:grid-cols-2">

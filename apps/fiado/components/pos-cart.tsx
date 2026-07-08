@@ -23,7 +23,7 @@ import {
 import type { Cliente, Producto } from '@/lib/db/schema';
 import { registrarVenta } from '@/app/(dashboard)/dashboard/pos/actions';
 
-const money = (n: number) => `₲${n.toLocaleString('es')}`;
+const money = (n: number) => `₲${n.toLocaleString('es-PY')}`;
 
 export function PosCart({ productos, clientes }: { productos: Producto[]; clientes: Cliente[] }) {
   const t = useTranslations('pos');

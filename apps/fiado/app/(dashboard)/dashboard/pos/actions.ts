@@ -7,12 +7,13 @@ import { and, eq, inArray, sql } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 import { isSubscribed } from '@koeti/billing';
+import { activityLogs } from '@koeti/db';
 import { db } from '@/lib/db/drizzle';
 import { clientes, productos, ventaItems, ventas } from '@/lib/db/schema';
 import { withTeam } from '@/lib/auth/middleware';
 import { notifyTeam } from '@/lib/notifications';
 
-const money = (n: number) => `₲${n.toLocaleString('es')}`;
+const money = (n: number) => `₲${n.toLocaleString('es-PY')}`;
 
 const cartItemSchema = z.object({
   productoId: z.number().int().positive(),
@@ -38,7 +39,7 @@ const schema = z.object({
     }),
 });
 
-export const registrarVenta = withTeam(async (formData, team) => {
+export const registrarVenta = withTeam(async (formData, team, user) => {
   const parsed = schema.safeParse(Object.fromEntries(formData));
   if (!parsed.success) return { error: parsed.error.errors[0].message };
   const { paymentType, items } = parsed.data;
@@ -91,6 +92,8 @@ export const registrarVenta = withTeam(async (formData, team) => {
         .where(and(eq(clientes.id, clienteId), eq(clientes.teamId, team.id)));
     }
   });
+
+  await db.insert(activityLogs).values({ teamId: team.id, userId: user.id, action: 'FIADO_SALE' });
 
   if (paymentType === 'fiado' && clienteId) {
     const [cliente] = await db.select().from(clientes).where(eq(clientes.id, clienteId)).limit(1);
