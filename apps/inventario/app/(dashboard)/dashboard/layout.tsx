@@ -38,6 +38,7 @@ import { NotificationsBell } from '@/components/notifications-bell';
 import { VerifyEmailBanner } from '@/components/verify-email-banner';
 import { User } from '@/lib/db/schema';
 import { APP_NAME } from '@/lib/site';
+import { BrandMark } from '@/components/brand-mark';
 import useSWR, { mutate } from 'swr';
 
 // Add one nav entry per domain entity to the first group (see .claude/rules/crud.md).
@@ -76,12 +77,7 @@ const fetcher = (url: string) => fetch(url).then((res) => res.json());
 function Brand() {
   return (
     <Link href="/" className="flex items-center gap-2.5">
-      <span
-        className="flex size-7 items-center justify-center rounded-md bg-sidebar-primary font-display text-sm font-bold text-sidebar-primary-foreground"
-        aria-hidden
-      >
-        {APP_NAME[0]}
-      </span>
+      <BrandMark className="bg-sidebar-primary text-sidebar-primary-foreground" />
       <span className="font-display text-base font-semibold text-sidebar-primary">{APP_NAME}</span>
     </Link>
   );

@@ -10,6 +10,7 @@ import { Loader2 } from 'lucide-react';
 import { forgotPassword, resetPassword } from './actions';
 import { ActionState } from '@/lib/auth/middleware';
 import { APP_NAME } from '@/lib/site';
+import { BrandMark } from '@/components/brand-mark';
 
 function AuthShell({
   title,
@@ -24,12 +25,7 @@ function AuthShell({
     <div className="flex min-h-[100dvh] flex-col justify-center px-6 py-12 sm:px-12">
       <div className="mx-auto w-full max-w-sm">
         <Link href="/" className="flex items-center gap-2.5">
-          <span
-            className="flex size-8 items-center justify-center rounded-md bg-primary font-display text-base font-bold text-primary-foreground"
-            aria-hidden
-          >
-            {APP_NAME[0]}
-          </span>
+          <BrandMark className="size-8" />
           <span className="font-display text-lg font-semibold">{APP_NAME}</span>
         </Link>
 

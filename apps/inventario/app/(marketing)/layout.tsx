@@ -22,19 +22,9 @@ import { User } from '@/lib/db/schema';
 import useSWR, { mutate } from 'swr';
 
 import { APP_NAME } from '@/lib/site';
+import { BrandMark } from '@/components/brand-mark';
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
-
-export function BrandMark({ className = '' }: { className?: string }) {
-  return (
-    <span
-      className={`flex size-7 items-center justify-center rounded-md bg-primary font-display text-sm font-bold text-primary-foreground ${className}`}
-      aria-hidden
-    >
-      {APP_NAME[0]}
-    </span>
-  );
-}
 
 function UserMenu() {
   const t = useTranslations('nav');

@@ -13,6 +13,7 @@ import { locales, localeNames } from '@koeti/i18n';
 import { requireRole } from '@/lib/auth/middleware';
 import { getStripePrices, getStripeProducts } from '@/lib/payments/stripe';
 import { APP_NAME } from '@/lib/site';
+import { BrandMark } from '@/components/brand-mark';
 import { completeOnboarding, saveInvites, saveLocale, saveWorkspace } from './actions';
 import { CURRENCIES, MEASUREMENT_SYSTEMS, STEPS, loadSearchParams, type Step } from './config';
 
@@ -43,12 +44,7 @@ export default async function OnboardingPage({
     <div className="flex min-h-[100dvh] flex-col items-center justify-center px-6 py-12">
       <div className="w-full max-w-md">
         <div className="flex items-center gap-2.5">
-          <span
-            className="flex size-8 items-center justify-center rounded-md bg-primary font-display text-base font-bold text-primary-foreground"
-            aria-hidden
-          >
-            {APP_NAME[0]}
-          </span>
+          <BrandMark className="size-8" />
           <span className="font-display text-lg font-semibold">{APP_NAME}</span>
         </div>
 
