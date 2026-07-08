@@ -1,7 +1,7 @@
 // Root layout: fonts, providers (intl/nuqs/SWR), theme, analytics.
 import './globals.css';
 import type { Metadata, Viewport } from 'next';
-import { Lexend, Source_Sans_3 } from 'next/font/google';
+import { Bricolage_Grotesque, Source_Sans_3 } from 'next/font/google';
 import { getUser, getTeamForUser } from '@/lib/db/queries';
 import { SWRConfig } from 'swr';
 import { Analytics } from '@koeti/analytics/client';
@@ -21,7 +21,7 @@ export const viewport: Viewport = {
   maximumScale: 1,
 };
 
-const lexend = Lexend({ subsets: ['latin'], variable: '--font-heading' });
+const lexend = Bricolage_Grotesque({ subsets: ['latin'], variable: '--font-heading' });
 const sourceSans = Source_Sans_3({ subsets: ['latin'], variable: '--font-body' });
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
