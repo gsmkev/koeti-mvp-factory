@@ -15,7 +15,7 @@ import { hashPassword } from '@/lib/auth/session';
 import { activityLogs, teamMembers, users } from '@koeti/db';
 import { db } from '@/lib/db/drizzle';
 import { withTeam } from '@/lib/auth/middleware';
-import { getTeamSlug } from '@/lib/db/queries';
+import { syntheticEmail } from '@/lib/auth/synthetic-email';
 
 const schema = z.object({
   name: z.string().min(1, 'El nombre es requerido').max(100),
@@ -54,14 +54,14 @@ export const createEmployee = withTeam(async (formData, team, user) => {
   }
 
   const { name, usuario, password } = parsed.data;
-  // Same slug as the owner (see (login)/actions.ts) — "usuario" only has to
-  // be unique within this despensa, not across the whole app.
-  const slug = await getTeamSlug(team.id);
-  if (!slug) return { error: 'No se pudo determinar el código de tu despensa.' };
-  const email = `${usuario}@${slug}.fiado.local`;
-
-  const [existing] = await db.select().from(users).where(eq(users.email, email)).limit(1);
-  if (existing) return { error: `El usuario "${usuario}" ya existe` };
+  // "usuario" only has to be unique within this despensa, not across the
+  // whole app — sign-in finds the right despensa on its own (see
+  // (login)/actions.ts), so employees never need to know or type one.
+  const alreadyExists = team.teamMembers.some(
+    (m) => m.user.email.split('@')[0].toLowerCase() === usuario,
+  );
+  if (alreadyExists) return { error: `El usuario "${usuario}" ya existe` };
+  const email = syntheticEmail(usuario);
 
   const passwordHash = await hashPassword(password);
   const [newUser] = await db.insert(users).values({ email, passwordHash, name }).returning();

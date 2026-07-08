@@ -87,10 +87,10 @@ function useNav(): AppShellNavGroup[] {
   ];
 }
 
-// Falls back to the "usuario" part of a synthetic usuario@<slug>.fiado.local
+// Falls back to the "usuario" part of a synthetic usuario@<random>.fiado.local
 // address instead of ever showing that suffix — a real name is optional at
 // sign-up, so this is the only thing standing between "Juan Pérez" and a
-// raw "juan@despensadejuan.fiado.local" leaking into the UI.
+// raw "juan@x7f2k9m1.fiado.local" leaking into the UI.
 function displayName(user: Pick<User, 'name' | 'email'>) {
   return user.name || user.email.split('@')[0];
 }

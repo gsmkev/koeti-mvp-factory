@@ -2,7 +2,7 @@
 // Server actions for the login segment.
 
 import { z } from 'zod';
-import { and, eq, sql } from 'drizzle-orm';
+import { and, eq, ilike, sql } from 'drizzle-orm';
 import { db } from '@/lib/db/drizzle';
 import {
   users,
@@ -31,14 +31,9 @@ import { cookies, headers } from 'next/headers';
 import { getLocale, getTranslations } from 'next-intl/server';
 import type { Locale } from '@koeti/i18n/config';
 import { createCheckoutSession } from '@/lib/payments/stripe';
-import {
-  createTeamSlug,
-  getTeamIdBySlug,
-  getTeamSlug,
-  getUser,
-  getUserWithTeam,
-} from '@/lib/db/queries';
+import { getUser, getUserWithTeam } from '@/lib/db/queries';
 import { validatedAction, validatedActionWithUser } from '@/lib/auth/middleware';
+import { syntheticEmail } from '@/lib/auth/synthetic-email';
 import {
   sendEmail,
   WelcomeEmail,
@@ -120,177 +115,117 @@ async function logActivity(
   await db.insert(activityLogs).values(newActivity);
 }
 
-// Ña Marta types a plain "usuario", not an email — but a bare username isn't
-// globally unique (two different despensas can each have a "juan"), so it's
-// namespaced by a per-despensa slug the owner picks at sign-up:
-// usuario@<slug>.fiado.local. `users.email` (shared schema, must stay
-// unique) keeps working with zero schema changes to that table — the slug
-// itself lives in fiado's own team_slugs table. A value that already looks
-// like an email (has "@") passes through as-is and needs no slug — covers
-// Google sign-in accounts and e2e test fixtures.
+// Ña Marta types a plain "usuario", not an email or a store name — a value
+// that already looks like an email (has "@") passes through as-is (covers
+// Google sign-in accounts and e2e test fixtures); a bare username is looked
+// up across every despensa (see syntheticEmail) and disambiguated by
+// password match, only asking which despensa is theirs if more than one
+// account shares both the username and the password.
 const usernameOrEmailRaw = z.string().trim().min(3).max(255);
-const slugRegex = /^[a-z0-9-]{3,50}$/;
 
-// Builds the real lookup/storage email from what the person typed. Returns
-// an error instead of throwing so callers can redisplay the form.
-function resolveLoginEmail(rawEmail: string, rawSlug: string): { email: string; error?: string } {
-  if (rawEmail.includes('@')) return { email: rawEmail };
-  const slug = rawSlug.trim().toLowerCase();
-  if (!slugRegex.test(slug)) {
-    return { email: '', error: 'despensaRequired' };
+async function finishSignIn(
+  user: typeof users.$inferSelect,
+  team: typeof teams.$inferSelect | null,
+  formData: FormData,
+) {
+  await Promise.all([setSession(user), logActivity(team?.id, user.id, ActivityType.SIGN_IN)]);
+
+  const redirectTo = formData.get('redirect') as string | null;
+  if (redirectTo === 'checkout') {
+    const priceId = formData.get('priceId') as string;
+    return createCheckoutSession({ team, priceId, getUser });
   }
-  return { email: `${rawEmail.toLowerCase()}@${slug}.fiado.local` };
+
+  redirect('/dashboard');
 }
 
 const signInSchema = z.object({
   email: usernameOrEmailRaw,
-  despensaSlug: z.string().trim().max(50).optional().default(''),
   password: z.string().min(8).max(100),
 });
 
 export const signIn = validatedAction(signInSchema, async (data, formData) => {
   const { password } = data;
-  // Redisplay what the person actually typed ("usuario"), not the synthetic
-  // "usuario@<slug>.fiado.local" resolved from it for the DB lookup.
   const rawEmail = String(formData.get('email') ?? '').trim();
+  const teamIdRaw = formData.get('teamId');
   const t = await getTranslations('errors');
-
-  const resolved = resolveLoginEmail(rawEmail, data.despensaSlug);
-  if (resolved.error) {
-    return {
-      error: t('despensaRequired'),
-      email: rawEmail,
-      despensaSlug: data.despensaSlug,
-      password,
-    };
-  }
-  const { email } = resolved;
 
   if (
     !(await limitOk(`signin:${await clientIp()}`, 10)) ||
-    !(await limitOk(`signin:${email.toLowerCase()}`, 10))
+    !(await limitOk(`signin:${rawEmail.toLowerCase()}`, 10))
   ) {
-    return {
-      error: t('tooManyAttempts'),
-      email: rawEmail,
-      despensaSlug: data.despensaSlug,
-      password,
-    };
+    return { error: t('tooManyAttempts'), email: rawEmail, password };
   }
 
-  const userWithTeam = await db
-    .select({
-      user: users,
-      team: teams,
-    })
+  const usingUsername = !rawEmail.includes('@');
+  const emailPattern = usingUsername ? `${rawEmail}@%.fiado.local` : null;
+
+  // Resubmit after the person picked their despensa from the list below.
+  if (usingUsername && teamIdRaw) {
+    const [row] = await db
+      .select({ user: users, team: teams })
+      .from(users)
+      .innerJoin(teamMembers, eq(users.id, teamMembers.userId))
+      .innerJoin(teams, eq(teamMembers.teamId, teams.id))
+      .where(and(ilike(users.email, emailPattern!), eq(teams.id, Number(teamIdRaw))))
+      .limit(1);
+    if (!row || !(await comparePasswords(password, row.user.passwordHash))) {
+      return { error: t('invalidCredentials'), email: rawEmail, password };
+    }
+    return finishSignIn(row.user, row.team, formData);
+  }
+
+  const candidates = await db
+    .select({ user: users, team: teams })
     .from(users)
     .leftJoin(teamMembers, eq(users.id, teamMembers.userId))
     .leftJoin(teams, eq(teamMembers.teamId, teams.id))
-    .where(eq(users.email, email))
-    .limit(1);
+    .where(usingUsername ? ilike(users.email, emailPattern!) : eq(users.email, rawEmail));
 
-  if (userWithTeam.length === 0) {
+  const matches: typeof candidates = [];
+  for (const candidate of candidates) {
+    if (await comparePasswords(password, candidate.user.passwordHash)) matches.push(candidate);
+  }
+
+  if (matches.length === 0) {
+    return { error: t('invalidCredentials'), email: rawEmail, password };
+  }
+
+  if (matches.length > 1) {
     return {
-      error: t('invalidCredentials'),
       email: rawEmail,
-      despensaSlug: data.despensaSlug,
       password,
+      teamChoices: matches.map((m) => ({ id: m.team?.id ?? 0, name: m.team?.name ?? '?' })),
     };
   }
 
-  const { user: foundUser, team: foundTeam } = userWithTeam[0];
-
-  const isPasswordValid = await comparePasswords(password, foundUser.passwordHash);
-
-  if (!isPasswordValid) {
-    return {
-      error: t('invalidCredentials'),
-      email: rawEmail,
-      despensaSlug: data.despensaSlug,
-      password,
-    };
-  }
-
-  await Promise.all([
-    setSession(foundUser),
-    logActivity(foundTeam?.id, foundUser.id, ActivityType.SIGN_IN),
-  ]);
-
-  const redirectTo = formData.get('redirect') as string | null;
-  if (redirectTo === 'checkout') {
-    const priceId = formData.get('priceId') as string;
-    return createCheckoutSession({ team: foundTeam, priceId, getUser });
-  }
-
-  redirect('/dashboard');
+  return finishSignIn(matches[0].user, matches[0].team, formData);
 });
 
 const signUpSchema = z.object({
   email: usernameOrEmailRaw,
   password: z.string().min(8),
   name: z.string().max(100).optional(),
-  despensaSlug: z.string().trim().max(50).optional().default(''),
   inviteId: z.string().optional(),
 });
 
 export const signUp = validatedAction(signUpSchema, async (data, formData) => {
   const { password, name, inviteId } = data;
   // Redisplay what the person actually typed ("usuario"), not the synthetic
-  // "usuario@<slug>.fiado.local" resolved from it for storage.
+  // email resolved from it for storage.
   const rawEmail = String(formData.get('email') ?? '').trim();
   const t = await getTranslations('errors');
 
   if (!(await limitOk(`signup:${await clientIp()}`, 5))) {
-    return {
-      error: t('tooManyAttempts'),
-      email: rawEmail,
-      despensaSlug: data.despensaSlug,
-      password,
-    };
+    return { error: t('tooManyAttempts'), email: rawEmail, password };
   }
 
-  const usingUsername = !rawEmail.includes('@');
-  // New despensa (no invite) picking a bare username also picks the slug
-  // that disambiguates them from every other "juan" in the app. The invite
-  // path is currently unreachable from the UI (onboarding dropped its
-  // email-invite step) — kept minimal, not slug-aware.
-  let email: string;
-  let slugToPersist: string | null = null;
-  if (!usingUsername) {
-    email = rawEmail;
-  } else if (inviteId) {
-    email = `${rawEmail.toLowerCase()}@fiado.local`;
-  } else {
-    const slug = data.despensaSlug.trim().toLowerCase();
-    if (!slugRegex.test(slug)) {
-      return {
-        error: t('despensaRequired'),
-        email: rawEmail,
-        despensaSlug: data.despensaSlug,
-        password,
-      };
-    }
-    if (await getTeamIdBySlug(slug)) {
-      return {
-        error: t('despensaTaken'),
-        email: rawEmail,
-        despensaSlug: data.despensaSlug,
-        password,
-      };
-    }
-    email = `${rawEmail.toLowerCase()}@${slug}.fiado.local`;
-    slugToPersist = slug;
-  }
+  const email = rawEmail.includes('@') ? rawEmail : syntheticEmail(rawEmail);
 
   const existingUser = await db.select().from(users).where(eq(users.email, email)).limit(1);
 
   if (existingUser.length > 0) {
-    return {
-      error: t('createUserFailed'),
-      email: rawEmail,
-      despensaSlug: data.despensaSlug,
-      password,
-    };
+    return { error: t('createUserFailed'), email: rawEmail, password };
   }
 
   const passwordHash = await hashPassword(password);
@@ -307,12 +242,7 @@ export const signUp = validatedAction(signUpSchema, async (data, formData) => {
   const [createdUser] = await db.insert(users).values(newUser).returning();
 
   if (!createdUser) {
-    return {
-      error: t('createUserFailed'),
-      email: rawEmail,
-      despensaSlug: data.despensaSlug,
-      password,
-    };
+    return { error: t('createUserFailed'), email: rawEmail, password };
   }
 
   let teamId: number;
@@ -346,12 +276,7 @@ export const signUp = validatedAction(signUpSchema, async (data, formData) => {
 
       [createdTeam] = await db.select().from(teams).where(eq(teams.id, teamId)).limit(1);
     } else {
-      return {
-        error: t('invalidInvitation'),
-        email: rawEmail,
-        despensaSlug: data.despensaSlug,
-        password,
-      };
+      return { error: t('invalidInvitation'), email: rawEmail, password };
     }
   } else {
     // Create a new team if there's no invitation. A generic, friendly
@@ -370,20 +295,11 @@ export const signUp = validatedAction(signUpSchema, async (data, formData) => {
     [createdTeam] = await db.insert(teams).values(newTeam).returning();
 
     if (!createdTeam) {
-      return {
-        error: t('createTeamFailed'),
-        email: rawEmail,
-        despensaSlug: data.despensaSlug,
-        password,
-      };
+      return { error: t('createTeamFailed'), email: rawEmail, password };
     }
 
     teamId = createdTeam.id;
     userRole = 'owner';
-
-    if (slugToPersist) {
-      await createTeamSlug(teamId, slugToPersist);
-    }
 
     await logActivity(teamId, createdUser.id, ActivityType.CREATE_TEAM);
   }
@@ -598,8 +514,6 @@ const updateAccountSchema = z.object({
   email: usernameOrEmailRaw,
 });
 
-// Changing your own username stays inside your own despensa — reuse its
-// existing slug rather than asking for one again.
 export const updateAccount = validatedActionWithUser(
   updateAccountSchema,
   async (data, formData, user) => {
@@ -607,15 +521,7 @@ export const updateAccount = validatedActionWithUser(
     const rawEmail = String(formData.get('email') ?? '').trim();
     const t = await getTranslations('errors');
     const userWithTeam = await getUserWithTeam(user.id);
-
-    let email: string;
-    if (rawEmail.includes('@')) {
-      email = rawEmail;
-    } else {
-      const slug = userWithTeam?.teamId ? await getTeamSlug(userWithTeam.teamId) : null;
-      if (!slug) return { name, error: t('despensaRequired') };
-      email = `${rawEmail.toLowerCase()}@${slug}.fiado.local`;
-    }
+    const email = rawEmail.includes('@') ? rawEmail : syntheticEmail(rawEmail);
 
     await Promise.all([
       db.update(users).set({ name, email }).where(eq(users.id, user.id)),

@@ -13,7 +13,7 @@ import {
   teams,
   users,
 } from '@koeti/db';
-import { clientes, pagos, productos, teamSlugs, ventas } from './schema';
+import { clientes, pagos, productos, ventas } from './schema';
 
 export async function getUser() {
   const sessionCookie = (await cookies()).get('session');
@@ -147,22 +147,6 @@ export async function getPendingInvitations(teamId: number) {
     .from(invitations)
     .where(and(eq(invitations.teamId, teamId), eq(invitations.status, 'pending')))
     .orderBy(desc(invitations.invitedAt));
-}
-
-// --- team slugs (disambiguates "juan" at despensa A from "juan" at despensa B) ---
-
-export async function getTeamSlug(teamId: number) {
-  const [row] = await db.select().from(teamSlugs).where(eq(teamSlugs.teamId, teamId)).limit(1);
-  return row?.slug ?? null;
-}
-
-export async function getTeamIdBySlug(slug: string) {
-  const [row] = await db.select().from(teamSlugs).where(eq(teamSlugs.slug, slug)).limit(1);
-  return row?.teamId ?? null;
-}
-
-export async function createTeamSlug(teamId: number, slug: string) {
-  await db.insert(teamSlugs).values({ teamId, slug });
 }
 
 export async function getTeamForUser() {

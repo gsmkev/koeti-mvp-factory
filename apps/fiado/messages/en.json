@@ -226,16 +226,9 @@
     "emailPlaceholder": "janedoe",
     "name": "Name",
     "namePlaceholder": "E.g. Jane Doe",
-    "despensaSlug": "Store",
-    "despensaSlugPlaceholder": "janesstore",
-    "despensaSlugHelpSignUp": "A short name for your store, no spaces. You'll use it together with your username to sign in.",
-    "despensaSlugHelpSignIn": "The short name you picked when you created the account.",
     "brandQuote": "Ditch the notebook today: every sale on credit gets recorded, with each customer's balance always on hand.",
-    "brandFooter": "{app} — your despensa's tab notebook"
-  },
-  "errors": {
-    "despensaRequired": "Enter your store's name (letters, numbers and dashes, no spaces).",
-    "despensaTaken": "That store name is already taken. Try another one."
+    "brandFooter": "{app} — your despensa's tab notebook",
+    "chooseDespensa": "We found more than one account with that username and password. Pick yours:"
   },
   "team": {
     "title": "Staff",

@@ -93,22 +93,6 @@ export function Login({
             )}
 
             <div className="space-y-2">
-              <Label htmlFor="despensaSlug">{t('despensaSlug')}</Label>
-              <Input
-                id="despensaSlug"
-                name="despensaSlug"
-                type="text"
-                autoComplete="organization"
-                defaultValue={state.despensaSlug}
-                maxLength={50}
-                placeholder={t('despensaSlugPlaceholder')}
-              />
-              <p className="text-xs text-muted-foreground">
-                {mode === 'signin' ? t('despensaSlugHelpSignIn') : t('despensaSlugHelpSignUp')}
-              </p>
-            </div>
-
-            <div className="space-y-2">
               <Label htmlFor="email">{t('email')}</Label>
               <Input
                 id="email"
@@ -147,18 +131,37 @@ export function Login({
               </p>
             )}
 
-            <Button type="submit" className="w-full" disabled={pending}>
-              {pending ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  {mode === 'signin' ? t('signingIn') : t('creatingAccount')}
-                </>
-              ) : mode === 'signin' ? (
-                t('signInCta')
-              ) : (
-                t('signUpCta')
-              )}
-            </Button>
+            {state?.teamChoices ? (
+              <div className="space-y-2">
+                <p className="text-sm text-muted-foreground">{t('chooseDespensa')}</p>
+                {(state.teamChoices as { id: number; name: string }[]).map((choice) => (
+                  <Button
+                    key={choice.id}
+                    type="submit"
+                    name="teamId"
+                    value={choice.id}
+                    variant="outline"
+                    className="w-full justify-start"
+                    disabled={pending}
+                  >
+                    {choice.name}
+                  </Button>
+                ))}
+              </div>
+            ) : (
+              <Button type="submit" className="w-full" disabled={pending}>
+                {pending ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    {mode === 'signin' ? t('signingIn') : t('creatingAccount')}
+                  </>
+                ) : mode === 'signin' ? (
+                  t('signInCta')
+                ) : (
+                  t('signUpCta')
+                )}
+              </Button>
+            )}
           </form>
 
           <p className="mt-8 text-sm text-muted-foreground">

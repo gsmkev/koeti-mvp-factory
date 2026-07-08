@@ -61,8 +61,8 @@ function AccountForm({ state, nameValue = '', emailValue = '' }: AccountFormProp
 
 function AccountFormWithData({ state }: { state: ActionState }) {
   const { data: user } = useSWR<User>('/api/user', fetcher);
-  // Never show the synthetic "usuario@<slug>.fiado.local" suffix — just the
-  // "usuario" part the person actually recognizes as theirs.
+  // Never show the synthetic "usuario@<random>.fiado.local" suffix — just
+  // the "usuario" part the person actually recognizes as theirs.
   const email = user?.email ?? '';
   const emailValue = email.endsWith('.fiado.local') ? email.split('@')[0] : email;
   return <AccountForm state={state} nameValue={user?.name ?? ''} emailValue={emailValue} />;
