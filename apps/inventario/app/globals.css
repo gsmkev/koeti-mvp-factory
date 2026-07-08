@@ -9,83 +9,84 @@
 @custom-variant dark (&:is(.dark *));
 
 /*
-  Factory design tokens — finance-grade trust palette.
-  Light-first: slate surface, deep trust-blue primary, emerald `success`
-  for money-positive values, dark navy "ledger" sidebar in both modes.
+  Factory design tokens — Mbarete brand palette.
+  Light-first: warm off-white surface, burnt terracotta-orange primary
+  (tierra colorada), golden accent, emerald `success` for money-positive
+  values, deep espresso-brown "ledger" sidebar in both modes.
 */
 :root {
-  --background: hsl(216 33% 97%);
-  --foreground: hsl(222 47% 11%);
-  --card: hsl(0 0% 100%);
-  --card-foreground: hsl(222 47% 11%);
-  --popover: hsl(0 0% 100%);
-  --popover-foreground: hsl(222 47% 11%);
-  --primary: hsl(226 70% 40%);
+  --background: hsl(30 30% 97%);
+  --foreground: hsl(20 35% 12%);
+  --card: hsl(30 20% 99%);
+  --card-foreground: hsl(20 35% 12%);
+  --popover: hsl(30 20% 99%);
+  --popover-foreground: hsl(20 35% 12%);
+  --primary: hsl(18 82% 45%);
   --primary-foreground: hsl(0 0% 100%);
-  --secondary: hsl(214 32% 93%);
-  --secondary-foreground: hsl(222 47% 11%);
-  --muted: hsl(214 32% 93%);
-  --muted-foreground: hsl(215 16% 42%);
-  --accent: hsl(222 60% 96%);
-  --accent-foreground: hsl(226 70% 35%);
+  --secondary: hsl(28 25% 92%);
+  --secondary-foreground: hsl(20 35% 12%);
+  --muted: hsl(28 25% 92%);
+  --muted-foreground: hsl(25 14% 40%);
+  --accent: hsl(40 60% 93%);
+  --accent-foreground: hsl(32 70% 28%);
   --destructive: hsl(0 72% 45%);
   --destructive-foreground: hsl(0 0% 100%);
   --success: hsl(160 84% 27%);
   --success-foreground: hsl(0 0% 100%);
-  --border: hsl(215 25% 88%);
-  --input: hsl(215 25% 84%);
-  --ring: hsl(226 70% 40%);
-  --chart-1: hsl(226 70% 47%);
+  --border: hsl(28 22% 87%);
+  --input: hsl(28 22% 82%);
+  --ring: hsl(18 82% 45%);
+  --chart-1: hsl(18 82% 47%);
   --chart-2: hsl(160 84% 33%);
-  --chart-3: hsl(35 95% 42%);
+  --chart-3: hsl(38 92% 50%);
   --chart-4: hsl(262 60% 55%);
-  --chart-5: hsl(199 89% 40%);
+  --chart-5: hsl(190 55% 38%);
   --radius: 0.625rem;
-  --sidebar-background: hsl(224 47% 10%);
-  --sidebar-foreground: hsl(215 28% 82%);
+  --sidebar-background: hsl(20 35% 10%);
+  --sidebar-foreground: hsl(30 20% 82%);
   --sidebar-primary: hsl(0 0% 100%);
-  --sidebar-primary-foreground: hsl(224 47% 10%);
-  --sidebar-accent: hsl(224 40% 17%);
+  --sidebar-primary-foreground: hsl(20 35% 10%);
+  --sidebar-accent: hsl(20 30% 18%);
   --sidebar-accent-foreground: hsl(0 0% 100%);
-  --sidebar-border: hsl(224 35% 17%);
-  --sidebar-ring: hsl(217 91% 60%);
+  --sidebar-border: hsl(20 28% 18%);
+  --sidebar-ring: hsl(20 88% 60%);
 }
 
 .dark {
-  --background: hsl(224 47% 7%);
-  --foreground: hsl(213 31% 91%);
-  --card: hsl(224 40% 11%);
-  --card-foreground: hsl(213 31% 91%);
-  --popover: hsl(224 40% 11%);
-  --popover-foreground: hsl(213 31% 91%);
-  --primary: hsl(217 91% 65%);
-  --primary-foreground: hsl(224 47% 10%);
-  --secondary: hsl(222 32% 16%);
-  --secondary-foreground: hsl(213 31% 91%);
-  --muted: hsl(222 32% 16%);
-  --muted-foreground: hsl(215 20% 62%);
-  --accent: hsl(224 40% 17%);
-  --accent-foreground: hsl(213 31% 91%);
+  --background: hsl(20 20% 8%);
+  --foreground: hsl(28 20% 92%);
+  --card: hsl(20 22% 12%);
+  --card-foreground: hsl(28 20% 92%);
+  --popover: hsl(20 22% 12%);
+  --popover-foreground: hsl(28 20% 92%);
+  --primary: hsl(20 88% 60%);
+  --primary-foreground: hsl(20 30% 10%);
+  --secondary: hsl(20 18% 17%);
+  --secondary-foreground: hsl(28 20% 92%);
+  --muted: hsl(20 18% 17%);
+  --muted-foreground: hsl(25 14% 64%);
+  --accent: hsl(20 22% 18%);
+  --accent-foreground: hsl(28 20% 92%);
   --destructive: hsl(0 72% 55%);
   --destructive-foreground: hsl(0 0% 100%);
   --success: hsl(158 64% 45%);
-  --success-foreground: hsl(224 47% 7%);
-  --border: hsl(222 30% 17%);
-  --input: hsl(222 30% 20%);
-  --ring: hsl(217 91% 65%);
-  --chart-1: hsl(217 91% 65%);
+  --success-foreground: hsl(20 20% 8%);
+  --border: hsl(20 20% 18%);
+  --input: hsl(20 20% 21%);
+  --ring: hsl(20 88% 60%);
+  --chart-1: hsl(20 88% 62%);
   --chart-2: hsl(158 64% 45%);
-  --chart-3: hsl(38 92% 55%);
+  --chart-3: hsl(40 90% 58%);
   --chart-4: hsl(262 70% 65%);
-  --chart-5: hsl(199 89% 55%);
-  --sidebar-background: hsl(224 47% 8%);
-  --sidebar-foreground: hsl(215 28% 82%);
+  --chart-5: hsl(190 60% 55%);
+  --sidebar-background: hsl(20 20% 7%);
+  --sidebar-foreground: hsl(30 20% 82%);
   --sidebar-primary: hsl(0 0% 100%);
-  --sidebar-primary-foreground: hsl(224 47% 10%);
-  --sidebar-accent: hsl(224 40% 17%);
+  --sidebar-primary-foreground: hsl(20 20% 8%);
+  --sidebar-accent: hsl(20 20% 17%);
   --sidebar-accent-foreground: hsl(0 0% 100%);
-  --sidebar-border: hsl(224 35% 15%);
-  --sidebar-ring: hsl(217 91% 60%);
+  --sidebar-border: hsl(20 18% 16%);
+  --sidebar-ring: hsl(20 88% 60%);
 }
 
 @theme inline {
