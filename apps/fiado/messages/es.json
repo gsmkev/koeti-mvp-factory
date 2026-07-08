@@ -228,7 +228,8 @@
     "namePlaceholder": "Ej: Juan Pérez",
     "brandQuote": "Dejá el cuaderno hoy: cada venta al fiado queda registrada, con el saldo de cada cliente siempre a mano.",
     "brandFooter": "{app} — la libreta de fiado de tu despensa",
-    "chooseDespensa": "Encontramos más de una cuenta con ese usuario y esa contraseña. Elegí la tuya:"
+    "despensaName": "Nombre de tu despensa",
+    "despensaNamePlaceholder": "Despensa de Juan Pérez"
   },
   "team": {
     "title": "Empleados",
@@ -260,5 +261,8 @@
     "actionSale": "Registró una venta",
     "actionPayment": "Registró un pago",
     "actionCreateEmployee": "Creó un usuario para un empleado"
+  },
+  "errors": {
+    "chooseDespensa": "Encontramos más de una cuenta con ese usuario y esa contraseña. Escribí el nombre de tu despensa para continuar."
   }
 }

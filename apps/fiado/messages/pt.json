@@ -228,7 +228,8 @@
     "namePlaceholder": "Ex: João Silva",
     "brandQuote": "Largue o caderno hoje: cada venda fiado fica registrada, com o saldo de cada cliente sempre à mão.",
     "brandFooter": "{app} — o caderno de fiado da sua loja",
-    "chooseDespensa": "Encontramos mais de uma conta com esse usuário e senha. Escolha a sua:"
+    "despensaName": "Nome da sua loja",
+    "despensaNamePlaceholder": "Mercadinho do Zé"
   },
   "team": {
     "title": "Funcionários",
@@ -260,5 +261,8 @@
     "actionSale": "Registrou uma venda",
     "actionPayment": "Registrou um pagamento",
     "actionCreateEmployee": "Criou um usuário para um funcionário"
+  },
+  "errors": {
+    "chooseDespensa": "Encontramos mais de uma conta com esse usuário e senha. Digite o nome da sua loja para continuar."
   }
 }

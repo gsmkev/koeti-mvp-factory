@@ -123,6 +123,11 @@ async function logActivity(
 // account shares both the username and the password.
 const usernameOrEmailRaw = z.string().trim().min(3).max(255);
 
+// Bare usernames are matched with SQL ILIKE ("usuario@%.fiado.local") to
+// search across every despensa — restricting the character set is what
+// keeps a typed "%" or "_" from ever reaching the query as a wildcard.
+const usernamePattern = /^[a-z0-9_.-]{3,50}$/i;
+
 async function finishSignIn(
   user: typeof users.$inferSelect,
   team: typeof teams.$inferSelect | null,
@@ -147,7 +152,7 @@ const signInSchema = z.object({
 export const signIn = validatedAction(signInSchema, async (data, formData) => {
   const { password } = data;
   const rawEmail = String(formData.get('email') ?? '').trim();
-  const teamIdRaw = formData.get('teamId');
+  const despensaName = String(formData.get('despensaName') ?? '').trim();
   const t = await getTranslations('errors');
 
   if (
@@ -158,21 +163,11 @@ export const signIn = validatedAction(signInSchema, async (data, formData) => {
   }
 
   const usingUsername = !rawEmail.includes('@');
-  const emailPattern = usingUsername ? `${rawEmail}@%.fiado.local` : null;
-
-  // Resubmit after the person picked their despensa from the list below.
-  if (usingUsername && teamIdRaw) {
-    const [row] = await db
-      .select({ user: users, team: teams })
-      .from(users)
-      .innerJoin(teamMembers, eq(users.id, teamMembers.userId))
-      .innerJoin(teams, eq(teamMembers.teamId, teams.id))
-      .where(and(ilike(users.email, emailPattern!), eq(teams.id, Number(teamIdRaw))))
-      .limit(1);
-    if (!row || !(await comparePasswords(password, row.user.passwordHash))) {
-      return { error: t('invalidCredentials'), email: rawEmail, password };
-    }
-    return finishSignIn(row.user, row.team, formData);
+  // A bare username that doesn't fit the allowed character set can never
+  // match a real account (see createEmployee's identical regex) — reject it
+  // before it ever reaches ILIKE, so "%"/"_" can't be used as SQL wildcards.
+  if (usingUsername && !usernamePattern.test(rawEmail)) {
+    return { error: t('invalidCredentials'), email: rawEmail, password };
   }
 
   const candidates = await db
@@ -180,7 +175,9 @@ export const signIn = validatedAction(signInSchema, async (data, formData) => {
     .from(users)
     .leftJoin(teamMembers, eq(users.id, teamMembers.userId))
     .leftJoin(teams, eq(teamMembers.teamId, teams.id))
-    .where(usingUsername ? ilike(users.email, emailPattern!) : eq(users.email, rawEmail));
+    .where(
+      usingUsername ? ilike(users.email, `${rawEmail}@%.fiado.local`) : eq(users.email, rawEmail),
+    );
 
   const matches: typeof candidates = [];
   for (const candidate of candidates) {
@@ -191,15 +188,26 @@ export const signIn = validatedAction(signInSchema, async (data, formData) => {
     return { error: t('invalidCredentials'), email: rawEmail, password };
   }
 
-  if (matches.length > 1) {
-    return {
-      email: rawEmail,
-      password,
-      teamChoices: matches.map((m) => ({ id: m.team?.id ?? 0, name: m.team?.name ?? '?' })),
-    };
+  if (matches.length === 1) {
+    return finishSignIn(matches[0].user, matches[0].team, formData);
   }
 
-  return finishSignIn(matches[0].user, matches[0].team, formData);
+  // Two different despensas independently picked the same username AND the
+  // same password — rare, but real (common weak passwords). Never disclose
+  // despensa names to someone who has only proven they guessed a common
+  // password; ask them to type the name themselves and match it server-side.
+  // Same generic error either way (no name → "type it"; wrong name → "wrong
+  // password") so a stranger who got this far by luck learns nothing new.
+  if (!despensaName) {
+    return { error: t('chooseDespensa'), email: rawEmail, password, needsDespensaName: true };
+  }
+  const chosen = matches.find(
+    (m) => m.team?.name.trim().toLowerCase() === despensaName.toLowerCase(),
+  );
+  if (!chosen) {
+    return { error: t('invalidCredentials'), email: rawEmail, password, needsDespensaName: true };
+  }
+  return finishSignIn(chosen.user, chosen.team, formData);
 });
 
 const signUpSchema = z.object({
@@ -220,7 +228,11 @@ export const signUp = validatedAction(signUpSchema, async (data, formData) => {
     return { error: t('tooManyAttempts'), email: rawEmail, password };
   }
 
-  const email = rawEmail.includes('@') ? rawEmail : syntheticEmail(rawEmail);
+  const usingUsername = !rawEmail.includes('@');
+  if (usingUsername && !usernamePattern.test(rawEmail)) {
+    return { error: t('createUserFailed'), email: rawEmail, password };
+  }
+  const email = usingUsername ? syntheticEmail(rawEmail) : rawEmail;
 
   const existingUser = await db.select().from(users).where(eq(users.email, email)).limit(1);
 
@@ -521,7 +533,11 @@ export const updateAccount = validatedActionWithUser(
     const rawEmail = String(formData.get('email') ?? '').trim();
     const t = await getTranslations('errors');
     const userWithTeam = await getUserWithTeam(user.id);
-    const email = rawEmail.includes('@') ? rawEmail : syntheticEmail(rawEmail);
+    const usingUsername = !rawEmail.includes('@');
+    if (usingUsername && !usernamePattern.test(rawEmail)) {
+      return { name, error: t('createUserFailed') };
+    }
+    const email = usingUsername ? syntheticEmail(rawEmail) : rawEmail;
 
     await Promise.all([
       db.update(users).set({ name, email }).where(eq(users.id, user.id)),
